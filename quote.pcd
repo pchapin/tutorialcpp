@@ -1,0 +1,58 @@
+##########################################################################
+FILE          : quote.pcd
+LAST REVISION : December 2001
+AUTHOR        : Peter C. Chapin
+SUBJECT       : Pseudo code for the text quoter program.
+
+(C) Copyright 2001 by Peter C. Chapin
+
+This file contains the p-code for a program that demonstrates the C++
+standard string class. The details of what this program does is
+described in the associated file EXAMPLE-02.txt.
+
+##########################################################################
+
+FUNCTION <Main>(VOID) RETURN int
+  BEGIN
+
+    # Get (or compute) the file names and open the files.
+    <Get the name of the input file>
+    <Get the name of the output file (same as input with ".q" appended)>
+    IF <The input file could not be opened> THEN
+      <Display an error message>
+      <Exit>
+    END
+    IF <The output file could not be opened> THEN
+      <Display and error message>
+      <Exit>
+    END
+
+    # Initialize.
+    <Prepare an initial output line by putting a "> " at the start>
+
+    # Read the input file a line at a time.
+    WHILE <Getting the next line from the input file works> LOOP
+
+      # Blank lines require special handling. If I have a paritally
+      # filled line, output it and a blank line. Otherwise just
+      # output a blank line.
+      #
+      IF <The line is blank> THEN
+        IF <The output line has something on it> THEN
+          <Write the current, partially filled output line>
+          <Prepare a new output line>
+        END
+        <Write a "blank" output line (it would have just a "> ")>
+
+      # Non blank lines need to be processed a word at a time.
+      ELSE
+        FOR <Each word of the input line> LOOP
+          IF <Appending this word would make the output too long> THEN
+            <Write the output line>
+            <Prepare a new output line>
+          END
+          <Append that word onto the end of the output line>
+        END
+      END
+    END
+  END

@@ -1,0 +1,583 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!-- FILE         : LESSON-18.xht
+     LAST REVISED : 2008-11-26
+     AUTHOR       : (C) Copyright 2008 by Peter Chapin
+     SUBJECT      : Overview of exception handling. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+  <head>
+    <title>Lesson #18</title>
+    <meta name="Author" content="Peter C. Chapin" />
+    <!-- <meta name="keywords" lang="en-US" content="..."> -->
+    <meta name="ROBOTS" content="NOARCHIVE" />
+    <link rel="stylesheet" href="cpp-tutorial.css" type="text/css" />
+  </head>
+
+  <body>
+
+    <h1>Lesson #18</h1>
+
+    <p class="subtitle">Overview of Exception Handling</p>
+
+    <h2>Overview</h2>
+
+    <p>In this lesson I will cover the following topics</p>
+
+    <ol id="overview-list">
+
+      <li>
+        <p>"Old fashion" error handling.</p>
+      </li>
+
+      <li>
+        <p>C++ exceptions.</p>
+      </li>
+
+      <li>
+        <p>Exceptions and destructors.</p>
+      </li>
+
+      <li>
+        <p>Exceptions and inheritance.</p>
+      </li>
+
+    </ol>
+
+    <h2>Body</h2>
+
+    <h3>Error handling the C way</h3>
+
+    <p>Handling errors gracefully is difficult. Error conditions are often just ignored in order
+      to make the programming easier and less confusing. Yet robust programs don't have the
+      luxury of ignoring errors.</p>
+
+    <p>There are many ways an error might be handled.</p>
+
+    <ol>
+
+      <li>
+        <p>A message might be displayed to the user, either on the terminal or, in the case of a
+          graphical interface, in a message box of some kind.</p>
+      </li>
+
+      <li>
+        <p>A message might be written to a log file instead of (or in addition to) being
+          presented to the interactive user.</p>
+      </li>
+
+      <li>
+        <p>The operation that failed might be retried after the program or user first performs
+          some sort of corrective action.</p>
+      </li>
+
+      <li>
+        <p>The program might terminate immediately or it might continue with reduced
+          functionality.</p>
+      </li>
+
+    </ol>
+
+    <p>There is no right way to handle an error in general. The best approach depends on the
+      application. The problem is that most errors are noticed in library functions that are
+      used in many applications. For example, suppose that you want to open a file. To do this
+      in a C program you would normally use the function <span class="code">fopen</span> from
+      the standard library. Yet <span class="code">fopen</span> can't take it upon itself to
+      decide how to best handle errors. Any one of the options above (and probably some other
+      options as well) are all potentially reasonable responses. If the <span class="code"
+        >fopen</span> function did something appropriate for one application it would very
+      likely be totally inappropriate for another.</p>
+
+    <p>To deal with this, most functions that have the potential of failing simply return a
+      special "error code" to the function that called them. Nothing is done about the error at
+      the point where the error is detected. Instead the function just tells it's caller, in
+      effect, "I wasn't able to do what you asked... make of it what you will." For example, the
+        <span class="code">fopen</span> function returns the NULL pointer if it fails.</p>
+
+    <pre class="code">
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+  FILE *input;
+
+  input = fopen("afile.txt", "r");
+  if (input == NULL) {
+    printf("The open operation failed\n");
+  }
+
+  // etc...
+}
+</pre>
+
+    <p>The <span class="code">fopen</span> function detects the error, but doesn't know what to
+      do about it. The main function in this application handles the error by printing a short
+      message on the terminal. In a different application the error might be handled in a
+      different way.</p>
+
+    <p>This method of dealing with errors works and it can be effective. But it has several
+      problems.</p>
+
+    <ol>
+
+      <li>
+        <p>The error code that the function returns has to be something different than any
+          legitimate return value so that it can be distinguished from the legitimate values.
+          The NULL pointer is often used as an error code for functions that return pointers.
+          The values 0 or -1 are often used as error codes for functions that return integers.
+          If all of the possible return values are potentially legitimate, the function has to
+          use some other means for getting the error code back to the caller (global variable,
+          pointer parameters, return a structure, etc). These other means are often awkward.</p>
+      </li>
+
+      <li>
+        <p>Usually the error code just informs the caller that the function failed, but it
+          typically doesn't give much other information. If the caller wants to know the details
+          about why the function failed, some additional mechanism must be used.</p>
+      </li>
+
+      <li>
+        <p>Often the function that receives the error code does not know what to do about the
+          error either. In that case it has to return its own error code to its caller. This
+          "passing back" of error codes is annoying to program. Most programmers don't bother
+          checking for error codes on all the functions they use and thus many errors go
+          undetected. This causes the program to do odd things when an error situation
+          occurs.</p>
+      </li>
+
+      <li>
+        <p>If a function owns resources (like memory, open files, network connections, etc), it
+          needs to be sure to properly release all of those resources when an error is detected.
+          Programming this correctly can be tricky. Many programs behave poorly when an error
+          occurs.</p>
+      </li>
+
+    </ol>
+
+    <p>Let me elaborate a bit on points #3 and #4 above. Here is some C code that opens an input
+      file and an output file. Notice that if the output file fails to open, it is necessary to
+      close the already opened input file.</p>
+
+    <pre class="code">
+FILE *input, *output;
+int   rc = -1;   // A return code of -1 means an error occured.
+
+if ((input = fopen("afile.txt", "r")) == NULL) {
+  printf("Can't open input\n");
+}
+else if ((output = fopen("bfile.txt", "w")) == NULL) {
+  printf("Can't open output\n");
+  fclose(input);
+}
+else {
+  // Main part of function.
+
+  // Clean up.
+  fclose(input);
+  fclose(output);
+
+  // Success!
+  rc = 0;
+}
+return rc;
+</pre>
+
+    <p>This code both prints an error message and returns an error code if an error is detected.
+      Depending on where this code is used printing error messages here might or might not be
+      appropriate.</p>
+
+    <p>Many programmers accidently leave out the <span class="code">fclose(input)</span> when
+      the output file fails to open. This leaves a resource (an open file) "dangling". Notice
+      also that dealing with all the error conditions causes this code to be a contorted mess of
+      if... else if... statements. Wouldn't it be nicer to just write</p>
+
+    <pre class="code">
+input  = fopen("afile.txt", "r");
+output = fopen("bfile.txt", "w");
+
+// Main part of function, etc...
+</pre>
+
+    <p>Although most programmers do check to see if files open okay, there are many situations
+      where programmers ignore error checking because it's just too annoying to worry about. For
+      example, did you know that <span class="code">printf</span> returns an error code if it
+      fails to print everything you asked? How many times have you checked it?</p>
+
+    <h3>The problem of error handling in C++</h3>
+
+    <p>C++ has even bigger problems with error handling than C does.</p>
+
+    <ol>
+
+      <li>
+        <p>Operator overloading makes it difficult, if not impossible, to check for error codes
+          being returned from functions. For example suppose all the objects below are an
+          abstract type <span class="code">very_long</span> integer:</p>
+        <pre class="code">
+X = (A + B)/(C - D);
+</pre>
+        <p>How can you check for an error code being returned by the <span class="code">+</span>
+          and <span class="code">-</span> operators? You can't. If you want nice expressions
+          like this to work, you have to give up on the idea of returning error codes from the
+          functions.</p>
+      </li>
+
+      <li>
+        <p>Constructors are used in places where it's quite impossible to check for returned
+          error codes (even if constructors had return values---which they don't). For example,
+          suppose function <span class="code">f</span> takes a string by value. Now consider</p>
+        <pre class="code">
+f("Hello, World");
+</pre>
+        <p>The compiler creates a temporary, anonymous string from the character pointer "Hello,
+          World". The function then uses that string. What if the constructor fails? How could
+          one check for that? Something like this doesn't work either</p>
+        <pre class="code">
+std::string temp = "Hello, World";
+  // Make sure the construction of temp worked okay.
+
+f(temp);
+</pre>
+        <p>In this example, the parameter of <span class="code">f</span> is initialized from
+            <span class="code">temp</span> using the copy constructor. What if the copy
+          constructor fails?</p>
+      </li>
+
+      <li>
+        <p>Templates mean that in general you don't know how to check for an error. For example
+          suppose you did this:</p>
+        <pre class="code">
+vector&lt;very_long&gt; my_vector;
+very_long         sum = 0;
+
+sum = accumulate(my_vector.begin(), my_vector.end(), sum);
+</pre>
+        <p>The <span class="code">accumulate</span> algorithm adds up all the items in the given
+          sequence, along with the given initial value, and returns the total sum. In this
+          example, I'm trying to add up all the <span class="code">very_long</span> values in my
+          vector. But what if one of those additions fail? The <span class="code"
+            >accumulate</span> template can't really handle it because it doesn't know what type
+          it is working with. The addition of <span class="code">very_long</span> might indicate
+          an error one way but the addition of some other type might indicate an error in a
+          different way. The only thing accumulate can do generically is just ignore the whole
+          issue.</p>
+      </li>
+
+    </ol>
+
+    <p>The old method for handling errors in C doesn't work well in C++ because C++ does more
+      automatically. The language doesn't give you the opportunity to insert checks for error
+      conditions everywhere, even if you wanted to.</p>
+
+    <h3>C++ exceptions</h3>
+
+    <p>C++ deals with all of the problems I mentioned above using exceptions. In C++ you can
+      "throw" an exception when you encounter an error condition. Here is how it might look.</p>
+
+    <pre class="code">
+void f()
+{
+  // etc...
+
+  if (something_bad())
+    throw "Something bad happened!";
+
+  // etc...
+}
+</pre>
+
+    <p>Here function <span class="code">f</span> returns void. It can't return an error code.
+      However, it can still report an error condition by throwing an exception. Inside function
+        <span class="code">f</span>, when a error is detected, it executes a throw statement. In
+      my example above it throws a pointer to constant character (string literals have type
+        <span class="code">const char *</span> in C++). When the throw executes, the function
+      ends. The statements after the throw don't happen. Of course, in my example above, the
+      throw is only executed conditionally. If the error condition is not detected, the throw is
+      skipped and the function continues normally.</p>
+
+    <p>You can actually throw any object you like. You can throw an integer, a double, or a
+      pointer. You can even throw large, complex objects like structures, or other user defined
+      types.</p>
+
+    <p>Throwing an execption is one thing. How is it handled? Look at this example below. The
+      function <span class="code">f</span> is the same function that I show above.</p>
+
+    <pre class="code">
+void g()
+{
+  // etc...
+  f();
+  // etc...
+}
+
+void h()
+{
+  try {
+    // etc...
+    g();
+    // etc...
+  }
+  catch (const char *message) {
+    cout &lt;&lt; "Exception caught: " &lt;&lt; message &lt;&lt; "\n";
+  }
+  catch (...) {
+    cout &lt;&lt; "Unknown exception caught!" &lt;&lt; "\n";
+  }
+}
+</pre>
+
+    <p>The function <span class="code">h</span> knows enough about the application to know how
+      to handle error conditions. It defines a "try block" where it executes the various
+      operations that might throw an exception. Below the try block it installs some "exception
+      handlers". The exception handlers all begin with the keyword <span class="code"
+        >catch</span>.</p>
+
+    <p>In my example, the first handler says that it can handle exception objects of the type
+      pointer to constant character. The second handler uses the special "..." symbol to
+      indicate that it can handle any kind of exception. What happens when these exceptions
+      occur is defined in the body of each handler.</p>
+
+    <p>When function <span class="code">h</span> executes normally, the try block runs and the
+      handlers are just skipped. Notice how function <span class="code">g</span> is called in
+      the try block. Notice how function <span class="code">g</span> in turn calls function
+        <span class="code">f</span>. Suppose function <span class="code">f</span> detects an
+      error condition. It then throws its exception object of type pointer to constant
+      character. Since there are no handlers in function <span class="code">f</span>, the
+      program immediately pops back into <span class="code">g</span> where it looks for an
+      appropriate handler. However, there are no handlers in <span class="code">g</span> either
+      so function <span class="code">g</span> ends at once and the program pops back into
+      function <span class="code">h</span>. This time there are handlers and, in fact, there is
+      a handler for pointer to constant character exceptions. The exception object is used to
+      initailize the parameter of the handler and the handler executes. In my example it just
+      prints out a silly message. In a real program it might do any number of things in response
+      to the error.</p>
+
+    <p>The order in which the exception handlers is defined is significant. The "..." catch-all
+      handler would also deal with pointer to constant character exceptions but since it comes
+      later it is not checked. The first handler that can process an exception is used. In my
+      example the catch-all handler would process all other exception types.</p>
+
+    <p>There are several nice things about this.</p>
+
+    <ol>
+
+      <li>
+        <p>The main logic of the functions is relatively unobscured by error handling code. In
+          function <span class="code">g</span> there is no mention of exceptions at all.
+          Function <span class="code">g</span> can act as if function <span class="code"
+            >f</span> works; it does not need to put the call to <span class="code">f</span>
+          inside of an if statement. Even in function <span class="code">h</span>, the try block
+          is not interrupted by the error handling. All the error handling logic is after the
+          try block in the exception handlers. This organization makes the functions easier to
+          read. It also means the error conditions in operator functions and constructors that
+          appear in the try block can be handled the same way as error conditions in the
+          ordinary functions.</p>
+      </li>
+
+      <li>
+        <p>Since it is possible to throw any type of object you desire there is no problem
+          sending detailed information from the point where the error is detected to the
+          handler. In many applications a structure is defined just for this purpose. When an
+          error is detected, a structure is filled with appropriate values and then thrown as a
+          unit. The handler can look at the members of that structure to find out more about
+          what happened.</p>
+      </li>
+
+      <li>
+        <p>The catch-all handler can process exceptions of unexpected types. In a large program
+          there may be many types of exception objects being thrown---including types the
+          application programmer might not know about (for example exceptions coming our of a
+          third party library that was recently modified). The catch-all handler allows the
+          program to deal with these errors to some extent even without knowing they exist.</p>
+      </li>
+
+    </ol>
+
+    <h3>Exceptions and destructors</h3>
+
+    <p>It turns out that the real beauty of exceptions is in how they work with the rest of C++.
+      When an exception passes through a function on its way to the handler, all local objects
+      in that function are destroyed properly using the destructors of those objects. This is
+      very important. Consider this example.</p>
+
+    <pre class="code">
+using namespace std;
+
+void f()
+{
+  vector&lt;string&gt; temp_vector;
+
+  // Fill temp_vector with lots of stuff.
+
+  g();
+    // Call function g to do something useful.
+
+  // Work with temp_vector some more.
+}
+</pre>
+
+    <p>Suppose function <span class="code">g</span> fails and throws an exception. Since there
+      are no handlers in <span class="code">f</span>, the exception will pass through <span
+        class="code">f</span> looking for a handler in whatever function called <span
+        class="code">f</span>. However, before the exception leaves <span class="code">f</span>,
+      the destructor of <span class="code">temp_vector</span> will be invoked. This is totally
+      appropriate and desirable. The exception will cause function <span class="code">f</span>
+      to end. It is necessary to properly destroy <span class="code">temp_vector</span> so that
+      the memory allocated by it will be recovered.</p>
+
+    <p>In general your program will allocate, use, and release many resources during its
+      lifetime. Memory is one of the most common and most important resources your program will
+      use. Other examples of resources include open files, handles to graphical environments,
+      locks of various kinds, and network connections. It is important that you properly release
+      all resources that you acquire. If your program fails to do that it is said to "leak"
+      resources. Eventually a program that leaks resources will be unable to function. It may
+      even crash the system in some extreme cases.</p>
+
+    <p>In C, without exceptions, you must write relatively contorted code to release resources
+      when errors occur. In C++, however, if you acquire resources in the constructor of an
+      object and release those resources in the corresponding destructor, your program will
+      never leak. The destructors are automatically executed when a function returns normally
+      AND when a function ends due to an exception. Consider the follow example</p>
+
+    <pre class="code">
+void f()
+{
+  std::string string1;
+  // ...
+  g();
+  // ...
+  std::string string2;
+  // ...
+}
+</pre>
+
+    <p>In this case if g throws an exception, only <span class="code">string1</span> is
+      destroyed. This is because at the time when g is executing only <span class="code"
+        >string1</span> has been constructed. The second string does not yet exist and thus
+      destroying it would be inappropriate. The compiler ensures that only the objects that have
+      been fully constructed are destroyed when an exception occurs.</p>
+
+    <p>As a further example, consider the case when a constructor throws an exception. Since any
+      base sub-objects and members have already been constructed when an object's constructor is
+      executing, the compiler ensures that the base sub-objects and members are properly
+      destroyed in this case. However, if an exception is thrown in a constructor, the
+      destructor for the object being constructed is <em>not</em> executed. This is because that
+      object has not yet been fully constructed (construction isn't complete until the
+      constructor returns normally). Thus if you do throw an exception in a constructor you need
+      to be sure that any resources you've acquired for the object are released first. I will
+      return to this topic in the next lesson.</p>
+
+    <h3>Exceptions and inheritance</h3>
+
+    <p>Exceptions can also be used effectively with inheritance. It turns out that it is
+      possible to catch an exception by reference. This means that a single handler can catch
+      and process exception objects from a set of related error classes. Suppose you defined the
+      following classes specifically to use for exceptions.</p>
+
+    <pre class="code">
+// Generic error class.
+class error {
+  public:
+    virtual string message() = 0;
+};
+
+// Describe file errors.
+class file_error : public error {
+  public:
+    virtual string message();
+  private:
+    // etc...
+};
+
+// Describe network errors.
+class network_error : public error {
+  public:
+    virtual string message();
+  private:
+    // etc...
+};
+</pre>
+
+    <p>My <span class="code">file_error</span> class supports the generic error interface. It
+      would also have members that are specific to the sort of errors you can get with files. To
+      keep things simple I don't show any of those members. Similarly the <span class="code"
+        >network_error</span> class would contain additional members that support network
+      specific errors. Again I did not show those members above.</p>
+
+    <p>Now suppose I just want to catch errors generically in a certain function. I can do</p>
+
+    <pre class="code">
+void f()
+{
+  try {
+    // Do stuff.
+  }
+  catch (error &amp;bad_thing) {
+    cerr &lt;&lt; "Exception caught: " &lt;&lt; bad_thing.message() &lt;&lt; "\n";
+  }
+}
+</pre>
+
+    <p>Suppose that inside the try block a <span class="code">file_error</span> is thrown. Since
+        <span class="code">file_error</span> is derived from <span class="code">error</span>, my
+      handler for <span class="code">error</span> will catch the <span class="code"
+        >file_error</span> exception too. When I invoke the virtual method <span class="code"
+        >message</span> on the reference to <span class="code">error</span>, it will actually
+      execute the message method in the <span class="code">file_error</span> exception object.
+      This is, of course, just the usual mechanism for handling virtual functions.</p>
+
+    <p>The C++ standard defines a standard set of related exception types that you can use in
+      your program. By deriving your own exception types from the standard types you make it
+      possible for other code to catch your exceptions without knowing anything about your
+      exceptions. This is a very powerful facility and we will look at it in more detail in a
+      later lesson.</p>
+
+    <h2>Summary</h2>
+
+    <ol id="summary-list">
+
+      <li>
+        <p>The function that detects an error condition is not usually the function that knows
+          how to best deal with the error. In a C program, functions that detect errors
+          typically return an error code to their caller. The calling function can then either
+          handle the error or pass an error code back to its caller. This approach is workable
+          but it does require careful attention to detail. Functions must be sure to properly
+          release resources after an error is encountered and they must rigorously check all the
+          functions they call for error returns.</p>
+      </li>
+
+      <li>
+        <p>In C++ a function can throw an exception when it detects an error condition. If the
+          calling function does not handle the exception, it will be automatically terminated
+          and the next higher calling function will be searched for a handler. The function that
+          knows how to deal with the error can install an appropriate exception handler for it.
+          All the functions between the point of the error and the handler can (ideally) just
+          ignore the error condition entirely.</p>
+      </li>
+
+      <li>
+        <p>When a function ends because it (or one of the functions it calls) throws an
+          exception, the destructors of all the local objects are invoked. This allows any
+          resources that those objects are holding to be properly released. This is a very
+          important facility because it helps programs from leaking resources (particularly
+          memory) while trying to handle an error.</p>
+      </li>
+
+      <li>
+        <p>Using inheritance, you can define families of types just for error handling. A
+          function can catch the base type by reference as a way of dealing generically with an
+          entire family of related error conditions. The C++ standard provides several classes
+          just for this purpose.</p>
+      </li>
+
+    </ol>
+
+    <address>
+&copy; Copyright 2008 by Peter C. Chapin.<br />
+Last Revised: <b>November 26, 2008</b>
+</address>
+
+  </body>
+</html>

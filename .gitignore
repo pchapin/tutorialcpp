@@ -1,0 +1,8 @@
+Thumbs.db
+
+# LaTeX artifacts
+*.aux
+*.log
+
+# Generated documents
+*.pdf

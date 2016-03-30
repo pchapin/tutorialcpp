@@ -1,0 +1,237 @@
+From pchapin@ecet.vtc.edu Mon Feb 10 16:50:59 2003
+Date: Mon, 10 Feb 2003 16:43:27 -0500 (EST)
+From: Peter C. Chapin <pchapin@ecet.vtc.edu>
+Reply-To: pchapin-cis4050@ecet.vtc.edu
+To: CIS-4050 Discussion <pchapin-cis4050@ecet.vtc.edu>
+Subject: Some reasons why C++ is scary.
+
+
+C++ causes compiler writers to wake up at night screaming. In this note I
+will point out a few of the reasons why that is. First there are several
+features of C++ that contribute to its syntactic problems. Let me start by
+describing some of them.
+
+1. It is legal to put extra parens around declarators (this is true in C
+too).
+
+	int x;    // Declares x to be an int.
+	int (x);  // Declares x to be an int with extra parens.
+
+The "declarator" is the part of the declaration where the name goes (not
+the part that describes the type). This feature exists because without it
+you can't declare pointers to functions or the even less used pointer to
+an array. For example
+
+	int (*p)(int);  // p is a pointer to a function taking...
+	int (*p)[10];   // p is a pointer to an array of 10 ints.
+
+A pointer to an array is different than a pointer to the first element of
+an array. If you increment a pointer to an array, it advances over the
+entire array. They are used to step through multidimensional arrays. Many
+people never use them. However, they are legal.
+
+2. C++ introduces a new style of declaration.
+
+	int x(10);  // Declares x to be an int initalized to 10.
+
+This notation is used to pass arguments to class constructors. But for
+consistency (think about templates) it can also be used with the built in
+types.
+
+3. C++ introduces a new cast syntax.
+
+	x = int(y);  // Convert y to int and store into x.
+
+4. You can throw away the result of an expression (this is true in C too).
+
+	x + y;   // Compute x + y and throw away the result.
+
+Many compilers produce warning messages about this but it is legal C/C++.
+
+5. If you remove the variable name from a declaration you get the name of
+a type. For example if you remove "x" from "int x" you get "int". This
+rule applies, however, in all cases no matter how complicated. For example
+"int (long)" is the name of the type "function taking long and returning
+int". If you don't see that, look at this declaration and imagine the name
+'f' going away:
+
+	int f(long);
+
+Okay now with those preliminaries out of the way let's look at some
+interesting cases. First, something that is true even in C... the parser
+must know the difference between names that are typenames and names that
+are not typenames. Without this information it can't parse your program.
+For example:
+
+	extern float *a;
+	char *f(float);
+	int main(void) { f(*a)[4]; ... }
+
+In the context above f is a function. Thus "f(*a)[4]" means "call function
+'f' passing it the thing pointed at by 'a' and then index off the pointer
+it returns." Now check this out:
+
+	extern float *a;
+	typedef int f;
+	int main(void) { f(*a)[4]; ... }
+
+Now "f(*a)[4]" means "declare 'a' as a pointer to an array of 4 'f's"
+(that is, ints). There is no space between the typename 'f' and the open
+parens, but none is necessary. The interpretation of "f(*a)[4]" depends on
+if 'f' is the name of a type or not.
+
+Both C and C++ have this issue and they both solve it by feeding back
+information from the parser to the lexical analyzer via the symbol table.
+When the parser recognizes the declaration of a type it marks the
+identifier as a typename in the symbol table. The lexical analyzer then
+returns a TYPENAME token for it in the future instead of a generic
+IDENTIFIER. This changes which rules the parser can use for the token. In
+this way C/C++ can handle a context sensitive issue with a hacked context
+free grammar. This issue is well known and is not considered a major
+problem.
+
+Now for some C++ specific strangeness.
+
+	class S { ... };
+	char *a;
+	int main() { S(*a)[5]; ... }
+
+What is "S(*a)[5]"? It could be
+
+1. A declaration of 'a' as a pointer to an array of 5 S objects. The fact
+that there is already an 'a' declared in an outer scope is not an issue...
+perhaps this is the declaration of a new, local 'a'.
+
+2. The conversion of *a to an S (using a new style cast) followed by the
+application of operator[] on the resulting S object. The result of
+operator[] is then throw away.
+
+This is called an "expression/declaration" conflict since the same
+statement could be interpreted as either an expression or a declaration.
+The C++ standard has what is called the "so be it" rule. It says:
+
+	"If it looks like a declaration, then so be it!"
+
+Thus "S(*a)[5]" declares 'a' as a pointer to an array of 5 S objects.
+
+Now look at this example:
+
+	int x(y);
+
+Is this the declaration of an object 'x' of type int being initailized
+with 'y', or is it the declaration of a function 'x' that returns an int
+and takes a 'y' as a parameter. In the second case 'y' has to be a type.
+So if 'y' is a type or an object the interpretation of the above differs.
+Now watch what happens...
+
+	int x(int (y));
+
+To understand what this means we have to ask: is "int (y)" the name of an
+object or a type? It could be either!
+
+int (y)  -- name of dummy argument 'y', of type int, with extra parens
+            around declarator.
+
+int (y)  -- name of type "function taking a 'y' and returning int".
+
+The resolution depends again on if 'y' is the name of a previously
+declared type or not. This problem can be recursed infinitely.
+
+	int x(int (int (z)));
+
+Is 'x' an object being initialized with the result of casting 'z' to int
+twice using new style casts or is 'x' the declaration of a function taking
+a function as a parameter? This is a declaration/declaration conflict but
+it can be resolved by applying the "so be it" rule recursively (perhaps to
+arbitrary depth).
+
+For example, the cast interpretation requires us to parse "int(z)" as a
+cast expression and not as a declaration. The "so be it" rule forbids that
+interpretation. "If it looks like a declaration, then so be it!"
+
+I feed the following program to CodeWarrior
+
+#include <iostream>
+
+int y;
+
+int main()
+{
+  int x(int(y));
+  x = 1;
+  return 0;
+}
+
+CodeWarrior correctly parsed "int(y)" as a dummy parameter of type int
+with name 'y' and with extra parens around the declarator (this is correct
+because 'y' is not a previously declared type). Thus 'x' is a function
+taking an int parameter and not an object being initialized by 'y' with a
+new style cast. The compiler then objects when I try to assign a value to
+'x' (can't assign an integer to a function like that).
+
+If I want to force x to be an integer I have to do
+
+int main()
+{
+  int x((int(y)));
+  x = 1;
+  return 0;
+}
+
+Since function parameter lists can't possibly start with '(', the stuff
+inside the top level parens in that declaration must be an expression. In
+particular it is a new style cast of 'y' into int (which is then being
+used to initialize the integer object 'x'. The program compiles without
+error since I can certainly assign 1 to an integer object.
+
+Are you screaming yet?
+
+Least you think this is too esoteric for any normal programmers to care
+about, there are situations in STL where you have to deal with this
+oddness.
+
+-----> cut here <-----
+ifstream dataFile("myfile.dat");
+
+list<int> data(istream_iterator<int>(dataFile), istream_iterator<int>());
+-----> cut here <-----
+
+The programmer probably thinks he/she is constructing a list of integers
+named data from two iterators. The first iterator points at the beginning
+of the data file and the second iterator points just past the end of the
+data file (istream_iterators let you treat input files like containers).
+
+It doesn't do this.
+
+Instead it declares data to be a *function* returning a list<int>. This
+function takes two parameters.
+
+1. First parameter is of type istream_iterator<int>. It has a dummy name
+of dataFile and there are extra parens around the declarator.
+
+2. Second parameter is of type "function taking no parameters and
+returning an istream_iterator<int>". This parameter has no dummy name.
+
+It is the "so be it" rule that causes this interpretation since what the
+programmer expected to be expressions (constructions of anonymous objects)
+are actually valid declarations too.
+
+Many people think C++ has serious problems because of stuff like this.
+
+There is more. For example, C++ parsers have to feed back information on
+template names as well as typenames. This is because the parser needs to
+know when an identifier is the name of a template. There are ambiguities
+on '<' otherwise. (Things that look at first like template instantiations
+can also sometimes be interpreted as expressions involving the relational
+operators '<' and '>'). There are also problems on '::' in complicated
+cases involving nested class names and inheritance. In short the grammar
+of C++ is a mess. It took compiler writers a long time to get all these
+issues right... and I'm sure there are still many bugs to be uncovered in
+this area. Some researchers think the only real solution is to bag C++
+entirely and build a new language from scratch. Many of C++'s issues are
+due to its desire to have a syntax compatible with C. The problem is that
+C's syntax is not very great (expressions and declarations look too
+similar) and after layering C++ features on top of it you get a horrible
+disaster.
+
+Peter

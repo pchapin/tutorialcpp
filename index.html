@@ -1,0 +1,220 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+  <head>
+    <meta name="Author" content="Peter C. Chapin" />
+    <meta name="ROBOTS" content="NOARCHIVE" />
+    <link rel="stylesheet" href="default.css" type="text/css" />
+    <title>pchapin's C++ Tutorial</title>
+  </head>
+
+  <body>
+    <div class="primary-title-header">
+      <h1>C++ Tutorial</h1>
+      <p>&copy; Copyright 2016 by Peter C. Chapin<br /> Last Revised: <b>January
+      2016</b><br/></p>
+    </div>
+    <hr />
+    <h2>Introduction</h2>
+
+    <p>The documents linked to this page constitute the "lectures" of a one-semester course in
+    the C++ programming language. I created these documents myself and have used them in
+    programming classes at <a href="http://www.vtc.edu/">Vermont Technical College</a>, where I
+    am an instructor. I am posting these documents on the web for public access under the terms
+    of the <a href="GFDL.txt">GNU Free Documentation License</a> (GFDL).</p>
+
+    <blockquote>
+      <p>Permission is granted to copy, distribute and/or modify this document (and the related
+      subordinate documents as described above) under the terms of the GNU Free Documentation
+      License, Version 1.1 or any later version published by the Free Software Foundation; with
+      no invariant sections, no front-cover texts, and no back-cover texts.</p>
+    </blockquote>
+
+    <p>If you make corrections or enhancements to any of these documents, I encourage you to
+    contact me so that I can consider incorporating your enhancements into my copy as well. It
+    is my hope that in this way on-line educational resources, such as these documents, can
+    benefit from the same process that has made open source programming projects such a
+    success.</p>
+
+    <hr />
+    <h2>Lessons</h2>
+
+    <p>This course assumes as a prerequisite that you are familiar with C. Teaching C++ on top
+    of a C background is somewhat controversial. Some C++ instructors believe that C++ is best
+    taught on its own terms and not as an enhancement to C. Such an approach makes sense because
+    C++ offers different (and better) ways of handling certain problems as compared to C. It can
+    take a while for a seasoned C programmer to break old habits and really start using C++ to
+    its full potential. However, at Vermont Technical College we teach plain C in our
+    introductory course because we believe there are still many contexts where plain C is all
+    that is available and thus worth learning for its own sake. As a result, our C++ course
+    assumes a solid C background.</p>
+
+    <p>C++ is an enormous language that can be used in many ways. It would be impossible for a
+    single course to cover all of what is C++. In this course I focus on C++'s support for user
+    defined types and object oriented programming. These are important facilities that are in
+    wide use. However, there are many C++ features that I do not describe in detail here. In
+    particular, this course is light on templates and generic programming. It is my hope,
+    however, that after working through the lessons in this course you will be in a good
+    position to study C++ templates from other sources.</p>
+
+    <p>I have broken all of this material into 30 lessons along with some supporting files. Each
+    lesson builds on the previous lessons. I recommend that you read the lessons in order.
+    However, if you have some previous C++ experience you may find it useful to skip around. In
+    places where it matters, which are few, this course assumes you are using the gcc compiler
+    on a Unix system. In addition this course assumes you are comfortable editing source code
+    files with a good programmer's editor.</p>
+
+    <p>In addition to the lessons themselves I have also prepared several example programs to
+    help illustrate some points and to show the features of C++ in a more realistic way. In the
+    list below I show links to these examples as well as to the lesson text. Each example is
+    associated with a particular lesson. You should review an example after you've read the
+    corresponding lesson text.</p>
+
+    <p>I have also created three review lessons that highlight essential topics from C that you
+    need to know before you'll be able to make sense of the materials in this course. These
+    three review lessons are shown below just before the main list of lessons for this course.
+    If you are interested in my full C course, see the links at the bottom of this page.</p>
+
+    <ul>
+      <li><a href="REVIEW-01.xht">Review Lesson 1</a>: Functions.</li>
+      <li><a href="REVIEW-02.xht">Review Lesson 2</a>: Pointers.</li>
+      <li><a href="REVIEW-03.xht">Review Lesson 3</a>: Structures.</li>
+    </ul>
+
+    <p>The following lessons contain the content of this course</p>
+
+    <ul>
+      <li><a href="LESSON-01.xht">Lesson 1</a>: Overview of C++.</li>
+      <li><a href="LESSON-02.xht">Lesson 2</a>: References and const.</li>
+      <li><a href="LESSON-03.xht">Lesson 3</a>: The IOStreams library.</li>
+      <li><a href="LESSON-04.xht">Lesson 4</a>: The concept of a class.</li>
+      <li><a href="LESSON-05.xht">Lesson 5</a>: Abstract data types. (<a
+      href="date.hpp"><tt>date.hpp</tt></a>, <a href="date.cpp"><tt>date.cpp</tt></a>, <a
+      href="GPL.txt">GNU General Public License</a>)</li>
+      <li><a href="LESSON-06.xht">Lesson 6</a>: Operator overloading. (<a
+      href="EXAMPLE-01.xht">Example 1</a>: An extended precision integer class. <a
+      href="big_int.hpp"><tt>big_int.hpp</tt></a>, <a
+      href="big_int.cpp"><tt>big_int.cpp</tt></a>)</li>
+      <li><a href="LESSON-07.xht">Lesson 7</a>: Operator overloading: Additional
+      topics.</li>
+      <li><a href="LESSON-08.xht">Lesson 8</a>: Dynamic memory using operator new and
+      operator delete. (<a href="getlongline.cpp"><tt>getlongline.cpp</tt></a>)</li>
+      <li><a href="LESSON-09.xht">Lesson 9</a>: Resouce management issues. (<a
+      href="Probe.hpp"><tt>Probe.hpp</tt></a>, <a href="Probe.cpp"><tt>Probe.cpp</tt></a>, <a
+      href="ProbeTest.cpp"><tt>ProbeTest.cpp</tt></a>)</li>
+      <li><a href="LESSON-10.xht">Lesson 10</a>: The library class string. (<a
+      href="EXAMPLE-02.xht">Example 2</a>: Text quotation: using std::strings. <a
+      href="quote.pcd"><tt>quote.pcd</tt></a>, <a
+      href="quote.cpp"><tt>quote.cpp</tt></a>)</li>
+      <li><a href="LESSON-11.xht">Lesson 11</a>: The library vector template.</li>
+      <li>Lesson 12: Introduction to inheritance.</li>
+      <li>Lesson 13: Virtual functions.</li>
+      <li>Lesson 14: Abstract classes.</li>
+      <li>Lesson 15: Object oriented design.</li>
+      <li>Lesson 16: Unified modeling language.</li>
+      <li>Lesson 17: Design patterns.</li>
+      <li><a href="LESSON-18.xht">Lesson 18</a>: Overview of exception handling.</li>
+      <li><a href="LESSON-19.xht">Lesson 19</a>: Exception safety.</li>
+      <li><a href="LESSON-20.xht">Lesson 20</a>: Standard exception types.</li>
+      <li><a href="LESSON-21.xht">Lesson 21</a>: Various other exception topics.</li>
+      <li>Lesson 22: Testing C++.</li>
+      <li>Lesson 23: Debugging C++.</li>
+      <li>Lesson 24: Namespaces.</li>
+      <li>Lesson 25: Multiple inheritance.</li>
+      <li>Lesson 26: C++ internals.</li>
+      <li>Lesson 27: Interfacing with C.</li>
+      <li>Lesson 28: Introduction to the STL.</li>
+      <li>Lesson 29: Iterators.</li>
+      <li>Lesson 30: Generic programming.</li>
+    </ul>
+
+    <hr />
+    <h2>Videos</h2>
+
+    <p>The following videos contain various bits of tutorial information. Some of the videos are
+    of a fairly advanced nature.</p>
+
+    <ul>
+      <li>Herb Sutter's <a
+      href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">"Atomic
+      Weapons" talk, Part 1</a>.</li>
+
+      <li>Herb Sutter's <a
+      href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-2-of-2">"Atomic
+      Weapons" talk, Part 2</a>.</li>
+    </ul>
+
+    <hr />
+    <h2>Slides</h2>
+
+    <p>The following slides provide supplementary information about various C++ topics.</p>
+
+    <ul>
+      <li>Information on <a href="Slides/StandardThread.pdf"><tt>std::thread</tt></a>.</li>
+    </ul>
+
+    <hr />
+    <h2>Links</h2>
+    <p>The following links provide access to potentially useful resources about C++. If you find
+    a resource that is particularly valuable, let me know and I'll consider adding it to this
+    list.</p>
+
+    <ul>
+      <li>My <a href="../C/">C tutorial</a> is useful background information.</li>
+
+      <li>At various places in my lessons I refer to the <a href="../c-style.html">VTC Style
+      Guide for C/C++ Programming</a>.</li>
+      
+      <li><a href="String-Reference-Card.pdf"><tt>std::string</tt> Quick Reference
+      Card</a>.</li>
+
+      <li><a href="http://www.learncpp.com/">LearnCpp.Com</a> contains an extensive tutorial on
+      C++.</li>
+
+      <li><a href="http://www.tutorialspoint.com/cplusplus/">C++ tutorial on tutorialspoint</a>.
+      It looks fairly polished but only appears to cover C++ 1998.</li>
+
+      <li>The <a href="http://www.cplusplus.com/">cplusplus.com</a> web site contains
+      documentation and reference material for C++. Although not an "official" source of
+      information about the language it nevertheless seems useful and maintained.</li>
+
+      <li>The <a href="http://en.cppreference.com/w/">cppreference.com</a> web site also
+      contains unofficial (but maintained) reference material for C++. Let me know which of
+      these two sites seems better; perhaps I should only link to one.</li>
+
+      <li><a href="http://msdn.microsoft.com/en-us/library/hh875057.aspx">Microsoft's reference
+      material on C++</a>. Most directly applicable to Visual Studio users, but much of what is
+      described is entirely standard.</li>
+
+      <li>The official web site of <a href="http://www.boost.org/">Boost</a>. Many people feel
+      boost is an essential add-on to any C++ project.</li>
+
+      <li>The official web sites of <a href="http://llvm.org">LLVM</a> and <a
+      href="http://clang.llvm.org/">clang</a>. I've written some <a
+      href="../clang.html">instructions for installing clang from source</a> on Linux
+      systems.</li>
+
+      <li>The <a href="http://gcc.gnu.org/">Gcc home page</a> contains all the latest about the
+      Gnu Compiler Collection.</li>
+
+      <li>Microsoft's page about <a href="http://www.visualstudio.com">Visual Studio</a>. The
+      official <a href="http://blogs.msdn.com/b/visualstudio/" >Visual Studio blog</a>.</li>
+
+      <li>Although considerably behind the compilers above, <a
+      href="http://www.openwatcom.org/">Open Watcom</a> will always be close in my heart (I was
+      a contributor for a number of years).</li>
+
+      <li>I've written a <a href="../git.html">short document about Git</a> to help you get up
+      to speed with the system. You may find knoweledge of Git useful when setting up to do
+      certain homework assignments.</li>
+    </ul>
+    <hr />
+    <address>
+      &copy; Copyright 2016 by Peter C. Chapin.<br />
+      Last Revised: <b>January 12, 2016</b>
+    </address>
+  </body>
+</html>

@@ -1,0 +1,484 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!-- FILE         : REVIEW-02.xht
+     LAST REVISED : 2016-01-12
+     AUTHOR       : (C) Copyright 2016 by Peter Chapin
+     SUBJECT      : Review of C pointers. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+  <head>
+    <title>Review Lesson #2</title>
+    <meta name="Author" content="Peter C. Chapin" />
+    <!-- <meta name="keywords" lang="en-US" content="..."> -->
+    <meta name="ROBOTS" content="NOARCHIVE" />
+    <link rel="stylesheet" href="cpp-tutorial.css" type="text/css" />
+  </head>
+
+  <body>
+    <h1>Review Lesson #2</h1>
+    <p class="subtitle">Pointers</p>
+
+    <h2>Overview</h2>
+
+    <p>In this review lesson I will cover the following topics</p>
+
+    <ol id="overview-list">
+      <li><p>What a pointer is and how to create and use one.</p></li>
+      <li><p>The relationship between pointers and arrays.</p></li>
+      <li><p>Passing pointers to functions and returning them from functions.</p></li>
+    </ol>
+
+    <h2>Body</h2>
+
+    <h3>What is a pointer?</h3>
+
+    <p>Pointers are often considered to be one of the most confusing aspects of C. Although many
+    languages have something like pointers, in C pointers have very few restrictions and can
+    thus be used in complicated and obscure ways. Some languages, such as Java, consider
+    pointers too error prone to use and don't support them at all (directly).</p>
+
+    <p>Every variable you create in your program is stored in the machine's memory at a specific
+    spot. Every spot in memory has a unique address and thus every variable you create has a
+    unique address. These addresses are just numbers. Often they have the same size and range as
+    the type integer. However, the exact format of an address is often different from one
+    machine to another. You should not assume that addresses are just like integers. In general
+    they are not.</p>
+
+    <p>A pointer is a variable that contains the address of something else. You can use a
+    pointer to get at the variable it points at "indirectly". Although the machine regards all
+    addresses the same way, the C language distinguishes between pointers that point at
+    different types of variables. For example, C treats a pointer to an integer differently than
+    a pointer to a character.</p>
+
+    <p>To declare a pointer you need to specify not only the name, but also the type of variable
+    it will point at. Here are a couple of examples</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int *p1;
+        /* p1 is a pointer to an integer. The asterisk is necessary to tell
+           the compiler that p1 is a pointer. Without it, p1 would look like
+           an integer. */
+
+      char *p2;
+        /* p2 is a pointer to a character. Although both p1 and p2 hold
+           addresses, they are intended to hold addresses of different types
+           types of variables. C thus regards them as different types of
+           pointers. */
+
+      int *p3, p4;
+        /* Be careful about this situation. Here p3 is being declared as a
+           pointer to an integer, but p4 is still just an integer. If you
+           wanted p4 to be a pointer also you have to say "int *p3, *p4" */
+
+      p1 = p2;
+        /* Here I'm trying to assign one pointer to another, but this is
+           an error because p1 and p2 have different pointer types. */
+
+      return 0;
+  }
+</pre>
+
+    <p>The pointers I declared above are all uninitialized. After they are declared they would
+    contain indeterminate addresses that should not be used. Before you can use a pointer, you
+    need to be sure it contains the address of a real variable. You can find the address of a
+    variable using the "address-of" operator. It looks like this:</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int  x;        // This is a real integer variable.
+      int *p;        // This is a pointer to an integer.
+
+      p = &amp;x;
+        // Give p the address of x. We now say that p "points at" x.
+
+      return 0;
+  }
+</pre>
+
+    <p>A statement such as <span class="code">p = x</span> is an error and does not make sense.
+    You can't put an integer into a variable that holds addresses (even if addresses are just
+    like integers in reality). But the expression <span class="code">&amp;x</span> represents
+    the "address of x" and such an expression can be stored into a variable of type "pointer to
+    integer" (since <span class="code">x</span> is an integer its address would be a pointer to
+    integer).</p>
+
+    <p>Now to access the variable pointed at by a pointer, you have to use the "indirection
+    operator". It looks like this</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int  x;
+      int *p;
+
+      p = &amp;x;
+        // Make p point at x like before.
+
+     *p = 10;
+        // Store a 10 into the variable pointed at by p.
+
+      return 0;
+  }
+</pre>
+
+    <p>The expression <span class="code">*p</span> represents the thing that p is pointing at.
+    It does not represent the pointer itself! When you want to talk about the address stored in
+    the pointer variable itself, you just use the name of the variable (as was done in <span
+    class="code">p = &amp;x</span>). When you want to talk about the thing the pointer is
+    pointing at, you have to use the indirection operator with the pointer.</p>
+
+    <p>When you work with pointers, there are really two entities you have to think about: the
+    pointer itself and the thing it points at. These two entities are quite different. They even
+    have different types. People often get confused about when to use the address-of operator or
+    the indirection operator. Yet there is no confusion if you keep track of what you are trying
+    to do. There is no once-and-for-all rule to follow. The correct syntax depends on the
+    situation.</p>
+
+    <p>Using the declarations above check out the following statements.</p>
+
+<pre class="code">
+  p = &amp;x;
+ *p = &amp;x;
+  p = 10;
+ *p = 10;
+</pre>
+
+    <p>Two of these statements don't make any sense and two do. Can you tell the difference? Let
+    me go through them.</p>
+
+<pre class="code">
+  p = &amp;x;
+</pre>
+
+    <p>This makes perfectly good sense. The address of x (an integer) is being stored into a
+    variable of type "pointer to integer." That is completely appropriate.</p>
+
+<pre class="code">
+  *p = &amp;x;
+</pre>
+
+    <p>This does not make sense. The expression <span class="code">*p</span> represents the
+    integer pointed at by p. I can't store the address of x into an integer.</p>
+
+<pre class="code">
+  p = 10;
+</pre>
+
+    <p>This also does not make sense. Here I'm storing the integer 10 into a pointer, but I
+    can't store integers into pointers.</p>
+
+<pre class="code">
+  *p = 10;
+</pre>
+
+    <p>This is fine. The expression <span class="code">*p</span> represents the integer pointed
+    at by p and I'm putting the integer 10 into that variable. That is completely
+    appropriate.</p>
+
+    <h3>Pointers and arrays.</h3>
+
+    <p>Pointers come into their own in C when you start using arrays. This is because the
+    compiler always treats the name of an array without an index as a pointer to the first
+    element in the array. This conversion is often used with arrays of characters. Because C
+    uses arrays of characters to hold strings such arrays are commonly manipulated.</p>
+
+<pre class="code">
+  int main( void )
+  {
+      char buffer[128];
+        // An array of characters that will hold an null terminated string.
+
+      char *p;
+        // This pointer will be used to "point into" the array.
+
+      strcpy( buffer, "Hello, World!" );
+        /* Put a null terminated string into buffer. The 'H' goes into
+           buffer[0], the 'e' goes into buffer[1], and so forth. Just
+           past the final '!' a null byte (ASCII code of zero) will be
+           placed into the buffer. */
+
+      for( p = buffer; *p; p++ ) {
+          *p = toupper( *p );
+      }
+      return 0;
+  }
+</pre>
+
+    <p>The juicy part of the program above is the for loop. It starts by giving p the address of
+    the first element in the array. This happens because of the way C treats the name of an
+    array without an index. Notice that I did not write <span class="code">*p = buffer</span>.
+    That would not have made sense. The expression *p represents a single character and I can't
+    put an address into a character.</p>
+
+    <p>The loop condition is just <span class="code">*p</span>. That evaluates to the character
+    pointed at by p. Here I'm using the fact that any non-zero value is taken in C to mean
+    "true". Thus the for loop executes as long as p points at something other than the null
+    character. This way of writing the loop condition might seem overly clever, but it is a
+    very, very common way to do things in C programs.</p>
+
+    <p>The final loop expression advances the pointer so that it will contain the address of the
+    next array element. Again, I don't want to do <span class="code">(*p)++</span> since I'm not
+    trying to increment a character. Just because p is a pointer doesn't mean you have to put
+    the indirection operator on it all the time! I often see students making this error. Use the
+    indirection operator only when you want to refer to the variable the pointer is pointing
+    at.</p>
+
+    <p>Inside the loop I use the function toupper to convert the character pointed at by p into
+    uppercase and then store that result back into the character pointed at by p. Again, a
+    statement like <span class="code">p = toupper(p)</span> would be incorrect because I'm not
+    trying to uppercase the address (that doesn't even make sense to talk about).</p>
+
+    <p>This loop steps down the array converting the characters in it to uppercase as it goes.
+    It stops as soon as p points at the null character. By convention that means there are no
+    more characters of interest in the array (the array may contain more elements, but when
+    working with strings in C we normally ignore anything past the null character).</p>
+
+    <p>Since the compiler knows how much memory each variable requires, it can be a bit clever
+    about how it increments pointers. In general, when you increment a pointer, the address
+    stored in that pointer is advanced by whatever amount is necessary to make it point at the
+    next variable in memory. For example, suppose integers are four bytes in size (32 bits).
+    Then take a look at this example:</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int  array[128];
+      int *p;
+
+      for( p = array; p != array + 128; p++ ) {
+          *p = 0;
+      }
+      return 0;
+  }
+</pre>
+
+    <p>When the pointer to integer, p, is incremented at the end of each loop pass, the address
+    stored in it will actually be advanced by four. This will cause it to point at the next
+    integer in memory. If the address had only be advanced by one the pointer would have been
+    left pointing at the second byte of the same integer it was pointing at originally. That
+    would not have been very useful.</p>
+
+    <p>This program also demonstrates another important characteristic of pointers: you can add
+    an integer to them. For example, if p points at the first element of an array of integers,
+    <span class="code">p + 1</span> would be the address of the next element. Unlike <span
+    class="code">p++</span>, an expression like <span class="code">p + 1</span> does not modify
+    p. Also, you can use addition to "jump" a pointer forward as far as you like. In the loop
+    above, I talk about the address "array + 128". Since array is 128 integers long, array + 128
+    is the address just off the end of the array (array + 127 would be the address of the last
+    (127th) element in the array).</p>
+
+    <p>The loop above initializes p to point at the start of the array and then steps it down
+    until it points just off the end of the array. Inside the loop it assigns the integer 0 to
+    each array element. The fact that p steps off the end of the array does not cause a problem
+    in this case because the loop ends before that "one too far" array element is actually
+    accessed. This is a very common idiom for stepping down an array and it plays a very
+    important role in C++ programming where, as you will see later, pointers get replaced by
+    more generalized "iterators".</p>
+
+    <h3>Pointers and functions.</h3>
+
+    <p>Pointers are often used with functions. One reason for this is because pointers give you
+    way to get around some of the restrictions ordinarily imposed on C functions. Consider this
+    classic example:</p>
+
+<pre class="code">
+  void swap( int A, int B )
+  {
+      int temp = A;
+      A = B;
+      B = temp;
+  }
+</pre>
+
+    <p>This function wants to exchange the two integers it is given. It does that, but it isn't
+    very useful. In C, functions always get copies of their arguments. While the function above
+    swaps the copies it gets, it does nothing to the original variables.</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int X, Y;
+
+      // ...
+
+      swap( X, Y );
+        // X is copied to A, Y is copied to B. Swap exchanges A and B but
+        // does not modify X or Y at all.
+
+      return 0;
+  }
+</pre>
+
+    <p>In C you can get around this by passing pointers to the function.</p>
+
+<pre class="code">
+  void swap( int *A, int *B )
+  {
+      int temp = *A;
+      *A = *B;
+      *B = temp;
+  }
+</pre>
+
+    <p>Notice how I have to now use the indirection operator on A and B inside the function.
+    This is because I'm not trying to swap the pointers. I want to swap the things they point
+    at. Also I created an ordinary integer local variable inside swap. I did not declare temp to
+    be a pointer to an integer because it needs to temporarily hold one of the integers I'm
+    swapping -- not one of the pointers.</p>
+
+    <p>Now to use this new version of swap, I have to give it the addresses of the two variables
+    I want it to operate on.</p>
+
+<pre class="code">
+  int main( void )
+  {
+      int X, Y;
+
+      // ...
+
+      swap( &amp;X, &amp;Y );
+        // Swap gets the address of X and Y and uses those addresses to
+        // modify X and Y as desired.
+
+      return 0;
+  }
+</pre>
+
+    <p>The <span class="code">scanf</span> function in the standard library needs a pointer for
+    each variable it is going to modify for exactly the same reason.</p>
+
+<pre class="code">
+  int number;
+
+  scanf( "%d", &amp;number );
+    // Give scanf the address of number so that it can modify my
+    // variable.
+</pre>
+
+    <p>It is very common for functions in C to take a pointer to a character as a parameter
+    expecting that pointer to really point at the start of a null terminated string.
+    Misunderstanding this causes many errors. Consider the library function gets. It reads a
+    line of text from the standard input device and places that text into the array pointed at
+    by its parameter. The declaration of gets looks like:</p>
+
+<pre class="code">
+  char *gets( char * );
+    /* Function gets takes a pointer to a buffer where it will store
+       what it reads. It returns the same address it was given or the
+       NULL pointer if it encounters an error or an EOF without read-
+       ing anything. */
+</pre>
+
+    <p>The proper way to use gets (without error handling) is like this:</p>
+
+<pre class="code">
+  int main( void )
+  {
+      char buffer[128];
+
+      printf( "What is your name? " );
+      gets( buffer );
+        // Read a line of text from the user and put it into buffer. Pray
+        // that the user does not enter in more than 127 characters.
+
+      return 0;
+  }
+</pre>
+
+    <p>Since the name, buffer, is the name of an array without an index, the C compiler regards
+    it as a pointer to the first element in the array. This happens to be just what gets is
+    expecting. If the user enters in more than 127 characters, gets will end up overflowing the
+    array (it needs one byte for the null character) and that is bad. For this reason gets is
+    not a good function to use in a serious program.</p>
+
+    <p>Sometimes students do this:</p>
+
+<pre class="code">
+  int main( void )
+  {
+      char *buffer;
+
+      printf( "What is your name? " );
+      gets( buffer );
+        // Read a line from the user.
+
+      return 0;
+  }
+</pre>
+
+    <p>But this version has a serious problem. The pointer <span class="code">buffer</span> is
+    not initialized. It points into space. When gets uses that pointer to locate the buffer it
+    is expecting to fill, it will end up writing characters into random memory locations. Yet
+    this version of the program does compile because technically gets is getting an argument of
+    the right type. Depending on what value happens to be in buffer when the program runs, the
+    program might even appear to work&mdash;sometimes.</p>
+
+    <p>Students occasionally try to correct this situation by doing:</p>
+
+<pre class="code">
+  int main( void )
+  {
+      char buffer;
+
+      printf( "What is your name? " );
+      gets( &amp;buffer );
+        // Read the result from the user.
+
+      return 0;
+  }
+</pre>
+
+    <p>Again, this compiles because <span class="code">&amp;buffer</span> is, in this case, a
+    pointer to a character. However, that pointer is only pointing at a single character. If the
+    user enters any text at all (remember gets needs one byte to hold the null character), gets
+    will again write in random memory locations.</p>
+
+    <p>Make sure you understand these two erroneous examples. They are fairly common. I have
+    even seen them in books that teach C programming!</p>
+
+    <h2>Summary</h2>
+
+    <ol id="summary-list">
+
+      <li>
+        <p>A pointer is a variable that holds the address of something else. You declare a
+        pointer using the asterisk like this:</p>
+      
+<pre class="code">
+  char *p;  // p is a pointer to a character.
+</pre>
+        <p>When you want to give a pointer a value you can use the address-of operator (&amp;)
+        to take the address of some other variable. When you want to access the variable the
+        pointer is pointing at, you use the indirection operator (*) on the pointer.</p>
+      </li>
+
+      <li>
+        <p>The name of an array without an index is a pointer to the first element in the array.
+        You can increment (and decrement) pointers and add integers to pointers as a way of
+        computing the address of other array elements.</p>
+      </li>
+
+      <li>
+        <p>Functions can not normally modify their original arguments. They can only modify the
+        copies they have been given. Yet by passing a function a pointer it can use that pointer
+        to access the original variable. This technique is often used. In C many functions that
+        are intended to operate on arrays are written to take a pointer. Such functions can then
+        be called using just the array's name as the argument. C coverts that name into a
+        pointer to the first element just as the function is expecting.</p>
+      </li>
+
+    </ol>
+
+    <address>
+      &copy; Copyright 2016 by Peter C. Chapin.<br />
+      Last Revised: <b>January 12, 2016</b>
+</address>
+
+  </body>
+</html>

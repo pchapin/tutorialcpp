@@ -1,0 +1,78 @@
+
+/* General document properties. */
+body { background: #F8F8F8; margin: 1.5cm; }
+
+/* Title heading. */
+h1         { text-align: center; text-transform: uppercase; }
+p.subtitle { text-align: center; text-transform: uppercase; }
+
+h2 { text-decoration: underline; }
+
+/* Normal paragraph properties. */
+p  { text-align: justify; }
+
+/* Special properties for notes. */
+p.note { font-style: italic; }
+
+/* Special formatting for the overview and summary. */
+#overview-list {
+  background: #EDE;
+  /* border: 2px solid black; */
+  padding: 2mm;
+}
+#summary-list {
+  background: #EDE;
+  /* border: 2px solid black; */
+  padding: 2mm;
+}
+
+/* The handling of code segments. */
+.code { color: #A67; font-weight: bold; font-family: monospace; }
+pre.code {
+  /* background: #D8D8D8; */
+  /* border: 2px solid black; */
+  margin-left: 0.5cm;
+  margin-right: 1cm;
+  padding-top: 1mm;
+  padding-left: 1mm;
+  padding-bottom: 1mm;
+}
+
+/* The handling of pseudo-code segments. */
+.pcode { color: #A2D; font-weight: bold; font-family: monospace; }
+pre.pcode {
+  /* background: #D8D8D8; */
+  /* border: 2px solid black; */
+  margin-left: 0.5cm;
+  margin-right: 1cm;
+  padding-top: 1mm;
+  padding-left: 1mm;
+  padding-bottom: 1mm;
+}
+
+/* The handling of terminal session segments. */
+.terminal { color: black; }
+pre.terminal {
+  /* background: #D8D8D8; */
+  /* border: 2px solid black; */
+  margin-left: 0.5cm;
+  margin-right: 1cm;
+  padding-top: 1mm;
+  padding-left: 1mm;
+  padding-bottom: 1mm;
+}
+.user-input { font-style: italic; }
+
+/* The handling of "figures" */
+pre.figure {
+  margin-left: 0.5cm;
+  margin-right: 1cm;
+  padding-top: 1mm;
+  padding-left: 1mm;
+  padding-bottom: 1mm;
+}
+
+/* The few formula that I need are handled like this. */
+pre.math-display { 
+  text-align: center;
+}

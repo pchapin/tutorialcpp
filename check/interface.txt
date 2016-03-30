@@ -1,0 +1,339 @@
+
+C++ Class Interfaces: General Issues
+(C) Copyright 2003 by Peter Chapin
+==================================
+
+Introduction:
+------------
+
+Beginning C++ programmers are often confused about what methods to
+implement for a given class. Indeed, it is generally conceded that
+designing a good class is a difficult operation which is not well suited
+for the novice. However C++ programmers must, of course, eventually deal
+with this important aspect of the language.
+
+In this paper, I will present some general principles of class interface
+design. I will assume that you are familiar with C++. I will also assume
+that you've already designed some classes and that you weren't happy
+with the results or that you felt you weren't getting as much out of the
+language as there was to get. If these conditions don't apply to you,
+then perhaps this paper is not for you.
+
+Throughout this paper I will frequently refer to "your class." That is,
+I will be assuming that you have some class in mind that you want to
+implement and are wondering what methods are appropriate. This is
+different than wondering about what class to implement. In other words,
+this paper is about implementing classes, not about what things are good
+to put into classes.
+
+
+If In Doubt...:
+--------------
+
+The first rule to remember is: "If in doubt, leave it out." It is MUCH
+easier to add additional abilities later than it is to remove them. It
+is usually possible to add methods without invalidating existing code.
+Don't try to write the definitive class immediately. Instead write a
+minimal one first, try it out for awhile, and then improve it based on
+your experience with it. It is much easier to remove bad stuff if it was
+never added in the first place.
+
+
+Completeness and Orthagonality:
+------------------------------
+
+You want the interface to your class to be complete. The best way to
+judge this is to put all data members in the private section of your
+class. If you find yourself wanting to do something that you cannot do
+without getting at those data members, you interface is probably
+incomplete (your program may have other design problems).
+
+You want the interface to your class to be orthagonal. That is, you
+don't normally want methods to do more than one thing at a time. If a
+method tries to do to much, clients will find themselves undoing things
+that they didn't want done. If you really feel that some combination of
+operations are appropriate for your class, add such methods IN ADDITION
+to the simple, atomic actions.
+
+
+Construction and Destruction:
+----------------------------
+
+If your class has private members, you probably want at least one
+constructor. Without a constructor, private members have no way of
+getting initialized. If you have even one constructor with parameters,
+you should think about adding a default constructor---even if it does
+nothing. Without one, you won't be able to declare objects of your class
+without explicitly initializing them! (Of course sometimes that is good)
+For example
+
+class Complex {
+  private:
+    double re_part, im_part;
+  public:
+    Complex(double, double = 0.0);
+    // etc, with no other constructors.
+  };
+
+Complex Z;     // Error! No Complex::Complex().
+
+If your class contains references to data structures outside of itself,
+it probably needs a copy constructor, an operator=(), and a destructor.
+For example, classes which hold pointers to heap memory, handles to
+files, or other "magic cookies," need to be copied in such a way that
+the associated data structures are also copied. These methods should
+look like
+
+X::X(const X &);
+X &operator=(const X &);
+X::~X();
+
+The references to const are more general and remind you that such
+methods should not change the existing object. The X& returned by
+operator=() allows you to write things like "A = B = C;" without
+incurring any performance penalty associated with copying a returned
+object even when it isn't used.
+
+Note that either both the copy constructor and operator=() are
+implemented or neither are. It is very unusual to require one but not
+the other. Similarly if those methods are needed, most likely a
+destructor is also needed. If a class manages resources that reside
+outside of itself then a destructor will probably have to be present to
+release those resources when the object goes out of scope.
+
+If you don't plan on copying objects of your class and don't want to be
+bothered implementing a copy constructor and an operator=(), you should
+at least provide a declaration of each in the private section of your
+class. This allows the compiler to catch any implicit uses of these
+functions of which you are not aware. The copy constructor, especially,
+is often called at unexpected times.
+
+If your class is a polymorphic base class, you should include a virtual
+destructor even if your class has nothing to destroy. Classes derived
+from your base may have destruction duties and you want them to be done
+even if a pointer to your base is deleted.
+
+Be wary of implementing "tricky" semantics for constructors and
+destructors. Unlike normal methods, the compiler implicitly calls
+constructors and destructors. The definition of the language assumes
+that constructors initialize ONLY and destructors clean up ONLY. If you
+abide by that rule, you will not get surprises (except pleasant ones).
+
+If a constructor cannot perform its duties, you have two choices. Either
+throw an exception or set a private error flag. The error flag should be
+made available to clients so that they can determine the state of the
+object. In addition, the error flag should be inspected by the other
+methods so that they can act accordingly.
+
+
+Type Conversions:
+----------------
+
+Constructors which take one parameter are, automatically, type
+conversion operators from the type of their parameter to your class
+(unless you use the "explicit" keyword on the constructor's
+declaration). You might consider adding type conversion operators from
+your class to those other types as well. For example, if it is
+meaningful to convert an int to your class, is it meaningful to convert
+an object of your class to an int?
+
+Type conversion methods should be const methods. Why should the action
+of producing a converted value change the existing object?
+
+
+Access Methods:
+--------------
+
+You should provide methods that allow clients of your class to inspect
+every interesting object attribute. Certainly any attribute that the
+client can change should also be readable by the client.
+
+Access methods should be const methods. If this sounds too restrictive,
+it may mean that your method is doing more than just reading object
+attributes. Probably it should be broken into more than one method or
+moved out of the set of access methods.
+
+BE CAREFUL about returning pointers or references to internal, private
+data structures. This makes the private section of your class indirectly
+visible and thus restricts your freedom if you want to reimplement the
+class' internal structure. If you must return such pointers (or
+references), make them pointers (or references) to const. For example
+
+class String {
+  private:
+    char *buffer;
+
+  public:
+    operator char *() { return buffer; }               // Poor.
+    operator const char *() { return buffer; } const;  // Better.
+    char operator[](unsigned index) const;             // Even better.
+  };
+
+If the implementor of the above class decided to insert special codes
+into the buffer, they could reimplement operator[] so that these codes
+are handled transparently. What about the clients that grab the pointer
+raw?
+
+Access methods can sometimes be implemented as type conversion operators
+(as shown above). This approach has the advantage of allowing objects
+from your class to be used in many more contexts. For example, given the
+above interface to class String,
+
+String thing;
+size_t length = strlen(thing);     // Thing converted.
+
+
+Operations:
+----------
+
+Operations that change the state of an object should be methods. If they
+take pointers or references as parameters, they should be pointers or
+references to const. If this seems to restrictive, it may mean that your
+method is changing the state of several objects.
+
+class X {
+  public:
+    void operator+=(const X &);    // Adds another X into this one.
+    void negate();                 // Negates this X.
+  };
+
+Operations that read the state of a single object and perform some sort
+of operation on that state should probably be const methods. Such
+methods are really specialized access functions. For example
+
+class X {
+  public:
+    X operator-() const;      // Return a negative version of this X.
+
+Operations that involve several objects should probably be ordinary
+functions. It should be possible for these functions to do what they
+must using the access methods and state changing methods in your class'
+interface. If they cannot, your interface may be incomplete. For
+efficiency reasons, you may want to make the functions friends. For
+example
+
+class Complex {
+  private:
+    double re_part, im_part;
+  public:
+    Complex(double, double = 0.0); // Construct (also state
+changing)
+    double re() const;   // Access real part.
+    double im() const;   // Access imaginary part.
+  };
+
+// Ordinary function can use normal class interface. Not a friend.
+Complex operator+(const Complex &left, const Complex &right)
+{
+  return Complex(left.re() + right.re(), left.im() + left.im());
+}
+
+Use pointers or references to const as parameters on such functions
+whenever the function only needs to read the object to which the pointer
+or reference refers. Notice how, in the above example, the parameters to
+operator+() are not changed and thus carry const qualification. If this
+prevents you from using, in the body of the function, methods that you
+want to use, it may mean that you should declare those methods const.
+
+If your class contains a collection of subobjects be sure to give your
+clients some natural way to iterate over the subobjects. A STL-style
+iterator nested class would be the best as it would allow your class to
+be used with STL library algorithms. However, even if you don't go with
+an STL-like structure, some sort of iterator would be desirable.
+
+Overload the arithmetic operators only if your class represents some
+sort of numeric type. Do not try to do anything cute with operator
+overloading. Although operator overloading is a powerful feature, it can
+be abused. Be sure the meaning of an overloaded operator is totally
+obvious to the client.
+
+
+I/O:
+---
+
+
+Dynamic Allocation:
+------------------
+
+
+Class Scoped Types:
+------------------
+
+
+Data Consistency:
+----------------
+
+If your class hides a complex data structure, you may want to provide
+some methods which allow clients to verify data consistency. This is
+particularly true if the data structure extends beyond the boundaries of
+your class. For example an object which associates itself with a file,
+may want to allow clients to check file integrity. Such methods should
+probably be const methods, at least if possible.
+
+If appropriate, you may want to also provide methods that repair damaged
+internal data. Such methods are specialized state changing functions.
+
+
+Pseudo-Copies or Smart References:
+---------------------------------
+
+
+Source File Breakdown:
+---------------------
+
+Each class should probably have it's own header file. Consider making
+that file self contained in the sense that it should #include any
+headers that it directly needs (for base classes for example). To
+prevent multiple inclusions, consider using the standard technique:
+
+#ifndef HEADER_HPP
+#define HEADER_HPP
+
+// Body of header file.
+
+#endif
+
+Consider placing I/O operations in a separate source file so that I/O
+code is not linked in unless it is actually needed. Similarly, consider
+putting any data consistency functions in a separate source file. If the
+main part of the class is too large for one source file, it may mean
+that your class is too complex. Consider breaking it up using
+inheritance and/or aggregation (see below).
+
+
+Implementing  a Class Hierarchary:
+---------------------------------
+
+Inheritance is useful in situations where you have several types which
+have some common operations, but which differ in how they handle those
+operations. There are many design issues involved with inheritance.
+Books have been written on the subject. Here are a few of the highlights
+as I see them.
+
+1. You should define a family of classes whenever there are several
+   different types in your program that share common generic operations.
+   Those generic operations become virtual functions in a common base
+   class.
+
+2. You should write, if possible, general purpose functions which
+   manipulate (pointers or references to) base obects as a way of
+   effectively reusing code. The function manipulates the object
+   according to its generic interface.
+
+3. Generic operations which have meaningful default behavior should have
+   that default behavior implemented in the common base class.
+
+4. Generic operations which do not have meaningful default behavior
+   should be declared as pure virtual functions in the base class.
+
+Be sure to declare the destructor in the base class as virtual to ensure
+that deleting a pointer to a base properly destroys the actual object to
+which it points.
+
+
+When to Use the Protected Section:
+---------------------------------
+
+
+Implementing Large Classes:
+--------------------------

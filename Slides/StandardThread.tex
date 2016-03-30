@@ -1,0 +1,603 @@
+%
+% Slides on C++ standard threads.
+%
+
+\documentclass[landscape]{slides}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{times}
+\usepackage{url}
+
+\input{../../LaTeX/Slides/slide-macros}
+
+% Default settings for code listings.
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily,
+  stringstyle=\ttfamily,
+  commentstyle=\ttfamily,
+  xleftmargin=0.25in,
+  showstringspaces=false}
+
+\lstMakeShortInline[basicstyle=\ttfamily]!
+
+\title{\color{titlecolor}C++ Standard Threads}
+\author{
+  \begin{tabular}{c}
+  \\[3mm]
+  \Large{Peter C. Chapin} \\[2mm]
+  \normalsize{Computer Information Systems}\\[5mm]
+  \includegraphics[scale=0.80]{../../LaTeX/Slides/VermontTech_stack_361.jpg}\\[16mm]
+  \end{tabular}
+}
+\date{April 8, 2015}
+
+\begin{document}
+
+\color{Black}
+\pagecolor{Background}
+
+\maketitle
+
+%%%%%
+
+\startslide{Overview}
+\begin{citemize}
+\item \cemph{Why?} Widespread agreement that C++ should have standardized thread handling
+  facilities.
+\begin{citemize}
+  \item Many programs need threads.
+  \item Currently must use non-portable, OS-specific facilities.
+  \item Semantics of C++ 1998 with multiple threads unclear.
+  \item C++ 2011 contains thread classes roughly taken from Boost.
+\end{citemize}
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Basic Example}
+{\small
+\begin{lstlisting}
+#include <thread>
+
+void f( int count )
+{
+    ...
+}
+
+int main( )
+{
+    // Start thread, pass argument to thread function.
+    std::thread my_thread( f, 42 );
+
+    ... // Execute here and in f at the same time.
+
+    // Wait for thread to end.
+    my_thread.join( );
+    return 0;
+}
+\end{lstlisting}
+}
+\stopslide
+
+%%%%%
+
+\startslide{Notes On Basic Example}
+\begin{citemize}
+  \item Thread function requirements\ldots
+  \begin{citemize}
+    \item Return !void!.
+    \item Can take parameters as needed (any type).
+    \item Can be any callable object.
+      \begin{citemize}
+        \item Pointer to function.
+        \item Class instance with overloaded !operator( )!.
+      \end{citemize}
+  \end{citemize}
+
+  \item thread behavior\ldots
+    \begin{citemize}
+      \item Given callable object is \cemph{moved} (or else copied).
+      \item Destructor detaches (unless thread already joined).
+    \end{citemize}
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Local Variables}
+Each thread has its own stack. Locals are allocated on the thread's stack; globals are shared
+between threads.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+int x;  // Global data.
+
+void f( int count )
+{
+    int temporary = count;  // Temporary local to the thread.
+    x = temporary;          // X is shared by threads.
+}
+
+// No problem with two threads executing same function.
+// Each thread has its own arguments and local variables.
+
+std::thread thread1( f, 42 );
+std::thread thread2( f, 84 );
+\end{lstlisting}
+}
+\stopslide
+
+%%%%%
+
+\startslide{Callable Class Instance}
+Possible to use a class instance as a callable.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+struct Worker {
+    void operator( )( int count );
+};
+
+void Worker::operator( )( int count )
+{
+    // Do stuff...
+}
+
+int main( )
+{
+    // Create an instance of a callable object.
+    Worker callable;
+    std::thread my_thread( callable, 42 );
+
+    ... // Execute here and in Worker::operator( ).
+
+    my_thread.join( );
+    return 0;
+}
+\end{lstlisting}
+}
+\stopslide
+
+%%%%%
+
+\startslide{Returning Values}
+\begin{citemize}
+  \item Thread callables must return !void!.
+  \item Returning a value is tricky.
+    \begin{citemize}
+      \item The parent thread is not waiting for the result; it is busy doing something else. 
+      \item Return value must be stored somewhere.
+    \end{citemize}
+  \item Three possibilities\ldots
+    \begin{citemize}
+      \item Global data (discouraged).
+      \item Use a pointer parameter (okay, can be tricky).
+      \item Members of a callable with class type (preferred).
+    \end{citemize}
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Return Values: First Try}
+This doesn't quite work.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+struct Worker {
+    int result;
+    void operator( )( int count );
+};
+
+void Worker::operator( )( int count ) {
+    ...
+    result = ...
+}
+
+int main( ) {
+    Worker callable;
+    std::thread my_thread( callable, 42 );
+    ...
+    my_thread.join( );
+    // Look at callable.result here.
+    return 0;
+}
+\end{lstlisting}
+}
+\stopslide
+
+%%%%%
+
+\startslide{Returning Values: Second Try}
+Problem: The callable is \cemph{moved} (or else copied)
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+#include <functional>
+
+int main( )
+{
+    Worker callable;
+    std::thread my_thread( std::ref( callable ), 42 );
+
+    ...
+
+    my_thread.join( );
+    // Now callable.result is meaningful.
+
+    return 0;
+}
+\end{lstlisting}
+}
+The !std::ref! function returns a !reference_wrapper! that can be copied into the thread object
+and that forwards all access to the original callable.
+\stopslide
+
+%%%%%
+
+\startslide{Thread Copies}
+The !std::thread! class is not copyable. \cemph{What would copying a thread mean?}
+
+But it is movable. Threads can be moved out of funtions (returned) and into ``move aware''
+containers.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+std::thread make_thread( )
+{
+    int x;
+
+    // Do complex stuff to prepare thread arguments.
+    return std::thread( f, x );
+}
+...
+
+std::vector<std::thread> my_threads;
+my_threads.push_back( make_thread( ) );
+\end{lstlisting}
+}
+It's okay to use local variable as thread parameter because it is moved (or else copied) into
+the thread object.
+\stopslide
+
+%%%%%
+
+\startslide{Exceptions}
+If the callable passed to a thread thows an unhandled exception,\\
+!std::terminate! is called.
+
+\begin{citemize}
+\item Normally aborts the \cemph{entire} program.
+\item Probably should wrap top level thread function in a catch-all handler.
+\end{citemize}
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+void thread_function( )
+{
+  try {
+    // Do stuff.
+  }
+  catch( ... ) {
+    // Unhandled exception reached here.
+    // Do something reasonable.
+    // Let function end without throwing.
+  }
+}
+\end{lstlisting}
+}
+\stopslide
+
+% Thread interruption is not supported in C++ 2011. Although Boost provides a reasonably safe
+% way to do it, I guess the C++ committee felt it was more complicated than it was worth. It's
+% better to not try to interrupt a running without its cooperation.
+%
+%%%%%%%
+%%
+%%\startslide{Thread Interruption}
+%%A thread can be interrupted.
+%%
+%%\begin{citemize}
+%%\item Call !interrupt! method on !boost::thread! object.
+%%\item Causes !boost::thread_interrupted! to be thrown in the thread.
+%%  \begin{citemize}
+%%    \item Thread can handle exception if it wants.
+%%    \item Thread stack unwound in the usual way (local objects destroyed, etc).
+%%    \item Does \cemph{not} cause termination if reaches top level.
+%%  \end{citemize}
+%%\item Thread can temporarily disable interruption.
+%%\item Interruption can only occur at specific \textit{interruption points} in the thread.
+%%\end{citemize}
+%%\stopslide
+%%
+%%%%%%%
+%%
+%%\startslide{Disabling Interruption}
+%%{\small
+%%\begin{lstlisting}
+%%void some_function( )
+%%{
+%%  // Constructor of di turns off interruption.
+%%  boost::this_thread::disable_interruption di;
+%%
+%%  // Thread will not be interrupted here.
+%%  // Destructor of di restores interruption status.
+%%}
+%%\end{lstlisting}
+%%}
+%%Uses constructor/destructor of special class to manage interruption.
+%%
+%%Restores interruption status for both normal return and if an exception is thrown.
+%%\stopslide
+
+%%%%%
+
+\startslide{Hardware Concurrency}
+Can query library to find out how many hardware threads are available.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+unsigned processor_count =
+  std::thread::hardware_concurrency( );
+
+if( processor_count == 0 ) {
+  // Can't tell how many CPUs there are.
+}
+else {
+  // Create as many threads as there are processors.
+}
+\end{lstlisting}
+}
+This is useful when doing parallel programming.
+\stopslide
+
+%%%%%
+
+\startslide{Namespace \texttt{this\_thread}}
+Functions in !std::this_thread! affect only the calling thread.
+
+Methods of a !std::thread! object affect the thread represented by that object (if any).
+
+A !std::thread! object might not represent a thread because\ldots
+\begin{citemize}
+  \item \ldots the thread has terminated.
+  \item \ldots the thread has been explicitly \cemph{detached} using the !detach! method.
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Thread IDs}
+Each thread has a unique ID.
+\begin{citemize}
+  \item Call !get_id! on the !std::thread! object.
+  \item Call !std::this_thread::get_id! to get the ID of the current thread.
+\end{citemize}
+
+Can be used as keys in an associative container.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+std::map<std::thread::id, string> thread_name;
+
+thread_name[std::this_thread::get_id( )] = "Me";
+thread_name[some_thread.get_id( )] = "You";
+\end{lstlisting}
+}
+\stopslide
+
+%%%%%
+% TODO: FIX ME! This is not the way sleeping works in C++ 2011.
+\startslide{Sleeping}
+The static method !std::thread::sleep! allows a thread to block until a specified time occurs.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+void f( )
+{
+  // Do stuff.
+
+  // Wait until the time specified arrives.
+  std::thread::sleep(
+    std::get_system_time( ) +
+    std::posix_time::milliseconds( 1000 ) );
+}
+\end{lstlisting}
+}
+There is also !std::this_thread_sleep!. It waits until a specified interval has elapsed.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+std::this_thread::sleep(
+  std::posix_time::milliseconds( 1000 ) );
+\end{lstlisting}
+}
+\stopslide
+
+%%%%
+
+\startslide{Mutual Exclusion}
+C++ provides several ``mutex'' classes for locks.
+\begin{citemize}
+  \item !class mutex!\\
+    Provides basic !lock!, !try_lock!, !unlock! methods.
+  \item !class timed_mutex!\\
+    Allows for specifying a time out with !timed_lock!.
+  \item !class recursive_mutex!\\
+    Will not deadlock if the same thread locks twice.
+  \item !class recursive_timed_mutex!\\
+    A recursive mutex with a !timed_lock! method.
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Using Mutex Objects}
+Mutex objects can be used directly\ldots
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+#include <mutex>
+
+// Must be shared between threads (so global).
+std::mutex mutual_exclusion;
+
+void f( )
+{
+  mutual_exclusion.lock( );
+
+  // This thread now has exclusive access.
+
+  mutual_exclusion.unlock( );
+}
+\end{lstlisting}
+}
+\cemph{Not recommended}. This isn't exception safe. The !unlock! method won't be called if an
+exception is thrown.
+\stopslide
+
+%%%%%
+
+\startslide{Use Template Wrappers}
+Instead use RAI enabled wrapper templates.
+\vspace{5mm}
+{\small
+\begin{lstlisting}
+std::mutex mutual_ex;
+
+void f( )
+{
+  // Constructor of 'guard' locks.
+  std::lock_guard<std::mutex> guard( mutual_ex );
+
+  // This thread now has exclusive access.
+
+  // Destructor of 'guard' unlocks.
+}
+\end{lstlisting}
+}
+\cemph{Lock is released even if an exception is thrown.}
+
+There is also a !unique_lock! template that is similar except it can be moved (for example into
+containers) and returned from functions. It has other features as well.
+\stopslide
+
+% The shared_mutex type from Boost is not part of C++ 2011 so the reader/writers example below
+% would have to be done differently in C++ 2011. TODO: Show how this would be done.
+%
+%%%%%%%
+%%
+%%\startslide{An Example Using Shared Locks}
+%%Solving the reader/writers problem\ldots
+%%\vspace{5mm}
+%%{\small
+%%\begin{lstlisting}
+%%using namespace boost;
+%%
+%%shared_mutex controller;
+%%
+%%void f( )
+%%{
+%%  shared_lock<shared_mutex> guard( controller );
+%%  // Threads share access... must read only.
+%%}
+%%
+%%void g( )
+%%{
+%%  unique_lock<shared_mutex> guard( controller );
+%%  // This thread has exclusive access... can write.
+%%}
+%%\end{lstlisting}
+%%}
+%%\stopslide
+
+%%%%%
+
+\startslide{Condition Variables}
+Modeled after POSIX condition variables, but with a C++ interface.
+\begin{citemize}
+  \item Allows a thread to \cemph{wait} until an arbitrary condition is true.
+    \begin{citemize}
+      \item Another thread \cemph{notifies} the waiting thread (or all waiting threads at once).
+    \end{citemize}
+  \item Proper use of condition variables is tricky.
+    \begin{citemize}
+      \item Refer to a description of POSIX condition variables to understand the issues.
+    \end{citemize}
+\end{citemize}
+\stopslide
+
+%%%%%
+
+\startslide{Example}
+\vspace{2mm}
+{\small
+\begin{lstlisting}
+std::condition_variable cond;
+std::mutex mut;
+bool data_ready;
+
+void wait_for_data( )
+{
+  std::unique_lock<std::mutex> lock( mut );
+  while( !data_ready ) cond.wait( lock );
+  process_data( );
+}
+
+void prepare_data( )
+{
+  do_the_work( );
+  {
+    std::lock_guard<std::mutex> lock( mut );
+    data_ready = true;
+  }
+  cond.notify_one( );
+}
+\end{lstlisting}
+}
+\stopslide
+
+% C++ 2011 does not support barriers. TODO: Show how this would be done.
+%%%%%%%
+%%
+%%\startslide{Barriers}
+%%A barrier allows multiple threads to wait until they have all reached a particular point.
+%%\vspace{5mm}
+%%{\small
+%%\begin{lstlisting}
+%%// Configure barrier for five threads.
+%%boost::barrier sync( 5 );
+%%
+%%void f( )
+%%{
+%%  // Do work. This function is called by five threads.
+%%
+%%  // Wait here until all five threads reach this spot.
+%%  sync.wait( );
+%%}
+%%\end{lstlisting}
+%%}
+%%Barriers are useful for parallel programming to ensure that an entire data structure has been
+%%processed by a team of threads before continuing.
+%%\stopslide
+
+%%%%%
+
+\startslide{Conclusion}
+\begin{citemize}
+\item C++ threads has more facilities than described here.
+\item POSIX-like functionality with convenient C++ interface.
+\item Boost.Thread inspired new thread features of the C++ 2011 library.
+\end{citemize}
+\vspace{0.5in}
+\centerline{Questions?}
+\stopslide
+
+\end{document}

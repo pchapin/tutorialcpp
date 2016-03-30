@@ -1,0 +1,231 @@
+
+C++ size_type and difference_type
+(C) Copyright 2000 by Peter Chapin
+==================================
+
+*** The integral types.
+
+C and C++ both define several built-in integral types. They are
+
+  short   (At least 16 bits)
+  int     (At least 16 bits)
+  long    (At least 32 bits)
+
+and
+
+  unsigned short (Same size as short)
+  unsigned       (Same size as int)
+  unsigned long  (Same size as long)
+
+All of these type names can optionally include "int" ("short int",
+"unsigned int", etc), but most programmers leave "int" out whenever they
+can. (Note: The character types are also integral types, but I'll ignore
+that for now).
+
+The exact number of bits used by each type is implementation dependent.
+It varies from compiler to compiler. The C and C++ standards require
+certain minimums (noted above), but implementations are free to use
+larger sizes if they want as long as
+
+       sizeof(short) <= sizeof(int) <= sizeof(long)
+
+Typically implementations choose one of the following three
+configurations.
+
+1. short: 16 bits, int: 16 bits, long: 32 bits. This is usually what
+   compilers for small, 16 bit microprocessors use. Such machines have
+   difficulties manipulating 32 bit numbers and thus 16 bit ints are the
+   natural choice for them.
+
+2. short: 16 bits, int: 32 bits, long: 32 bits. This is usually what
+   compilers for 32 bit systems use. Such machines find 32 bit integers
+   to be the most natural size.
+
+3. short: 16 bits, int: 32 bits, long: 64 bits. This is usually what
+   compilers for 64 bit systems use. Notice that even on a 64 bit
+   machine the type "int" is usually just 32 bits.
+
+Some compilers also define a type "long long" or "int64_t" (or both)
+that are 64 bit integers which can be used even on a 32 bit system. Both
+gcc and CodeWarrior support "long long" as a language extension. [Note:
+C99 requires these types; they are not extensions in the latest version
+of the standard]
+
+Most (all?) microprocessor based implementations use a 2's complement
+representation for negative integers. Thus if a type has N bits, the
+range of possible values for that type are -2^(N-1) to +2^(N-1) - 1. The
+C and C++ standards do not require that implementations use a 2's
+complement representation. Some implementations use other ways of
+representing negative values (for example the 1's complement). However
+such implementations are relatively rare.
+
+The unsigned types are required by the C and C++ standards to have the
+same number of bits as their corresponding signed types. Thus, since
+they don't store negative values the range of possible values they
+support is 0 to 2^N - 1. In addition, unsigned arithmetic is gaurenteed
+by the standard to be modular. In other words, it will "warp around"
+without error. For example, with 16 bits: 65535 + 1 == 0. Most
+implementations also wrap signed numbers (32767 + 1 == -32768), but the
+standard doesn't require this. Overflowing signed integer arthmetic
+technically causes "undefined" behavior. For example, an implementation
+is allowed to detect such a problem at run time and abort your program.
+(I don't know of any compiler that actually does this, however).
+
+Because a signed integer and its corresponding unsigned integer have the
+same number of bits, you can convert one to the other and then back again
+without loss of information. For example
+
+        int       x;
+        unsigned  y;
+
+        x = -1;
+        y =  x;   // Puts a signed into an unsigned.
+        x =  y;   // x still has the value -1.
+
+Technically the value in x can't be stored in an unsigned integer
+because it lies outside the range of permitted values for an unsigned.
+However, you can still store x into y anyway. If the implementation uses
+the 2's complement representation for negative values, the resulting
+value in y will work out to be 2^N - 1. When that value is jammed back
+into a signed integer (technically it's too big to fit), the result will
+definitely be -1 again. No bits are lost or modified.
+
+In my introductory courses I usually recommend that students use only
+signed integers in their programs and avoid the unsigned integers. The
+reason for this is that unsigned integers are tricky to use properly.
+For example, suppose you wanted to write a loop that counted down from
+MAX to 0 (inclusive).
+
+   for (int i = MAX; i >= 0; --i) {
+     // This works fine. The loop ends with i == -1
+   }
+
+But now consider
+
+   for (unsigned i = MAX; i >= 0; --i) {
+     // Infinite loop! The value of i is always >= 0!
+   }
+
+This sort of thing happens fairly regularly. Think about scanning an
+array backwards.
+
+Nevertheless, the unsigned integers are important and you need to know
+how to handle them. For example, technically the bit manipulation
+operators are only defined to work on unsigned integers. When you apply
+them to signed integers the effect is as if the signed integers are
+converted to unsigned integers, the operators are applied, and the
+result is converted back into a signed integer. In this course we are
+not interested in bit manipulation, but we are interested in the way
+integers are used to represent the size of things...
+
+*** size_t and ptrdiff_t
+
+The C (and C++) standard defines two typedef names in various standard
+headers. The first, size_t, is an unsigned integral type suitable for
+the representation of the size of things. Notice that size_t is
+UNSIGNED. The idea here is that each implementation selects a type for
+size_t that can effectively hold the size of the largest object the
+implementation can handle. In practice size_t is either unsigned int or
+unsigned long.
+
+For example, a small 8 or 16 bit system would probably choose size_t to
+be unsigned int (16 bits). Such systems might only have 64 KBytes of
+address space and thus no array or structure could ever be larger than
+64 KBytes. To represent such a size, 16 bits is sufficient. The type
+unsigned long (32 bits) would be needlessly large and wasteful of
+memory.
+
+On the other hand, a 64 bit system would probably choose size_t to be
+unsigned long (64 bits) so that it could represent the size of the
+extremely large objects supported by such systems. A 64 bit system
+typically supports a 64 bit address space and could thus manipulate an
+array or structure larger than the 4 GByte limit imposed by a 32 bit
+unsigned integer.
+
+Technically the sizeof operator returns a value of type size_t and you
+should use objects of type size_t for array indicies. For example:
+
+       size_t Size = Get_Size();
+         // How many array elements do I need?
+
+       T *p = malloc(Size * sizeof(T));
+         // Allocate them.
+
+       size_t Index;
+       for (Index = 0; Index < Size; ++Index) {
+         // Process p[Index]
+       }
+
+Writing the above code using the type "int" instead of size_t is
+inappropriate. Why? Consider the following situation: You are writing
+for a 64 bit system and you need to manipulate an array with 20 billion
+elements. If Size was of type int (typically 32 bits), it would not be
+able to hold the value "20 billion" correctly and the program would
+fail. Okay... but why not use (signed) long instead? Now consider this
+situation: You are writing for an 8 bit system and you need to
+manipulate an array with 10 thousand elements. If Size was of type long
+(32 bits), it would not be very efficient since 8 bit processors can't
+compute with 32 bits in one operation.
+
+To summarize, incorrectly using int where size_t is appropriate will
+cause your program to needlessly limit the size of the objects it
+manipulates or run needlessly slowly. A high quality program thus uses
+size_t when the value to be stored is a size or an array index.
+
+In C and C++ you can subtract two pointers that point into the same
+array and get a measure of the "distance" between those two pointers.
+What type should be used to hold that distance? The C (and C++)
+standards defines a type called ptrdiff_t for this purpose. (Read
+ptrdiff_t as "pointer difference tee"). The type ptrdiff_t is a SIGNED
+type. This is because you want to distinguish between the result of p1 -
+p2 and p2 - p1. That is, a negative result tells you that the first
+pointer is actually before the second one rather than after it. Normally
+ptrdiff_t is the signed version of whatever type is used for size_t.
+Thus ptrdiff_t and size_t have the same number of bits.
+
+Notice that there is an anomoly here. If you create an very large array
+and then try to compute the difference between its starting address and
+the address of the last element, you may get a result that is too large
+to fit into a ptrdiff_t. There is no escaping this. The type ptrdiff_t
+needs to be able to represent negative values and thus it can't possibly
+represent values as large as size_t can. (However, if the implementation
+uses 2's complement for negatives and wraps signed integers without
+error -- as is commonly done -- then you can still use the overflowed
+value of the ptrdiff_t variable in pointer computations and get the
+right results anyway. Alas, such trickiness is technically not
+portable).
+
+
+*** The C++ container library.
+
+C++ extends the concept of size_t and ptrdiff_t by allowing every
+container to define it's own notion of size and distance. In particular,
+each library container defines a nested type "size_type" to be a
+suitable unsigned integral type that can represent the size of the
+largest possible container. For example, std::list<int>::size_type is an
+unsigned integral type that can be used to represent the largest
+possible list<int>. The size() member function of every container
+returns something of that container's size_type.
+
+Normally size_type is the same as size_t. In fact the standard
+containers require this. However, is possible that certain containers
+might need a size_type that is smaller (or larger!) than that provided
+by size_t. For example, a container that represents data in a file might
+need a size_type with more range than that required for in-memory
+objects. (In a 16 bit system such a container's size_type might be
+unsigned long while size_t might only be unsigned int).
+
+Similarly, each library container defines a nested type "difference_
+type" to be a suitable signed integral type that can represent the
+distance between the container's iterators. As with ptrdiff_t, a
+container's distance type is going to be the signed version of that
+container's size_type.
+
+Whenever you work with a library container (or a container written in
+the style of the library) you should declare objects to be of that
+container's size type or difference type as appropriate. Doing so
+insures that your program will be able to cope with large containers on
+all systems and that you won't encounter any artificial limits. The type
+"int" will probably work fine for small to medium sized containers...
+and in some cases might work fine for full sized containers... yet it is
+not generally the most appropriate type for the job.

@@ -1,0 +1,70 @@
+
+[The following text was originally prepared for a lesson. However, after
+some reflection I decided that it was too much of a digression for
+CS-212. However, it seemed too good to simply delete so I'm saving it
+aside for possible future use. --pchapin]
+
+*** What are input and output iterators anyway?
+
+Input and output iterators are very weak. No only do they only go
+forward, they only allow information to flow in one direction (reading
+with input iterators and writing with output iterators), and they don't
+let you ever use the same element more than once. Suprisingly, this is
+all many algorithms need. The existence of these strange iterators also
+allows you to process I/O operations with the generic algorithms. This
+is not a major topic for this course, but to demonstrate, consider the
+following program
+
+#include <algorithm> // Needed for copy.
+#include <iostream>
+#include <iterator>  // Needed for istream_iterator and back_inserter.
+#include <list>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+  istream_iterator<string> Input(cin);
+  istream_iterator<string> eof;
+  list<string> Words;
+
+  copy(Input, eof, back_inserter(Words));
+  return 0;
+}
+
+This unlikely looking program reads the standard input file and loads
+Words with every word that it finds there. Here is what's happening.
+
+1. An istream_iterator<string> is declared named Input and that iterator
+   is made to "point" at the first element in the sequence of strings at
+   the standard input device (cin). Istream_iterators are of the input
+   iterator catagory and they allow you to treat sources of input like a
+   container.
+
+2. Another istream_iterator<string> is declared named eof that
+   represents "just past the end" of the input sequence. It turns out
+   that the default constructor for istream_iterator creates this
+   special value.
+
+3. Words is an ordinary list of strings, initially empty.
+
+4. The copy algorithm takes two input iterators that define the sequence
+   to be copied and an output iterator that defines where the copy is to
+   go. Normally copy overwrites the output elements. That would be bad
+   in this case because the list is initially empty so there are no
+   elements to overwrite. However, the back_inserter "function" (it's
+   really a template) takes a container and returns an output iterator
+   that uses push_back on that container to add new items to it.
+
+Thus in this program copy takes words out of the standard input file and
+appends them to the list. It reads the input a word at a time because
+that's what an istream_iterator<string> is going to do (istream
+iterators use the >> operator to get each item, and when you use >> with
+strings you just get one word). You can use copy to copy elements from
+one container to another, but because of istream iterators you can also
+use copy to copy elements from a file into a container. You could also
+use ostream_iterators to copy elements from a container into a file or
+both iterator types to copy elements from one file to another, all using
+the same, generic copy algorithm.
+

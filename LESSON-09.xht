@@ -1,0 +1,677 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!-- FILE         : LESSON-09.xht
+     LAST REVISED : 2007-07-25
+     AUTHOR       : (C) Copyright 2007 by Peter Chapin
+     SUBJECT      : Resource Management. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+  <head>
+    <title>Lesson #9</title>
+    <meta name="Author" content="Peter C. Chapin" />
+    <!-- <meta name="keywords" lang="en-US" content="..."> -->
+    <meta name="ROBOTS" content="NOARCHIVE" />
+    <link rel="stylesheet" href="cpp-tutorial.css" type="text/css" />
+  </head>
+
+  <body>
+
+    <h1>Lesson #9</h1>
+
+    <p class="subtitle">Resource Management</p>
+
+    <h2>Overview</h2>
+
+    <p>In this lesson I will cover the following topics</p>
+
+    <ol id="overview-list">
+      <li><p>The difference between initialization and assignment.</p></li>
+
+      <li><p>How and why you should define a <i>copy constructor</i> and an <i>assignment
+      operator</i> for a class. (This is done to manage resources that an object owns that are
+      not actually stored inside the object itself).</p></li>
+
+      <li><p>How objects are often copied more than you might expect and how the compiler
+      insures that all such copies are properly made and cleaned up.</p></li>
+    </ol>
+
+    <h2>Body</h2>
+
+    <h3>Initialization vs assignment.</h3>
+
+    <p>There is an important difference between initializing an object and assigning to an
+    object. When you initialize an object, its value is at first meaningless. The purpose of the
+    initialization is to give the object a meaningful value. However, when you assign a value to
+    an object, the object has a meaningful value already. That value is just getting overwritten
+    with a new value.</p>
+
+    <p>This distinction is subtle. In fact, with simple types like integers you don't have to
+    think about it at all. For example what's the difference between</p>
+
+    <pre class="code">
+int x;
+x = 10;
+</pre>
+
+    <p>and</p>
+
+    <pre class="code">
+int x = 10;
+</pre>
+
+    <p>For something like integer, there really isn't much of a difference. In the first case,
+    <span class="code">x</span> is not initialized, but later I assign it a value. When I do the
+    assignment, I overwrite the indeterminate value that was initially in <span
+    class="code">x</span>. In the second case, I initialize <span class="code">x</span> right
+    away but otherwise it's hard to see what the difference is.</p>
+
+    <p>For complicated types, there can be a BIG difference.</p>
+
+    <pre class="code">
+big_int  number;
+number = 10;
+</pre>
+
+    <p>Here I first execute the default constructor in class <span class="code">big_int</span>
+    to initialize number in some sensible way. In general, class objects need to be initialized
+    before they will even "work". The purpose of the default constructor is to insure that this
+    internal set-up gets done. Yet in my example, just after initializing the object to a
+    default value, I then overwrite that value by assigning 10 to the object. The work done
+    initializing the object to the default value was a waste.</p>
+
+    <pre class="code">
+big_int number = 10;
+</pre>
+
+    <p>Here I invoke the <span class="code">big_int</span> constructor that takes an integer
+    parameter. That constructor initializes the <span class="code">big_int</span> to the given
+    value directly. Since it doesn't bother doing the work of the default constructor (just to
+    undo it later) it is faster.</p>
+
+    <p>Remember: initialization is usually faster because it does not have to undo the value
+    currently stored in an object. For speed reasons you should make every effort to initialize
+    all objects to useful values when you declare them. To support this practice, C++ allows you
+    to declare objects anywhere in your program. You don't need to put all your declarations at
+    the top of each block the way you do in C.</p>
+
+    <h3>Objects that hold dynamic memory.</h3>
+
+    <p>This is a very important example, so study it closely.</p>
+
+    <p>Many useful objects need to manage dynamic memory internally. Typically they allocate
+    some memory when they are constructed and release that memory when they are destroyed. While
+    they are being used, they often reallocate their internal memory to cope with the demands of
+    the user. Here is a skeleton example</p>
+
+    <pre class="code">
+namespace vtc {
+
+  class skel {
+    public:
+      skel();  // Constructor allocates some memory.
+     ~skel();  // Destructor releases it.
+
+      // Other public operations of interest...
+
+    private:
+      char *workspace;
+  };
+}
+</pre>
+
+    <p>Here is how the constructor and destructor work:</p>
+
+    <pre class="code">
+namespace vtc {
+
+  skel::skel()
+  {
+    workspace = new char[1024];
+      // Allocate 1024 bytes to start. I might expand this later in
+      // the other methods, depending on what I'm asked to do.
+  }
+
+
+  skel::~skel()
+  {
+    delete [] workspace;
+      // Get rid of whatever dynamic memory I've allocated during my lifetime.
+  }
+}
+</pre>
+
+    <p>When a user creates a <span class="code">skel</span> object, its default constructor will
+    allocate some memory behind the scenes. When that <span class="code">skel</span> object goes
+    away, the compiler will call its destructor function automatically and it will release the
+    dynamic memory by itself. The user does not need to concern him/herself with deleting the
+    dynamic memory. Memory leaks are avoided because for every <span class="code" >skel</span>
+    created, its destructor will definitely be called when it is no longer needed.</p>
+
+    <p>In general this is how all resources are handled. An object obtains the resources it
+    needs when it is constructed (or during its lifetime on demand) and then releases those
+    resources when it is destroyed. While memory is a very important resource that many objects
+    need, there are other resources that need managing too. Examples of such resources include:
+    open files, network connections, database locks, graphical contexts, subordinate threads,
+    etc, etc. Failure to make sure that every resource acquired by the program is ultimately
+    released is a major source of program bugs. In C++ these problems can be minimized by using
+    the "resource allocation is initialization (RAI)" idiom. In other words: allocate your
+    resources as part of the initialization (construction) of some object and release those
+    resources in the corresponding destruction.</p>
+
+    <h3>Copying objects.</h3>
+
+    <p>C++ allows you to assign one class object to another. This is consistent with the way C
+    allows you to assign one structure to another with an equals sign. When you do assign one
+    class object to another, each member is assigned one-for-one. This is often what you want.
+    Consider the class date I discussed earlier. If I do</p>
+
+    <pre class="code">
+vtc::date X, Y;
+
+X = Y;
+  // Assign all the members of Y to the corresponding members of X.
+</pre>
+
+    <p>the member-for-member assignment is perfect. I want the <span class="code">day</span>,
+    <span class="code">month</span>, and <span class="code">year</span> members of <span
+    class="code">Y</span> to be put into the corresponding members of <span class="code"
+    >X</span>.</p>
+
+    <p>But what happens if you try to assign one skel object to another?</p>
+
+    <pre class="code">
+vtc::skel X, Y;
+  // Each of these objects holds a pointer to 1024 bytes of
+  // dynamically allocated memory.
+
+X = Y;
+  // Copy the pointer in Y to X. Bad!
+</pre>
+
+    <p>The address stored in <span class="code">Y.workspace</span> is copied to <span
+    class="code">X.workspace</span>. This means that two different <span
+    class="code">skel</span> objects will point at the same dynamic memory. It also means that
+    the dynamic memory <span class="code">X.workspace</span> once pointed at no longer has
+    anything pointing at it. The object <span class="code">X</span> has leaked memory! What's
+    worse, when <span class="code">X</span> and <span class="code">Y</span> are destroyed, a
+    delete operation will be done on the same block of memory twice. That is very bad.</p>
+
+    <p>Here is a picture of <span class="code">X</span> and <span class="code">Y</span> before
+    the assignment is done.</p>
+
+    <pre class="figure">
+     Object X has a single member named "workspace."
+     +-----------+
+     | workspace |------> (Block of 1024 bytes of memory)
+     +-----------+
+
+     Object Y has a single member named "workspace."
+     +-----------+
+     | workspace |------> (Block of 1024 bytes of memory)
+     +-----------+
+</pre>
+
+    <p>After doing <span class="code">X = Y</span> I have</p>
+
+    <pre class="figure">
+     Object X
+     +-----------+
+     | workspace |--------+    (Block of 1024 bytes of memory)
+     +-----------+        |
+                          |
+     Object Y             |
+     +-----------+        V
+     | workspace |------> (Block of 1024 bytes of memory)
+     +-----------+
+</pre>
+
+    <p>The address stored in <span class="code">Y.workspace</span> has been put into <span
+    class="code">X.workspace</span> so now both pointers point at the same block of memory. The
+    block of memory that <span class="code">X.workspace</span> used to point at is not
+    inaccessible (and can never be deleted).</p>
+
+    <p>This situation is bad. But there is a way to fix it. C++ allows you to overload the
+    assignment operator. In this way you can define what it means to assign one object to
+    another and do whatever it takes to make a proper assignment.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  class skel {
+    public:
+      skel();
+     ~skel();
+
+      skel &amp;operator=(const skel &amp;right);
+        // The assignment operator should always be declared like this.
+
+      // Other public operations of interest...
+
+    private:
+      char *workspace;
+  };
+}
+</pre>
+
+    <p>I've modified the definition of class <span class="code">skel</span> to include an
+    overloaded <span class="code">operator=</span> function. The way that I have declared that
+    function is traditional and highly recommended. It should take its right parameter by
+    reference (a reference to a const since assignment should not change the source object). It
+    should return a reference as well so that assignments can be chained in the usual way.</p>
+
+    <pre class="code">
+X = Y = Z;
+  // Really X.operator=(Y.operator=(Z));
+</pre>
+
+    <p>Here is what skel's <span class="code">operator=</span> looks like:</p>
+
+    <pre class="code">
+namespace vtc {
+
+  skel &amp;skel::operator=(const skel &amp;right)
+  {
+    delete [] workspace;
+      // Free my current workspace so that I don't leak memory.
+
+    workspace = new char[1024];
+      // Make a new workspace into which I will copy the incoming
+      // workspace. Here I'm just using a size of 1024, but in
+      // real life I would have to find out how big right's workspace
+      // is and use that size here. (One assumes that right has
+      // expanded its workspace since it was first constructed).
+
+    std::memcpy(workspace, right.workspace, 1024);
+      // Copy right's workspace into my new one.
+
+    return *this;
+      // This strange looking expression is how you can return a
+      // reference to yourself. You should always do this at the
+      // end of your assignment operations.
+  }
+}
+</pre>
+
+    <p>Instead of just copying right's workspace member, which would be wrong, this function
+    creates a brand new workspace value and copies the real data that right is holding. Now when
+    I do <span class="code">X = Y</span> everything works. <span class="code">X</span> does not
+    leak memory and <span class="code">Y</span>'s data is properly copied into <span
+    class="code">X</span>. Pretty cool, huh?</p>
+
+    <p>But there is another context where objects get copied: initialization. Consider this
+    example</p>
+
+    <pre class="code">
+skel X;
+skel Y = X;
+  // Here I'm using X to initailize Y. I could have also written this as
+  // "skel Y(X)" if I wanted to use the new style initialization syntax.
+</pre>
+
+    <p>As with assignment, the compiler will automatically initialize <span
+    class="code">Y</span>'s members with the corresponding members of <span
+    class="code">X</span> (actually the rules are a bit more complicated than this, but we don't
+    need to fuss with all those details right now). While this is fine for some types (like
+    <span class="code" >date</span>), it stinks for <span class="code">skel</span> for exactly
+    the same reasons I explained above.</p>
+
+    <p>To fix this, you can define a <i>copy constructor</i> that the compiler will use when
+    copying an object like this. Here is <span class="code">skel</span>'s definition again.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  class skel {
+    public:
+      skel();
+     ~skel();
+      skel &amp;operator=(const skel &amp;right);
+
+      skel(const skel &amp;other);
+        // The copy constructor should always be declared like this.
+
+      // Other public operations of interest...
+
+    private:
+      char *workspace;
+  };
+}
+</pre>
+
+    <p>The copy constructor is a constructor that takes a reference to the same type as it's
+    constructing. It is used by the compiler to intialize one object with another of the same
+    type. Here is what <span class="code">skel</span>'s copy constructor looks like:</p>
+
+    <pre class="code">
+namespace vtc {
+
+  skel::skel(const skel &amp;other)
+  {
+    workspace = new char[1024];
+      // As before, I should really find out how big other's workspace
+      // is right now and use that size.
+
+    std::memcpy(workspace, other.workspace, 1024);
+  }
+
+}
+</pre>
+
+    <p>Compare this with <span class="code">skel</span>'s <span class="code">operator=</span>.
+    The issues are the same, but there are some important differences.</p>
+
+    <p>First, I did <em>not</em> delete <span class="code">workspace</span> at first. Why not?
+    Because when an object is being constructed its members have undefined values. If I
+    attempted to do <span class="code">delete [] workspace</span> in this constructor I would be
+    attempting to delete a random piece of memory!</p>
+
+    <p>The assignment operator <em>must</em> clean up the object's current value (to avoid
+    leaks), the copy construct <em>must not</em> attempt to clean up the current value (because
+    the object has no current value). This is the essential difference between initialization
+    and assignment. This is why initialization uses a different function than assignment. If you
+    are unclear about this, go back and re-read my earlier section on the difference between
+    those two concepts. Remember: in C the difference is irrelevant. In C++ it is critical.</p>
+
+    <p>Second, I did not bother to <span class="code">return *this</span> in the copy
+    constructor. That's because the constructor does not return anything.</p>
+
+    <p>Because the copy constructor does not have to bother cleaning up the object's existing
+    value, it has less to do than the assignment operator. Consequently it is normally faster.
+    Remember: Initialization is usually faster than assignment. Initialize all your objects when
+    you declare them!</p>
+
+    <p style="text-align: center;">!!! NOTE !!!</p>
+
+    <p>Whenever you create a class that does dynamic memory allocation internally (and many
+    classes do this), you will need</p>
+
+    <ol>
+      <li><p>A destructor to release the dynamic memory when the object is no longer
+      needed.</p></li>
+
+      <li><p>An assignment operator to properly copy the dynamic memory and release any that is
+      no longer needed when one object is assigned to another.</p></li>
+
+      <li><p>A copy constructor to properly initialize the dynamic memory of one object with
+      that of another.</p></li>
+    </ol>
+
+    <p>You either need all three of these methods or you don't need any of them. It is quite
+    unusual to have a class that needs only one or two of these methods. If you think you have
+    such a class, check carefully. You might find a bug. You can use my <span
+    class="code">skel</span> class as a skeleton for how these functions should be declared and
+    for what they must do.</p>
+
+    <h3>More copying than meets the eye!</h3>
+
+    <p>Actually objects get copied around in your program more often than you might think. Take
+    a look at this example using integers:</p>
+
+    <pre class="code">
+int f(int x)
+{
+  x++;
+  return x;
+}
+
+int main()
+{
+  int y = 1;
+  int z;
+
+  z = f(y):
+  return 0;
+}
+</pre>
+
+    <p>This program is pretty silly, but it illustrates my point. When I do <span
+    class="code">f(y)</span> the value of <span class="code">y</span> is copied into the
+    parameter of the function. That's the way C and C++ functions work: the parameters are
+    <em>copies</em> of the arguments. Inside the function the parameter is incremented and then
+    it is copied back to the calling function. That copy goes into an anonymous temporary object
+    in the calling function. Then, finally, the anonymous temporary is assigned to <span
+    class="code" >z</span>.</p>
+
+    <p>The fact that the return value of the function first goes into an anonymous temporary may
+    seem strange. Why not just put it directly into <span class="code">z</span>? In this case
+    that would make sense. But the function does not know what is going to happen to the return
+    value so it has to consider that. Take a look at this usage:</p>
+
+    <pre class="code">
+int main()
+{
+  int y = 1;
+  int z;
+
+  z = f(y) + 10;
+  return 0;
+}
+</pre>
+
+    <p>Obviously here the return value of the function is not to be put directly into <span
+    class="code">z</span>. Where should it go? It has to participate in a larger expression. The
+    function (which does the copying) just assumes it is initializing an anonymous temporary.
+    It's up the to calling program to deal with the value from then on.</p>
+
+    <p>If all this sounds quite complicated... it is! When you first learned C, you probably
+    didn't think much about anonymous temporaries and so forth. That's because when the types
+    are simple, like int, the whole issue pretty much doesn't matter&#x2014;unless you are
+    trying to write a compiler. But in C++, copying an object might be an ordeal. Some objects
+    are huge and have extremely complicated, time consuming copy constructors. The idea of
+    copying things around a lot should make you cringe. If it doesn't, you haven't been
+    programming in C++ long enough yet!</p>
+
+    <p>To explore this idea more fully, I created a special <span class="code">Probe</span>
+    class. This class does nothing important, but it does have all the critical functions. It
+    has a default constructor, a destructor, an assignment operator, and a copy constructor.
+    Each probe object gets a unique identification number (the constructors take care of that),
+    and all the functions print out a message telling you what they are doing. Here is what
+    Probe.hpp looks like:</p>
+
+    <pre class="code">
+class Probe {
+  public:
+    Probe();
+    Probe(const probe &amp;);
+    Probe &amp;operator=(const probe &amp;);
+   ~Probe();
+
+  private:
+    int ID_number;
+};
+</pre>
+
+    <p>This is basically the same as <span class="code">skel</span>'s definition. Here is what
+    Probe.cpp looks like:</p>
+
+    <pre class="code">
+static int master_ID = 0;
+
+Probe::Probe()
+{
+  ID_number   = ++master_ID;
+  std::cout &lt;&lt; "Default constructor: ID = " &lt;&lt; ID_number &lt;&lt; "\n";
+}
+
+Probe::Probe(const Probe &amp;existing)
+{
+  ID_number = ++master_ID;
+  std::cout &lt;&lt; "Copy constructor: ID = " &lt;&lt; ID_number &lt;&lt; ". Copying object "
+            &lt;&lt; existing.ID_number &lt;&lt; "\n";
+}
+
+Probe &amp;Probe::operator=(const Probe &amp;other)
+{
+  std::cout &lt;&lt; "Assigning to " &lt;&lt; ID_number &lt;&lt; " from "
+            &lt;&lt; other.ID_number &lt;&lt; "\n";
+  return *this;
+}
+
+Probe::~Probe()
+{
+  std::cout &lt;&lt; "Destructor: " &lt;&lt; ID_number &lt;&lt; "\n";
+}
+</pre>
+
+    <p>Study this over and make sure you understand what is going on here. To exercise this
+    class, I wrote a simple test program. Here it is:</p>
+
+    <pre class="code">
+Probe global_object;
+  // Gets constructed before main is called and then destroyed when main returns.
+
+Probe f(Probe incoming)
+{
+  // Create a local probe. Causes default construction.
+  Probe result;
+
+  result = incoming;
+    // Assign incoming to result.
+
+  // Copy construct this probe into a temp in the calling program's
+  // address space. Destroy this local probe.
+  //
+  return result;
+}
+
+int main()
+{
+  // Create a local Probe. Causes default construction.
+  Probe answer;
+
+  // Assign temp to Answer and then destroy the temp.
+  answer = f(answer);
+
+  // Destroy the local probe declared in this function.
+  return 0;
+}
+</pre>
+
+    <p>There is a lot going on here. Let me spell it all out.</p>
+
+    <ol>
+      <li>First <span class="code">global_object</span> is constructed. This happens before
+          <span class="code">main</span> starts.</li>
+      <li>Function <span class="code">main</span> begins and <span class="code">answer</span> is
+        constructed.</li>
+      <li>The copy constructor is used to initialize <span class="code">f</span>'s
+        parameter.</li>
+      <li>Function <span class="code">f</span> is called and <span class="code">result</span> is
+        constructed.</li>
+      <li>Function <span class="code">f</span>'s parameter is assigned to <span class="code"
+          >result</span>.</li>
+      <li>The copy constructor is used to copy <span class="code">result</span> back to an
+        anonymous temporary object in <span class="code">main</span>.</li>
+      <li>
+        <span class="code">result</span> is destroyed.</li>
+      <li> Function <span class="code">f</span> returns and the parameter is destroyed.</li>
+      <li> The anonymous temporary is assigned to <span class="code">answer</span>.</li>
+      <li> The anonymous temporary is destroyed.</li>
+      <li>
+        <span class="code">answer</span> is destroyed.</li>
+      <li> Function <span class="code">main</span> returns and <span class="code"
+          >global_object</span> is destroyed.</li>
+    </ol>
+
+    <p>Despite the apparent simplicity of the program, the compiler is calling numerous
+    functions to initialize, copy, and clean up the objects involved. While this may seem
+    inefficient, it is actually very nice. Once you define the appropriate functions for a
+    class, the objects more or less take care of themselves. Notice how even the anonymous
+    temporary object is cleaned up with the destructor function. That is just as it must be if
+    all memory leaks are to be avoided.</p>
+
+    <p>Let me run this program and see what it does. I get this output:</p>
+
+    <pre class="terminal">
+Default constructor: ID = 1
+Default constructor: ID = 2
+Copy constructor: ID = 3. Copying object 2
+Default constructor: ID = 4
+Assigning to 4 from 3
+Copy constructor: ID = 5. Copying object 4
+Destructor: 4
+Destructor: 3
+Assigning to 2 from 5
+Destructor: 5
+Destructor: 2
+Destructor: 1
+</pre>
+
+    <p>Be sure you understand what is happening during each line above.</p>
+
+    <h2>Summary</h2>
+
+    <ol id="summary-list">
+
+      <li>
+        <p>Here is a skeleton class that you could use as the basis for any class that manages a
+        resource.</p>
+        <pre class="code">
+     class skel {
+       public:
+         skel();
+           // The default constructor gives meaningful values to the pri-
+           // vate data members and acquires any system resources the
+           // object is going to need (such as dynamically allocated
+           // memory).
+
+        ~skel();
+           // The destructor releases any system resources the object
+           // has been using so that the program won't leak those
+           // resources.
+
+         skel(const skel &amp;existing);
+           // The copy constructor initializes the members of one object
+           // with a copy of an existing object. Any system resources
+           // the existing object is using will need to be copied
+           // properly. Just copying members is probably not enough.
+
+         skel &amp;operator=(const &amp;skel right);
+           // The assignment operator makes a copy of its right operand.
+           // However, unlike the copy constructor it first has to
+           // "clean up" the value currently stored in the left
+           // operand (the implicit object). Assignment is somewhat
+           // like a destruction of the left operand followed by
+           // a copy construction. However, you must explicitly
+           // code the necessary steps.
+
+       private:
+         // The data members required to make the class work.
+     };
+</pre>
+      </li>
+
+      <li><p>If the class manages resources that exist outside the data members themselves (like
+      dynamic memory, files, network connections, etc), then it will almost certainly need all
+      of the above methods.</p></li>
+
+      <li><p>If the class does not manage any outside resources it probably won't need the
+      destructor, copy constructor, or assignment operator.</p></li>
+
+      <li><p>Initialization and assignment are different. When an object is initialized
+      (constructed) it has no current value so you <em>must not</em> attempt to clean up its
+      current value in the copy constructor. On the other hand, you <em>must</em> clean up its
+      current value in the assignment operator before giving it a new value in order to avoid
+      resource leaks.</p></li>
+
+      <li><p>You should try to initialize objects when you declare them. C++ helps you do this
+      by allowing you to declare objects anywhere in your program and not just at the top of a
+      block. This practice will improve the performance of your programs since copy construction
+      is typically faster than default construction plus a later assignment.</p></li>
+
+      <li><p>If the destructor and/or copy constructor are defined, the compiler will use them
+      in all relevant contexts. The copy constructor will be used to copy an object into a
+      function parameter and to copy the return value back to the calling function. The
+      destructor will be used to destroy the function parameter and to destroy any anonymous
+      temporary objects created by the compiler.</p></li>
+    </ol>
+
+    <address>
+&copy; Copyright 2007 by Peter C. Chapin.<br />
+Last Revised: <b>July 25, 2007</b>
+</address>
+
+  </body>
+</html>

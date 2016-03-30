@@ -1,0 +1,483 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!-- FILE         : EXAMPLE-01.xht
+     LAST REVISED : 2006-05-27
+     AUTHOR       : (C) Copyright 2006 by Peter Chapin
+     SUBJECT      : Operator overloading example. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+  <head>
+    <title>Example #1</title>
+    <meta name="Author" content="Peter C. Chapin" />
+    <!-- <meta name="keywords" lang="en-US" content="..."> -->
+    <meta name="ROBOTS" content="NOARCHIVE" />
+    <link rel="stylesheet" href="cpp-tutorial.css" type="text/css" />
+  </head>
+
+  <body>
+
+    <h1>Example #1</h1>
+
+    <p class="subtitle">Big Integers</p>
+
+    <p>The time has come to give you an extended example. This will, hopefully, give you a
+      better idea of how some of the features I've been talking about in the lessons work in a
+      real program. The short examples in my lessons are fine, but they don't give you the big
+      picture.</p>
+
+    <p>In this example, I want to develop a useful numeric class. In particular, I will create a
+      class <span class="code">big_int</span>. Objects of this class will act just like normal
+      integers, but they will have a much greater capacity. In particular, they will support
+      integers with up to 256 decimal digits. Although it is rare to need such large integers,
+      there are applications for which they are essential. By creating an appropriate class,
+      with a complete set of overloaded operators, using such integers can be made very
+      natural.</p>
+
+    <p>An even more useful version of <span class="code">big_int</span> would allow the number
+      of digits to grow dynamically to whatever was necessary. Creating such a class is more
+      complicated and requires techniques that we haven't covered yet. For now my arbitrary
+      limit of 256 decimal digits should be sufficient.</p>
+
+    <p>As is typical, class <span class="code">big_int</span> comes in two files. The first,
+      big_int.hpp, contains the class definition. The various supporting functions will all be in
+      big_int.cpp. Any program that wishes to use <span class="code">big_int</span> objects will
+      need to #include "big_int.hpp" and also compile big_int.cpp into the program.</p>
+
+    <h3>What operations should big_int support?</h3>
+
+    <p>When designing an abstract type this is the central question. My goal is to have <span
+        class="code">big_int</span> behave like a normal integer. This means</p>
+
+    <ol>
+      <li>
+        <p>It should have some constructors to allow it to be initialized.</p>
+      </li>
+
+      <li>
+        <p>It should support "all the usual" math operations.</p>
+      </li>
+
+      <li>
+        <p>It should support relational tests.</p>
+      </li>
+
+      <li>
+        <p>It should support I/O operations.</p>
+      </li>
+
+    </ol>
+
+    <p>I can capture these requirements in the following declarations</p>
+
+    <pre class="code">
+namespace vtc {
+
+  class big_int {
+    friend std::ostream &amp;operator&lt;&lt;(std::ostream &amp;, const big_int &amp;);
+    friend std::istream &amp;operator&gt;&gt;(std::istream &amp;, big_int &amp;);
+      // I/O operations.
+
+    friend bool operator==(const big_int &amp;, const big_int &amp;);
+    friend bool operator&lt; (const big_int &amp;, const big_int &amp;);
+      // Relational operators.
+
+    public:
+      big_int();
+        // Default constructor.
+
+      big_int(long number);
+        // Allows a big_int to be initialized with a normal int.
+
+      void operator+=(const big_int &amp;);
+      void operator-=(const big_int &amp;);
+      void operator*=(const big_int &amp;);
+      void operator/=(const big_int &amp;);
+      void operator%=(const big_int &amp;);
+        // All the usual math operations.
+
+    private:
+      // To be determined.
+  };
+
+}
+</pre>
+
+    <p>This class definition provides for two constructors, the two basic I/O functions, two
+      relational operators, and the "in place" math operators. The in place math operators are
+      member functions and would be used like this</p>
+
+    <pre class="code">
+int main()
+{
+  big_int X, Y;
+
+  X += Y;  // Really X.operator+=(Y);
+
+  // etc...
+}
+</pre>
+
+    <p>The in place operators are actually more basic than the usual binary operators. It is
+      very easy to implement the binary operators in terms of the in place operators. Thus the
+      header file needs to also include the following inline functions</p>
+
+    <pre class="code">
+namespace vtc {
+
+  inline big_int operator+(const big_int &amp;left, const big_int &amp;right)
+    { big_int temp(left); temp += right; return temp; }
+
+  inline big_int operator-(const big_int &amp;left, const big_int &amp;right)
+    { big_int temp(left); temp -= right; return temp; }
+
+  inline big_int operator*(const big_int &amp;left, const big_int &amp;right)
+    { big_int temp(left); temp *= right; return temp; }
+
+  inline big_int operator/(const big_int &amp;left, const big_int &amp;right)
+    { big_int temp(left); temp /= right; return temp; }
+
+  inline big_int operator%(const big_int &amp;left, const big_int &amp;right)
+    { big_int temp(left); temp %= right; return temp; }
+
+}
+</pre>
+
+    <p>Each of these functions creates a local <span class="code">big_int</span> named <span
+        class="code">temp</span> and initializes it (using the new-style syntax) to be a copy of
+        <span class="code">left</span>. It then uses the in place operator defined in the class
+      to do the computation and leave the result in <span class="code">temp</span>. Finally it
+      returns <span class="code">temp</span>. That's all there is to these functions.</p>
+
+    <p>Similarly of the six relational operators, you only need to define two. The other four
+      are easily expressed in terms of the first two.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  inline bool operator!=(const big_int &amp;left, const big_int &amp;right)
+    { return !(left == right); }
+
+  inline bool operator&gt;=(const big_int &amp;left, const big_int &amp;right)
+    { return !(left &lt; right); }
+
+  inline bool operator&gt;(const big_int &amp;left, const big_int &amp;right)
+    { return right &lt; left; }
+
+  inline bool operator&lt;=(const big_int &amp;left, const big_int &amp;right)
+    { return right &gt;= left; }
+
+}
+</pre>
+
+    <p>Supporting "all the usual" math and relational operations is not as difficult as it
+      seems! I should point out, however, that in some cases you might want to write out all of
+      these functions individually. Defining one function in terms of others does not always
+      lead to an acceptably efficient implementation. However, if your primary interest is to
+      get the class up and running you can often leave issues of efficiency for a later
+      revision.</p>
+
+    <p>Now that I have defined which operations I want to support, I need to think about how to
+      represent <span class="code">big_ints</span>. I need to think about the private section of
+      the class.</p>
+
+    <p>There are numerous possibilities, but for now I will go with something quite simple. I
+      will use an array of short integers to represent the digits. Each element of the array
+      will be a number from 0 to 9 and there will be 256 elements in the array. I will use the
+      zeroth array element as the least significant digit. Since each array element only needs
+      to hold a number from 0 to 9, I decided to use short integer array elements to save
+      memory. This is an application where using characters to hold numbers would be sensible,
+      but using characters that way is unusual and I felt it might make my example
+      confusing.</p>
+
+    <p>Since I want <span class="code">big_int</span>s to handle both positive and negative
+      numbers, I will create a flag member that holds the sign information only. The digits in
+      the array will always be positive.</p>
+
+    <p>This representation means that every <span class="code">big_int</span> object will take
+      about 260 bytes of memory. That's a fair amount. In general I hope to avoid copying <span
+        class="code">big_int</span> objects whenever I can. This is one major reason for using
+      reference parameters on all the functions.</p>
+
+    <p>The attached header file, big_int.hpp, embodies these declarations. There are a few other
+      minor issues discussed in that file, please take a quick look at it. These operations
+      should allow me to declare <span class="code">big_int</span> objects, initialize them with
+      numbers, and compute with them normally. In addition, I can do I/O with <span class="code"
+        >big_ints</span> in the same way as I can use for regular integers.</p>
+
+    <p>The implementation file is where I will put the definitions of all the (non-inline)
+      functions. When I have completed writing (and testing) all of these functions, my job will
+      be done and <span class="code">big_int</span> will be ready to deploy.</p>
+
+    <p>I will start with the default constructor. Let it set the <span class="code"
+        >big_int</span> it is constructing to zero.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  big_int::big_int()
+  {
+    sign = 1;  // Zero is positive.
+
+    for (int i = 0; i &lt; 256; i++) {
+      digits[i] = 0;
+    }
+  }
+
+}
+</pre>
+
+    <p>The constructor function needs to initialize the members. Here I set the sign flag to one
+      to indicate a positive number and zero out all of the digits. Notice that this
+      implementation allows for the possibility of both a positive and negative zero.
+      Mathematically, +0 == -0. It would be necessary to consider this possibility in the
+      comparison functions for <span class="code">big_int</span>. However, instead of doing that
+      I will simple make sure that -0 is never created. This tends to be a more satisfactory
+      solution in the long run.</p>
+
+    <p>In the function above I use</p>
+
+    <pre class="code">
+for (int i = 0; ...
+</pre>
+
+    <p>to declare and initialize the loop index right inside the loop. This is legal in C++
+      (also in C99). The scope of the loop index created this way is confined to the loop body.
+      The object <span class="code">i</span> is undeclared below the loop.</p>
+
+    <p>The other constructor is a bit harder. It is supposed to initialize a <span class="code"
+        >big_int</span> with a normal number. Yet my representation of <span class="code"
+        >big_int</span>s is quite different than the way normal numbers are stored. I'll have to
+      break the normal number into individual digits.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  big_int::big_int(long number)
+  {
+    int i;
+
+    // Set the sign flag appropriately. Make sure number is positive.
+    sign = 1;
+    if (number &lt; 0) {
+      sign = -1;
+      number = -number;
+    }
+
+    // Zero out ALL the digits to start. When the constructor begins
+    // executing the data members have indeterminate values.
+    //
+    for (i = 0; i &lt; 256; i++) {
+      digits[i] = 0;
+    }
+
+    // Now get the individual digits of number, one at a time.
+    i = 0;
+    while (number != 0) {
+      digits[i] = static_cast&lt;short&gt;(number % 10);
+      i++;
+      number /= 10;
+    }
+  }
+
+}
+</pre>
+
+    <p>In this function I use</p>
+
+    <pre class="code">
+static_cast&lt;short&gt;(number % 10)
+</pre>
+
+    <p>to convert the result of <span class="code">number % 10</span> into a short integer. This
+      conversion is definitely safe since the result will definitely fit into a short, but I
+      don't want the compiler warning me about my trying to put a long into a short. You might
+      be familiar with the C style cast</p>
+
+    <pre class="code">
+(short)(number % 10);
+</pre>
+
+    <p>This works in C++ as well, but it is considered old fashion. On the rare occasions when
+      you need to do a type conversion you should use the newer style.</p>
+
+    <p>Next I will implement the addition operation. This operation has to work on two <span
+        class="code">big_int</span> objects: the first is implicit and the second is explicit.
+      Since this is a method it has direct access to the object against which is is invoked (the
+      left operand of the operator). It can access the members of the object provided as a
+      parameter using the dot operator in the usual way.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  void big_int::operator+=(const big_int &amp;right)
+  {
+    // If both operands are positive or if both are negative, we
+    // just add their absolute values and leave the sign alone.
+    // Notice below how I access the left operand's members directly
+    // and the right operands members using the dot operator.
+    //
+    if (sign == right.sign) {
+      short sum, carry = 0;
+      for (int i = 0; i &lt; 256; i++) {
+        sum       = digits[i] + right.digits[i] + carry;
+        digits[i] = sum % 10;
+        carry     = sum / 10;
+      }
+      // No overflow checking!
+    }
+
+    // The signs are different. In that case I really need to subtract.
+    else {
+      std::cerr &lt;&lt; "big_int::operator+=(): "
+        "Addition of unlike signs not yet implemented!\n";
+    }
+  }
+}
+</pre>
+
+    <p>To keep this example short, I'm not going to bother implementing every detail of <span
+        class="code">big_int</span> here. The case where the two numbers being added have
+      different signs is harder because I first need to figure out which has a larger absolute
+      magnitude and keep track of the resulting sign flag appropriately. It is my intention for
+      this class to properly handle negatives in every way, but for now I just put in an error
+      message that will trigger if anyone attempts to use the unimplemented facilities. The C++
+      feature of <i>exceptions</i> is a better way to report an error like this. I will cover
+      exceptions in a later lesson.</p>
+
+    <p>The subtraction, multiplication, and division operators must also be written but again,
+      in the interests of keeping this example short, I will skip those for now. I leave the
+      implementation of those operations as an exercise for the reader.</p>
+
+    <p>Let me now turn my attention to the relational operators.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  bool operator==(const big_int &amp;left, const big_int &amp;right)
+  {
+    // To be equal, they must have the same sign. No -0 allowed.
+    if (left.sign != right.sign) return false;
+
+    // They must also have all identical digits.
+    for (int i = 0; i &lt; 256; i++) {
+      if (left.digits[i] != right.digits[i]) return false;
+    }
+
+    // If I get here, they must be equal.
+    return true;
+  }
+
+}
+</pre>
+
+    <p>Since this function is not a method, I don't have implicit access to either operand. I
+      thus have to use the dot operator on both the left and right operands. However, because
+      this function is a friend of <span class="code">big_int</span> I do have the ability to
+      access the private section of the operands without a problem.</p>
+
+    <p>This function also uses the C++ type <span class="code">bool</span> to handle true/false
+      values. In C, one just uses int for this purpose, but C++ has a real, built-in type you
+      can (and should) use instead. The keywords <span class="code">true</span> and <span
+        class="code">false</span> are the only values you can legitimately put into a bool
+      object.</p>
+
+    <p>The operator&lt; function is a little trickier, particular when it comes to dealing with
+      negative values properly.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  bool operator&lt;(const big_int &amp;left, const big_int &amp;right)
+  {
+    if (left.sign &lt; right.sign) return true;
+    if (left.sign &gt; right.sign) return false;
+      // Here I use the fact that -1 &lt; 1 to check for situations where
+      // the two numbers have a different sign. After getting through
+      // this the two numbers must have the same sign.
+
+    if (left.sign == 1) {
+      // The two numbers are both positive.
+      for (int i = 255; i &gt;=0; i--) {
+        if (left.digits[i] &lt; right.digits[i]) return true;
+        if (left.digits[i] &gt; right.digits[i]) return false;
+        // Otherwise these two digits are equal. Let's try the next pair.
+      }
+    }
+    else {
+      // The two numbers are both negative.
+      for (int i = 255; i &gt;=0; i--) {
+        if (left.digits[i] &lt; right.digits[i]) return false;
+        if (left.digits[i] &gt; right.digits[i]) return true;
+        // Otherwise these two digits are equal. Let's try the next pair.
+      }
+    }
+
+    // If I get here the two numbers must have had all equal digits.
+    return false;
+  }
+
+}
+</pre>
+
+    <p>Okay, now what about those I/O functions? The inserter is not too difficult.</p>
+
+    <pre class="code">
+namespace vtc {
+
+  std::ostream &amp;operator&lt;&lt;(std::ostream &amp;os, const big_int &amp;right)
+  {
+    int i;
+
+    if (right.sign == -1) os &lt;&lt; "-";
+      // Print a minus sign if the number is negative.
+
+    // Find the first non-zero digit.
+    for (i = 255; i &gt;= 0; i--) {
+      if (right.digits[i] != 0) break;
+    }
+
+    // If the above loop didn't break, then there were no non-zero
+    // digits. Thus the number is 0.
+    //
+    if (i == -1) os &lt;&lt; "0";
+    else {
+      // Print the number, one digit at a time.
+      while (i &gt;= 0) {
+        os &lt;&lt; right.digits[i];
+        i--;
+      }
+    }
+  }
+
+}
+</pre>
+
+    <p>This function avoids printing out leading zeros (a good thing since there might be a
+      couple of hundred of them) and handles negative numbers properly. It does not mimic the
+      formatting features of the built-in types. For example if the caller uses the <span
+        class="code">setw</span> manipulator to set a field width before trying to print a <span
+        class="code">big_int</span>, it won't work as expected. This can be corrected, but doing
+      so is beyond the scope of this example.</p>
+
+    <p>The extractor function is tricky. It needs to read the input a character at a time. If it
+      tries to read an integer with the standard extractor, it would overflow when trying to
+      read a very big integer. Again, in the interest of keeping my example short, I won't
+      bother implementing that function here.</p>
+
+    <p>See big_int.cpp for the overall results so far. I invite you to enhance and extend this
+      class. Fill in the other functions so that it is more generally useful!</p>
+
+    <p>
+      <i>Note: to properly complete this example, I need to also talk about testing the <span
+          class="code">big_int</span> class</i>
+    </p>
+
+    <address>
+&copy; Copyright 2006 by Peter C. Chapin.<br />
+Last Revised: <b>May 27, 2006</b>
+</address>
+
+  </body>
+</html>

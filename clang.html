@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+
+<head>
+  <meta name="Author" content="Peter C. Chapin"/>
+  <meta name="ROBOTS" content="NOARCHIVE"/>
+  <link rel="stylesheet" href="default.css" type="text/css"/>
+
+  <title>Installing clang++ from Source</title>
+</head>
+
+<body>
+<h1>Installing clang++ from Source</h1>
+
+<p>This document describes how to install clang++ from source. The full details are in the <a
+    href="http://llvm.org/docs/">LLVM documentation</a> (look, in particular, at the <a
+    href="http://llvm.org/docs/GettingStarted.html"><i>Getting Started with the LLVM
+  System</i></a> document). The purpose of this document is to distill that information into a
+  short, easily digestible form.</p>
+
+<p>This document assumes you are using a Linux or some other Unix-like system. Please refer to the
+  official documentation above if you want to install clang++ on Windows. Follow the steps
+  below.</p>
+
+<ol>
+  <li><p>LLVM and clang++ are written in C++, and you'll need a C++ compiler to bootstrap them.
+    Normally you would use g++. Use the command</p>
+    <pre>
+        $ which g++
+    </pre>
+    <p>to see if you have g++ installed. If you see no output you'll need to install <tt>g++</tt>
+      using your system's package manager.</p></li>
+
+  <li><p>Download LLVM from the official <a href="http://llvm.org/releases/">LLVM Releases</a> web
+    page. At the time of this writing, the most recent version of the system is version 3.3. You
+    need three components: Clang source code, LLVM source code, and Compiler RT source code.</p>
+  </li>
+
+  <li><p>Unpack the LLVM source code in some suitable place. It should create a directory named
+    something like <tt>llvm-3.3.src</tt>.</p></li>
+
+  <li><p>Unpack the Clang source code and move the directory created into
+    <tt>llvm-3.3.src/tools</tt>. Rename the directory to just <tt>clang</tt> (take away any
+    version number, etc).</p></li>
+
+  <li><p>Unpack the Compiler RT source code and move the directory created into <tt>llvm-3.3.src/projects</tt>.
+    Rename the directory to just <tt>compiler-rt</tt> (take away any version number, etc). This
+    step and the previous step put these auxiliary projects into a location where they will be
+    automatically found and built by the main LLVM build system.</p></li>
+
+  <li><p>Create a directory to hold the result of the build. I suggest <tt>llvm-3.3.bld</tt> as a
+    sibling of <tt>llvm-3.3.src</tt>. All build artifacts will be put into this directory leaving
+    the source directory in a pristine state.</p></li>
+
+  <li><p>Change into your build directory and do</p>
+    <pre>
+        $ ../llvm-3.3.src/configure --prefix=path/to/installation
+      </pre>
+    <p>Replace <tt>path/to/installation</tt> with the location where you would like the system
+      ultimately to be installed. If you leave off the <tt>--prefix</tt> option it will default to
+      <tt>/usr/local</tt>. Often this is fine but you may wish to install the system somewhere
+      under your home directory instead (for example). In any case be sure the <tt>bin</tt>
+      directory beneath the installation prefix is on your PATH. If this is not the case you won't
+      be able to execute the programs once they are installed.</p></li>
+
+  <li><p>when <tt>configure</tt> completes run <tt>make</tt> in the build directory to compile
+    everything. If you have a multicore processor, you can speed up the build by running parallel
+    instances of the compiler. Use</p>
+    <pre>
+        $ make -j n
+      </pre>
+    <p>where <tt>n</tt> is the number of parallel instances to run (try using the number of cores
+      you have). Fully building everything takes a long time.</p></li>
+
+  <li><p>Once the system has finished building run <tt>make check</tt> to run the LLVM unit tests.
+    This will give you some confidence that it built correctly. Note that this only tests the LLVM
+    infrastructure. This step does not test the clang compiler.</p></li>
+
+  <li><p>Run <tt>make install</tt> to install everything to the location you specified previously
+    with the <tt>--prefix</tt> option. You may need to become root to do this step depending on
+    where you are installing the system (if you are installing to your home directory, you can do
+    everything under your normal user account). You are now ready to program using LLVM and clang!
+  </p></li>
+</ol>
+
+<!-- BEGIN signature block -->
+<hr/>
+<p class="signature">Last Revised: 2013-08-31<br/>© Copyright 2013 by Peter Chapin</p>
+<!-- END signature block -->
+</body>
+</html>

@@ -18,10 +18,10 @@
 <h2>Introduction</h2>
 
 <p>The documents linked to this page constitute the "lectures" of a one-semester course in the C++
-  programming language (the 1998 standard). I created these documents myself and have used them in
-  programming classes at <a href="http://www.vtc.edu/">Vermont Technical College</a>, where I am
-  an instructor. I am posting these documents on the web for public access under the terms of the
-  <a href="GFDL.txt">GNU Free Documentation License</a> (GFDL).</p>
+  programming language (primarily the 1998 standard). I created these documents myself and have
+  used them in programming classes at <a href="http://www.vermontstate.edu/">Vermont State
+    University</a>, where I am an instructor. I am posting these documents on the web for public
+  access under the terms of the <a href="GFDL.txt">GNU Free Documentation License</a> (GFDL).</p>
 
 <blockquote>
   <p>Permission is granted to copy, distribute and/or modify this document (and the related
@@ -29,11 +29,6 @@
     License, Version 1.1 or any later version published by the Free Software Foundation; with no
     invariant sections, no front-cover texts, and no back-cover texts.</p>
 </blockquote>
-
-<p>If you make corrections or enhancements to any of these documents, I encourage you to contact
-  me so that I can consider incorporating your enhancements into my copy as well. It is my hope
-  that in this way on-line educational resources, such as these documents, can benefit from the
-  same process that has made open source programming projects such a success.</p>
 
 <hr/>
 <h2>Lessons</h2>
@@ -96,8 +91,8 @@
       href="big_int.cpp"><tt>big_int.cpp</tt></a>)
   </li>
   <li><a href="LESSON-07.html">Lesson 7</a>: Operator overloading: Additional topics.</li>
-  <li><a href="LESSON-08.html">Lesson 8</a>: Dynamic memory using operator new and operator delete.
-    (<a href="getlongline.cpp"><tt>getlongline.cpp</tt></a>)
+  <li><a href="LESSON-08.html">Lesson 8</a>: Dynamic memory using operator new and operator
+    delete. (<a href="getlongline.cpp"><tt>getlongline.cpp</tt></a>)
   </li>
   <li><a href="LESSON-09.html">Lesson 9</a>: Resource management issues. (<a
       href="Probe.hpp"><tt>Probe.hpp</tt></a>, <a href="Probe.cpp"><tt>Probe.cpp</tt></a>, <a
@@ -154,76 +149,85 @@
 <p>The following slides provide supplementary information about various C++ topics.</p>
 
 <ul>
-  <li>Information on <a href="Slides/StandardThread.pdf"><tt>std::thread</tt></a>.</li>
+  <li>Information on <a href="Slides/StandardThread.tex"><code>std::thread</code></a>.</li>
 </ul>
 
 <hr/>
 <h2>Links</h2>
-<p>The following links provide access to potentially useful resources about C++. If you find a
-  resource that is particularly valuable, let me know and I'll consider adding it to this
-  list.</p>
+
+<p>The following links provide access to potentially useful resources about C++.</p>
+
+<h3>Compilers</h3>
 
 <ul>
-  <li>My <a href="../C/">C tutorial</a> is useful background information.</li>
-
-  <li>At various places in my lessons I refer to the <a href="../c-style.html">VTC Style Guide for
-    C/C++ Programming</a>.
+  <li><p>Here is Microsoft's page about <a href="http://www.visualstudio.com">Visual Studio</a>,
+    and the official <a href="http://blogs.msdn.com/b/visualstudio/">Visual Studio blog</a>.</p>
   </li>
 
-  <li><a href="String-Reference-Card.pdf"><tt>std::string</tt> Quick Reference Card</a>.</li>
+  <li><p>The <a href="http://gcc.gnu.org/">Gcc home page</a> contains all the latest about the Gnu
+    Compiler Collection.</p></li>
 
-  <li><a href="http://www.learncpp.com/">LearnCpp.Com</a> contains an extensive tutorial on C++.
-  </li>
-
-  <li><a href="http://www.tutorialspoint.com/cplusplus/">C++ tutorial on tutorialspoint</a>. It
-    looks fairly polished but only appears to cover C++ 1998.
-  </li>
-
-  <li>The <a href="http://www.cplusplus.com/">cplusplus.com</a> web site contains documentation
-    and reference material for C++. Although not an "official" source of information about the
-    language it nevertheless seems useful and maintained.
-  </li>
-
-  <li>The <a href="http://en.cppreference.com/w/">cppreference.com</a> web site also contains
-    unofficial (but maintained) reference material for C++. Let me know which of these two sites
-    seems better; perhaps I should only link to one.
-  </li>
-
-  <li><a href="http://msdn.microsoft.com/en-us/library/hh875057.aspx">Microsoft's reference
-    material on C++</a>. Most directly applicable to Visual Studio users, but much of what is
-    described is entirely standard.
-  </li>
-
-  <li>The official web site of <a href="http://www.boost.org/">Boost</a>. Many people feel boost
-    is an essential add-on to any C++ project.
-  </li>
-
-  <li>The official web sites of <a href="http://llvm.org">LLVM</a> and <a
+  <li><p>The official websites of <a href="http://llvm.org">LLVM</a> and <a
       href="http://clang.llvm.org/">clang</a>. I've written some <a
-      href="../clang.html">instructions for installing clang from source</a> on Linux systems.
+      href="clang.html">instructions for installing clang from source</a> on Linux systems.</p>
   </li>
 
-  <li>The <a href="http://gcc.gnu.org/">Gcc home page</a> contains all the latest about the Gnu
-    Compiler Collection.
-  </li>
-
-  <li>Microsoft's page about <a href="http://www.visualstudio.com">Visual Studio</a>. The official
-    <a href="http://blogs.msdn.com/b/visualstudio/">Visual Studio blog</a>.
-  </li>
-
-  <li>Although considerably behind the compilers above, <a
-      href="http://www.openwatcom.org/">Open Watcom</a> will always be close in my heart (I was a
-    contributor for a number of years).
-  </li>
-
-  <li>I've written a <a href="../git.html">short document about Git</a> to help you get up to
-    speed with the system. You may find knowledge of Git useful when setting up to do certain
-    homework assignments.
-  </li>
+  <li><p><a
+      href="http://www.openwatcom.org/">Open Watcom</a> only supports C++ 1998, and even that
+    support is incomplete, but it does still support various legacy targets such as MS-DOS, 16-bit
+    Windows, and OS/2 (as well as modern Windows and Linux).</p></li>
 </ul>
+
+<h3>Tutorials</h3>
+
+<ul>
+  <li><p>My <a href="https://github.com/pchapin/tutorialc">C tutorial</a> is useful background
+    information.</p></li>
+
+  <li><p><a href="http://www.learncpp.com/">LearnCpp.Com</a> contains an extensive tutorial on
+    C++.</p></li>
+
+  <li><p><a href="http://www.tutorialspoint.com/cplusplus/">C++ tutorial on tutorialspoint</a>. It
+    looks fairly polished but only appears to cover C++ 1998.</p></li>
+</ul>
+
+<h3>References</h3>
+
+<ul>
+  <li><p>The <a href="http://en.cppreference.com/w/">cppreference.com</a> website contains
+    reference material for C++. Although not an "official" source of information about the
+    language, it nevertheless seems useful and well maintained.</p></li>
+
+  <li><p>The <a href="http://www.cplusplus.com/">cplusplus.com</a> website also contains
+    documentation and unofficial reference material for C++. Let me know which of these two sites
+    seems better; perhaps I should only link to one.</p></li>
+
+  <li><p><a href="http://msdn.microsoft.com/en-us/library/hh875057.aspx">Microsoft's reference
+    material on C++</a>. Most directly applicable to Visual Studio users, but much of what is
+    described is entirely standard.</p></li>
+
+  <li><p>The <a href="https://isocpp.github.io/CppCoreGuidelines/">C++ Core Guidelines</a> is an
+    attempt to describe rules for writing modern, high quality C++. Some tools (e.g, Visual
+    Studio) can check your program against these guidelines and report on violations.</p></li>
+
+  <li><p>My <a href="String-Reference-Card.odt"><code>std::string</code> Quick Reference Card</a>
+    is a cheat sheet for <code>std::string</code> methods.</p></li>
+
+  <li><p>Here is the <a href="C++-Style.odt">C++ Style Guide</a> that I use for my own
+    programming, and that I used for the samples in this tutorial..</p></li>
+
+</ul>
+
+<h3>Libraries</h3>
+
+<ul>
+  <li><p>The official website of <a href="http://www.boost.org/">Boost</a>. Many people feel boost
+    is an essential add-on to any C++ project.</p></li>
+</ul>
+
 <hr/>
 <address>
-  &copy; Copyright 2016 by Peter Chapin.<br/> Last Revised: <b>January 12, 2016</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>July 17, 2023</b>
 </address>
 </body>
 </html>

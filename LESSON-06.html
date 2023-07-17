@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+
+<head>
+  <title>Lesson #6</title>
+  <meta name="Author" content="Peter Chapin"/>
+  <!-- <meta name="keywords" lang="en-US" content="..."> -->
+  <meta name="ROBOTS" content="NOARCHIVE"/>
+  <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
+</head>
+
+<body>
+
+<h1>Lesson #6</h1>
+
+<p class="subtitle">Operator Overloading</p>
+
+<h2>Overview</h2>
+
+<p>In this lesson I will cover the following topics</p>
+
+<ol id="overview-list">
+
+  <li>
+    <p>Operator overloading.</p>
+  </li>
+
+</ol>
+
+<h2>Body</h2>
+
+<h3>What is operator overloading and why should we care about it?</h3>
+
+<p>You have already seen operator overloading in some of my earlier examples. In this lesson I
+  will describe this important C++ feature in more detail. Operator overloading allows you to
+  define a meaning for the standard operators as they are applied to your own types. In this way,
+  you can make your own types behave much more naturally than would otherwise be the case.</p>
+
+<p>For example, suppose you wanted to create a type <span class="code">complex</span> to hold
+  complex numbers. In fact, the standard library has such a type but let's ignore that for now. To
+  create your own complex type you might start by creating a header file named complex.hpp like
+  this</p>
+
+<pre class="code">
+namespace vtc {
+
+  class complex {
+    public:
+      // We will fill in some operations shortly.
+
+    private:
+      double re, im;
+  };
+}
+</pre>
+
+<p>Here I'm using the rectangular representation of complex numbers (as a real part and an
+  imaginary part). Alternative representations exist, but those issues aren't my primary concern
+  right now.</p>
+
+<p>Regardless of their internal representation, I would like to make complex numbers as easy and
+  natural to use as possible. In particular, I would like to write things like this</p>
+
+<pre class="code">
+#include "complex.hpp"
+
+int main()
+{
+  vtc::complex Z, X1, X2, X3, X4;
+
+  std::cout &lt;&lt; "Enter four complex numbers: ";
+  std::cin  &gt;&gt; X1 &gt;&gt; X2 &gt;&gt; X3 &gt;&gt; X4;
+
+  Z = (X1 + X2) / (X1 - X2);
+  std::cout &lt;&lt; "The result is: " &lt;&lt; Z &lt;&lt; "\n";
+  return 0;
+}
+</pre>
+
+<p>Since complex numbers are numbers, I should be able to apply the usual numeric operations on
+  them just the way I can with integers. Also I should be able to do I/O with complex numbers
+  using inserter and extractor operators. In a language without operator overloading (such as C)
+  all operations would have to be implemented with normal functions. In that case I would have to
+  write things like</p>
+
+<pre class="code">
+Z = complex_divide(complex_add(X1, X2), complex_subtract(X1, X2));
+</pre>
+
+<p>That is not nearly as nice. It also significantly restricts what I can accomplish with my user
+  defined type. By making complex numbers seem like "just another number" it is possible to create
+  <i>generic</i> algorithms using a C++ feature called templates (which I will introduce in a
+  later lesson) that apply not only to the built in types, but also to appropriate user-defined
+  types with the necessary overloaded operators.</p>
+
+<h3>Okay, so how does it work?</h3>
+
+<p>To overload an operator, you only need to write a function with a special name. For example,
+  here is how I might create an overloaded version of <span class="code">+</span> that knows how
+  to add complex numbers.</p>
+
+<pre class="code">
+namespace vtc {
+
+  complex operator+(const complex &amp;left, const complex &amp;right)
+  {
+    complex result;
+
+    result.re = left.re + right.re;
+    result.im = left.im + right.im;
+    return result;
+  }
+
+}
+</pre>
+
+<p>This function is perfectly ordinary looking except for the funny name: <span class="code"
+>operator+</span>. This special name tells the compiler that this function is to be invoked
+  whenever you try to use <span class="code">+</span> with complex numbers. An expression like
+  <span class="code">Z = X1 + X2</span> is really <span class="code">Z =
+        operator+(X1, X2)</span>. In fact, you could even write it that way if you wanted.</p>
+
+<p>Note that in my example above, the operator function is not a method of the class. Thus in
+  order to have access to the class's private section it would need to be declared as a <i>friend
+    function</i> in the header file.</p>
+
+<pre class="code">
+namespace vtc {
+
+   class complex {
+     friend complex operator+(const complex &amp;left, const complex &amp;right);
+
+     public:
+       // Public methods.
+
+     private:
+       double re, im;
+   };
+
+}
+</pre>
+
+<p>Friend functions are ordinary functions that have direct access to the private section of the
+  class that declares them as friends. In terms of access control, they are similar to methods.
+  However, unlike a method a friend function has no implicit object that it is working on. All
+  objects must be passed to the friend in other ways (for example, as parameters).</p>
+
+<p>Notice how I didn't have to put a namespace qualifer on <span class="code"
+>operator+</span> when I used it? For example when I just did <span class="code">Z = X1
+        + X2</span> how did the compiler know to look in namespace <span class="code">vtc</span>
+  for the <span class="code">operator+</span> I'm trying to use? C++ has a special rule that it
+  uses in a case like this. If it can't locate an appropriate operator function any other way, it
+  will search in the namespaces where the types of the operator's arguments are located. In the
+  example above <span class="code">X1</span> and <span class="code"
+  >X2</span> are both of type <span class="code">vtc::complex</span>. Thus the compiler will know
+  to look in the <span class="code">vtc</span> namespace for an appropriate <span
+      class="code">operator+</span>. This rule is technically called <i>argument dependent
+    lookup</i>, but most people refer to it as "Koenig lookup" (after Andrew Koenig, who first
+  proposed the feature). It is essential for operator overloading to work smoothly with
+  namespaces.</p>
+
+<p>Here are some restrictions that apply when you are overloading operators.</p>
+
+<ol>
+
+  <li>
+    <p>An operator function must have a user defined type or a reference to a user defined type as
+      at least one of its parameters. Alternatively, operator functions can be class methods. It
+      is also possible to overload operators that have enumeration types for their parameters.</p>
+    <p>This rules out redefining operators that operate exclusively on the built in types or
+      pointers types. For example, you can't redefine the meaning of <span class="code"
+      >+</span> as applied to integers.</p>
+  </li>
+
+  <li>
+    <p>You cannot introduce operators. You can only overload operators native to C++, and of those
+      you cannot overload <span class="code">.</span>, <span class="code">::</span>, <span
+          class="code">?:</span>, and <span class="code">.*</span>.</p>
+  </li>
+
+  <li>
+    <p>You cannot change an operator's precedence or associativity.</p>
+  </li>
+
+</ol>
+
+<p>On the other hand, operator overloading lifts several restrictions normally present on the
+  operators. In general, operator functions have all the capabilities of ordinary functions.</p>
+
+<ol>
+
+  <li>
+    <p>As long as one parameter is of class (or enumeration) type, the other parameter, if
+      present, can be of any type at all. In fact, you can overload operator functions on
+      parameter types just like ordinary functions.</p>
+  </li>
+
+  <li>
+    <p>Operator functions can return any type at all.</p>
+  </li>
+
+  <li>
+    <p>Operator functions can accept non lvalue arguments and return lvalues (by returning a
+      reference) even if the original operators could not. For example a statement like</p>
+    <pre class="code">
+A + B = C;     // operator+ returns a reference.
+</pre>
+    <p>might be legal when you use overloaded operators. This example is strange, but the ability
+      for an operator function to return a reference is very important. I will show useful
+      examples of that in later lessons.</p>
+  </li>
+
+  <li>
+    <p>You do not need to maintain relationships between operators. For example</p>
+    <pre class="code">
+A  = A + 1;  // Probably A = operator+(A, 1);
+A += 1;      // Probably A.operator+=(1);
+++A;         // Probably A.operator++();
+</pre>
+    <p>are all handled with independent operator functions. Of course, to prevent surprises, you
+      should provide the same semantics for all three expressions.</p>
+    <p>It may be possible, however, to overload operators so <span class="code">++A</span> is
+      significantly more efficient than the long winded <span class="code">A = A +
+            1</span>. If <span class="code">A</span> were of type int, modern compilers would
+      probably handle all three of the above statements the same way. For an elaborate user
+      defined type, however, you may want to overload <span class="code">operator+</span>, <span
+          class="code">operator+=</span>, and <span class="code">operator++</span> separately for
+      efficiency reasons.</p>
+  </li>
+
+</ol>
+
+<p>In general you should only overload operators to do what one would naturally expect. Don't
+  overload <span class="code">-</span> to do addition, or <span class="code">*</span> to do
+  subtraction! Operator overloading is a powerful feature, but it is easily abused. Some
+  programmers overload operators much too aggressively. If it is not totally clear that an
+  overloaded operator is appropriate, it probably isn't appropriate.</p>
+
+<h3>Method vs non-method vs friend functions.</h3>
+
+<p>You can create operator functions that are mehods, non-methods, or friends. What are the
+  differences? When an operator function is a class mehod, one of its arguments is the implicit
+  object against which it is invoked. For example, suppose I wanted to make an overloaded <span
+      class="code">+</span> operator for complex that was a class method. In the header file I
+  would do</p>
+
+<pre class="code">
+namespace vtc {
+
+   class complex {
+     public:
+       complex operator+(const complex &amp;right);
+         // I show only one parameter. The other parameter is the implicit object.
+
+     private:
+       // etc...
+   };
+}
+</pre>
+
+<p>To use this operator I might do</p>
+
+<pre class="code">
+int main()
+{
+  vtc::complex Z, X1, X2;
+
+  Z = X1 + X2;  // Really Z = X1.operator+(X2);
+
+  // etc...
+}
+</pre>
+
+<p>The left operand is the object against which the method is applied. The right operand is
+  explicit. The asymmetry is a little strange for a case like <span class="code">+</span> since
+  <span class="code">+</span> is inherently symmetrical in its action. However, some operators are
+  asymmetrical anyway (such as <span class="code">+=</span>) and are more natural as methods. Also
+  unary operators are often more natural as methods. Here is an example of that</p>
+
+<pre class="code">
+namespace vtc {
+
+  class complex {
+    public:
+      complex operator-();
+        // Unary minus (used to negate a complex number) takes no
+        // parameters when declared as a method. It operates on the
+        // implicit object.
+
+    private:
+      // etc...
+  };
+}
+
+int main()
+{
+  vtc::complex Z, X1;
+
+  Z = -X1; // Really Z = X1.operator-();
+
+  // etc...
+}
+</pre>
+
+<p>Symmetric binary operators like <span class="code">+</span> are usually more naturally defined
+  as non-method functions. This is what I did in my earlier examples. However, non-method
+  functions have no special access to the private section of the class. In some cases, this is
+  fine. If the operator function can be written efficiently without such access, then there is no
+  point in giving it such access. In many cases, though, the operator function will need access to
+  the private section. Thus declaring non-method operator functions to be friends often makes
+  sense.</p>
+
+<h3>The value of references and const.</h3>
+
+<p>Now is the time for me to describe why references and const are important in C++. Notice how in
+  my examples above I declared my overloaded addition operator to take references to const
+  complex. What if I tried to use pointers to complex numbers instead?</p>
+
+<pre class="code">
+namespace vtc {
+
+  complex operator+(complex *left, complex *right)
+  {
+    complex result;
+
+    result.re = left->re + right->re;
+    result.im = left->im + right->im;
+    return result;
+  }
+
+}
+</pre>
+
+<p>Here I'm using the <span class="code">-></span> operator to access the members of the objects
+  pointed at by left and right. That is not a problem. The problem is: how would I use this
+  function?</p>
+
+<pre class="code">
+Z = X1 + Z2;
+</pre>
+
+<p>This doesn't work. My <span class="code">operator+</span> requires pointers.</p>
+
+<pre class="code">
+Z = &amp;X1 + &amp;X2;
+</pre>
+
+<p>This doesn't really work either. I'm trying to add two pointers here, not two <span
+    class="code">vtc::complex</span> objects. I can't overload operators on just pointers (see the
+  list of restrictions above) so the whole idea of using pointers is ill-founded. Even if it were
+  legal, the requirement of putting <span class="code">&amp;</span> in front of <span
+      class="code">X1</span> and <span class="code">X2</span> above is pretty unacceptable.</p>
+
+<p>Of course I could write my operator function to take its parameters by value like this</p>
+
+<pre class="code">
+namespace vtc {
+
+  complex operator+(complex left, complex right)
+  {
+    complex result;
+
+    result.re = left.re + right.re;
+    result.im = left.im + right.im;
+    return result;
+  }
+
+}
+</pre>
+
+<p>The problem with this is that it requires that my complex objects get copied every time an
+  operator function is called. For a relatively small object like complex (it only contains two
+  doubles as members) that requirement might not be too bad. But for a large object, the time
+  spent copying it would be unacceptable. The only proper solution is to define my operator
+  functions to take references.</p>
+
+<p>Now, why is the const necessary? Remember in an earlier lesson when I said the compiler won't
+  bind a non-const reference argument to a literal number? Here is that example again</p>
+
+<pre class="code">
+void f(int &amp;);
+  // Function f takes a reference to a (non-const) int.
+
+int main()
+{
+  f(100);  // Error!
+  return 0;
+}
+</pre>
+
+<p>The idea here is that function <span class="code">f</span> might try to modify the object
+  referred to by its parameter and modifying a literal number just doesn't make sense. Now, with
+  that in mind, take another look at this expression involving my complex type</p>
+
+<pre class="code">
+Z = (X1 + X2) / (X1 - X2);
+</pre>
+
+<p>What are the operands to the <span class="code">operator/</span> function? The left operand is
+  the output of the <span class="code">operator+</span> function and the right operand is the
+  output of the <span class="code">operator-</span> function. The objects returned by those two
+  functions are anonymous temporary objects. They were not explicitly declared by me, yet they
+  must be set up and managed by the compiler in order for the expression to work. If the <span
+      class="code">operator/</span> function took references to non-const, the compiler would
+  assume that the function was going to try and modify the anonymous temporaries. That really
+  doesn't make any sense (and it makes it difficult for the compiler to manage those temporaries
+  intelligently). As a result, the compiler would just not allow the expression above to be
+  written. It would be an error.</p>
+
+<p>Thus to allow elaborate, nested expressions using overloaded operators, you must be sure to
+  declare the parameters of your operator functions as taking references to const. If you leave
+  out the const, you won't be able to use your operators in a natural way.</p>
+
+<h3>Don't return references.</h3>
+
+<p>Although you normally do want references (to const) as the parameters of your overloaded
+  functions, you normally do <em>not</em> want to return a reference. Instead you usually want to
+  return a whole object. It is true that returning whole objects might be sluggish when the
+  objects are large, but if you try to do otherwise subtle errors will creep into your program.
+  Suppose you tried to write <span class="code">operator+</span> for complex like this:</p>
+
+<pre class="code">
+namespace vtc {
+
+  complex &amp;operator+(const complex &amp;left, const complex &amp;right)
+  {
+    static complex result;
+      // This has to be static or it will just vanish when the function returns.
+
+    result.re = left.re + right.re;
+    result.im = left.im + right.im;
+    return result;
+      // This really just returns a reference to result. The result is not copied.
+  }
+
+}
+</pre>
+
+<p>This looks great. But look again. What happens when you do</p>
+
+<pre class="code">
+Z = (X1 + X2) / (X3 + X4);
+</pre>
+
+<p>When you first compute <span class="code">X1 + X2</span> the result is left in a static local
+  object in the <span class="code">operator+</span> function. Then when you compute <span
+      class="code">X3 + X4</span>, the new result overwrites the old one. By the time <span
+      class="code">operator/</span> is called, it will get two references to the latest sum.</p>
+
+<p>In general, to properly evaluate some expressions, objects must occasionally be copied into
+  temporaries. This is just the way it is. If you try to fight that by creating operator functions
+  that return references instead of whole objects, you are flirting with disaster. Don't do
+  it.</p>
+
+<h3>I/O operations.</h3>
+
+<p>You can use operator overloading to create your own inserter and extractor operators. Here is
+  how to make an operator&lt;&lt; for complex numbers.</p>
+
+<pre class="code">
+namespace vtc {
+
+  std::ostream &amp;operator&lt;&lt;(std::ostream &amp;os, const complex &amp;right)
+  {
+    os &lt;&lt; "(" &lt;&lt; right.re &lt;&lt; ", " &lt;&lt; right.im &lt;&lt; ")";
+    return os;
+  }
+}
+</pre>
+
+<p>With this function you can say</p>
+
+<pre class="code">
+int main()
+{
+  vtc::complex number;
+
+  // Put a value into number.
+
+  std::cout &lt;&lt; "The answer is: " &lt;&lt; number &lt;&lt; "\n";
+  return 0;
+}
+</pre>
+
+<p>The function defines a new operator&lt;&lt; that takes a reference to a <span
+    class="code">std::ostream</span> on the left and a reference to a (const) <span
+    class="code">complex</span> on the right. It then uses the standard <span class="code"
+>ostream</span> inserter operators to output the components of the <span class="code"
+>complex</span> in some suitable way. Finally it returns the reference to the <span
+    class="code">ostream</span>. This allows the <span class="code">&lt;&lt;</span> operator to be
+  chained so that any further applications of it will be applied to the same <span
+      class="code">ostream</span> (as in the way the "\n" is printed in my example above). An
+  extractor operator can be created similarly. In this way you can arrange to do I/O on your own
+  types as naturally as with the built-in types.</p>
+
+<p>Notice how this operator function <em>does</em> return a reference. You might wonder what's up
+  with that. Just a few paragraphs earlier, I talked about how returning a reference from an
+  operator function was a bad idea. But this is a different case. Here I'm returning the same
+  reference I've been given in order to "pass it on". The real object is located somewhere else.
+  There is no need to create a temporary here. The I/O operators are a bit unusual in this respect
+  as compared to most overloaded operators.</p>
+
+<h2>Summary</h2>
+
+<ol id="summary-list">
+
+  <li>
+    <p>C++ supports operators overloading. This allows you to define your own functions that will
+      be used whenever someone uses a standard operator with an object of class type. Most
+      operators can be overloaded but there are some restrictions. At least one of the operator's
+      arguments must be of class type (or enumeration type), new operators can't be introduced,
+      and the assocation and precedence of existing operators can't be changed. However, operator
+      functions are otherwise completely general; they can do whatever you like.</p>
+  </li>
+
+  <li>
+    <p>Overloaded operators can be class methods, ordinary functions, or friend functions. As
+      class methods, their first (left) parameter is always the object they are invoked against.
+      Friend functions are ordinary functions that have access to a class's private section. Often
+      symmetric, binary operators are implemented as friends.</p>
+  </li>
+
+  <li>
+    <p>When overloading operators it is usual to take parameters by reference but to return the
+      result by value. Reference parameters are usually faster because they don't involve copying
+      the operands. However, returning by reference is dangerous because, in general, it isn't
+      possible to allocate the memory for the return value properly.</p>
+  </li>
+
+</ol>
+
+<address>
+  &copy; Copyright 2007 by Peter C. Chapin.<br/> Last Revised: <b>July 25, 2007</b>
+</address>
+
+</body>
+</html>

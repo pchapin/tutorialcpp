@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+
+<head>
+  <title>Lesson #4</title>
+  <meta name="Author" content="Peter Chapin"/>
+  <!-- <meta name="keywords" lang="en-US" content="..."> -->
+  <meta name="ROBOTS" content="NOARCHIVE"/>
+  <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
+</head>
+
+<body>
+
+<h1>Lesson #4</h1>
+
+<p class="subtitle">The Concept of a Class</p>
+
+<h2>Overview</h2>
+
+<p>In this lesson I will cover the following topics</p>
+
+<ol id="overview-list">
+
+  <li>
+    <p>The syntax of a class definition and how to access class members and methods.</p>
+  </li>
+
+  <li>
+    <p>Using a class to hide information and why that is important.</p>
+  </li>
+
+  <li>
+    <p>How to organize the source files containing a class.</p>
+  </li>
+
+</ol>
+
+<h2>Body</h2>
+
+<h3>What is a class?</h3>
+
+<p>Much of what C++ programmers do is define and use classes. Understanding what classes are, and
+  the basic syntax involved in using them, is of utmost importance. This information also applies
+  to some extent to other object oriented languages that are inspired by C++. For example, Java's
+  concept of a class is very similar to that of C++'s.</p>
+
+<p>A class is basically a new type. C++ has the same built-in types as C: <span class="code"
+>int</span>, <span class="code">long</span>, <span class="code">double</span>, etc. Also like C,
+  there are pointer types and array types ("pointer to char" or "array of 10 double"). However,
+  C++ allows you to define entirely new types using classes. Thus much C++ programming revolves
+  around creating libraries of types called <i>class libraries</i>. C actually has a similar
+  facility, although not nearly as advanced, in its structures. C++ classes are essentially just
+  enhanced structures.</p>
+
+<p>Why would you want to create your own types? Why aren't the built-in types good enough? The
+  built-in types are quite primitive because they are close to the machine. They represent the
+  types of data the computer is good at manipulating. The built-in types are very efficient
+  because of this. However, the built-in types might not have much to do with the issues of your
+  application. It is much easier to write your program in terms of <i>abstract types</i> that
+  define concepts that make sense to your problem. For example, you might define a class the
+  represents a window. Then you could declare objects to be windows in your program as easily as
+  you declare integers.</p>
+
+<pre class="code">
+int    i, j, k;			// Three integers.
+window primary, help, output;	// Three windows.
+</pre>
+
+<p>There is no <span class="code">window</span> type in C++, but you can create your own---with
+  suitable behavior---using classes.</p>
+
+<p>As another example, suppose you wrote a program that needed to keep track of large quantites of
+  money. The problem with money is that you need to be accurate to one cent while still being able
+  to handle billions of dollars. The need for accuracy requires a integral type, but the required
+  range overflows 32 bit integers. There are various ways you can handle this, but the cleanest is
+  to create a new type "money" that deals with those issues internally. Then you can just declare
+  and use money objects in your program.</p>
+
+<h3>Information Hiding</h3>
+
+<p>Another important aspect of classes is information hiding. The internal structure of your new
+  types should be hidden from the user of those types. For example, when you use int you don't
+  (normally) have to worry about how integers are stored in memory. You just perform operations on
+  them, like addition and subtraction, and you let the compiler worry about how that works. If you
+  move your program to a machine that stores integers differently, the compiler on that system
+  will translate your addition and subtraction operations appropriately so that they have the same
+  meaning.</p>
+
+<p>It is the same with user defined types. The internal workings of a class should be hidden from
+  the user of the class so that the internal workings can be changed without affecting the
+  programs that use that class. Such changes are often necessary to fix bugs, improve performance,
+  or add features. By hiding the internal structure of a class, such changes can be made without
+  introducing incompatibilities. This is a very important idea.</p>
+
+<h3>Sounds great. So how does it work?</h3>
+
+<p>In this lesson I will show you the basic syntax of defining and using classes. In the next
+  lesson I will discuss in more detail the issues around creating abstract types.</p>
+
+<p>Classes have two parts: a definition and an implementation. Here is a possible definition for a
+  class that represents money. This definition isn't complete. I'll expand on it as I go.</p>
+
+<pre class="code">
+class money {
+  private:
+    long dollars;
+    int  cents;
+};
+</pre>
+
+<p>Basically a class is like a plain C structure. It has a name (<span class="code"
+>money</span>) and it has members. In the example above the members are <span
+    class="code">dollars</span> and <span class="code">cents</span>. Each member has its own type.
+  I'm using long integers to represent dollars because on some machines regular integers are only
+  16 bits and that would only allow me to handle $32,767.</p>
+
+<p>The two members I've defined so far are <i>private members</i>. What this means is that users
+  of class <span class="code">money</span> can't access them. For example:</p>
+
+<pre class="code">
+int main()
+{
+  money  account_balance;
+
+  // Try to set account_balance to $173.53
+  account_balance.dollars = 173;  // Error! Member dollars is private.
+  account_balance.cents   = 53;   // Error! Member cents is private.
+
+  // etc...
+}
+</pre>
+
+<p>The lines marked with "Error" are wrong because I can't access the private members there. My
+  use of the dot operator makes sense because the members of a class are like the members of a
+  structure. However, in this case the members are private to the class and can't be touched. This
+  is information hiding. A future version of money might represent money differently. The members
+  dollars and cents might not exist in the future. A program that tries to use them now would be
+  incompatible with such a change. To prevent such incompatibilities, I keep programs from
+  "knowing" about the existance of those members by declaring them as private in the class
+  definition.</p>
+
+<p>Notice how I was able to declare <span class="code">account_balance</span> to be of type <span
+    class="code">money</span> in a natural way. This is because every class is like a new type.
+  Once the compiler has seen the class definition it understands <span
+      class="code">money</span> to be a type just like <span class="code">int</span> or <span
+      class="code">char</span> is a type.</p>
+
+<p>This is fine, but if dollars and cents are private, then how can they be given values? The
+  answer is with methods.</p>
+
+<pre class="code">
+class money {
+  private:
+    long dollars;
+    int  cents;
+
+  public:
+    void set(long D, int C);
+};
+</pre>
+
+<p>This version of <span class="code">money</span> defines a public method named <span
+    class="code">set</span>. The <span class="code">set</span> method takes two parameters and
+  returns nothing. Because it is public it can be used by anyone. Here is how:</p>
+
+<pre class="code">
+int main()
+{
+  money  account_balance;
+
+  account_balance.set(173, 53);
+  // etc...
+}
+</pre>
+
+<p>Here I apply the set operation to the <span class="code">account_balance</span> object using
+  the dot operator. Since <span class="code">set</span> takes two parameters, I have to give it
+  arguments. In my example I give it 173 for <span class="code">D</span> and 53 for <span
+      class="code">C</span>. Notice that I don't do this:</p>
+
+<pre class="code">
+  money.set(173, 53);
+    // Error! I can't apply an operation to a type; only to an object.
+</pre>
+
+<p>If I had multiple money objects in my program I could apply <span class="code">set</span> to
+  each one independently.</p>
+
+<pre class="code">
+int main()
+{
+  money account_balance;
+  money deposit;
+
+  account_balance.set(173, 53);
+  deposit.set(20, 97);
+  // etc...
+}
+</pre>
+
+<p>Each object is independent and has its own copy of the internal members. Setting the <span
+    class="code">account_balance</span> object does not in any way modify the values stored in
+  <span class="code">deposit</span>.</p>
+
+<p>It might seem silly to have a <span class="code">set</span> function that just sets the
+  members. Why not make <span class="code">dollars</span> and <span class="code"
+  >cents</span> public members (you could do this) and access them directly? Yet doing things with
+  private members is better. If the internal structure of <span class="code"
+  >money</span> changes, the <span class="code">set</span> method could be modified so that it
+  still works the same way. Thus programs that use <span class="code">set</span> would still be
+  correct while programs that directly accessed the members would be incompatible.</p>
+
+<p>How might the set function be written? Here is how</p>
+
+<pre class="code">
+void money::set(long D, int C)
+{
+  dollars = D;
+  cents   = C;
+}
+</pre>
+
+<p>This is the <i>implementation</i> of the <span class="code">money</span>'s <span
+    class="code">set</span> method. You can tell this is a method of class <span
+    class="code">money</span> because of the <span class="code">money::</span> in front of its
+  name. Other than that, it looks like any other function. It has a return type mentioned first
+  and then the parameters are declared later.</p>
+
+<p>All this method does is copy its parameters <span class="code">D</span> and <span
+    class="code">C</span>, into the members <span class="code">dollars</span> and <span
+    class="code">cents</span>. It can access the private members because it is a method. Only
+  methods have access to the private section of a class. Yet this definition still looks
+  confusing. Who's <span class="code">dollars</span> and <span class="code"
+  >cents</span> are we updating here? When the caller does</p>
+
+<pre class="code">
+account_balance.set(173, 53);
+deposit.set(20, 97);
+</pre>
+
+<p>the first time we want to set the <span class="code">dollars</span> and <span
+    class="code">cents</span> members inside <span class="code">account_balance</span> and the
+  second time we want to set the <span class="code">dollars</span> and <span
+      class="code">cents</span> members inside <span class="code">deposit</span>. This is, in
+  fact, exactly what happens. When you invoke a method on a particular object, the compiler passes
+  the address of that object into the method as a hidden parameter. When you define a method the
+  compiler understands that there is an extra pointer parameter being given to it that you did not
+  write. Inside the method any time you use a member name, the compiler accesses that member via
+  the pointer it was given. In other words the calls to set above are sort of like this</p>
+
+<pre class="code">
+money__set(&amp;account_balance, 173, 53);
+money__set(&amp;deposit, 20, 97);
+</pre>
+
+<p>and the implementation of the method is sort of like this</p>
+
+<pre class="code">
+void money__set(money *this, long D, int C)
+{
+  this->dollars = D;
+  this->cents   = C;
+}
+</pre>
+
+<p>In fact, this is exactly the way most C++ compilers process methods. If you were trying to do
+  this with plain C, this is how you would set it up too. C++ just makes it easier.</p>
+
+<h3>Organizing files.</h3>
+
+<p>I haven't been too specific yet on just where a class's definition and implementation should
+  go. Now I want to talk about that.</p>
+
+<p>Typically the definition of a class goes into a header file. Although I could put <span
+    class="code">money</span> into the global name space, I will use a <span class="code"
+>vtc</span> name space for my examples. When writing C++ programs it is generally a good idea to
+  organize your code into various namespaces of your own creation. Thus</p>
+
+<pre class="code">
+// ----- money.hpp -----
+
+namespace vtc {
+
+  class money {
+    private:
+      long dollars;
+      int  cents;
+
+    public:
+      void set(long D, int C);
+  };
+
+}
+</pre>
+
+<p>Next I need to create a file to hold the implementations of the methods. I will call it
+  money.cpp</p>
+
+<pre class="code">
+// ----- money.cpp -----
+
+#include "money.hpp"
+  // Include the header file so that the compiler knows what "vtc::money" is.
+
+namespace vtc {
+
+  void money::set(long D, int C)
+  {
+    dollars = D;
+    cents   = C;
+  }
+
+}
+</pre>
+
+<p>Inside name space <span class="code">vtc</span>, I don't need to put <span class="code"
+>vtc::</span> in front of <span class="code">money</span>. The compiler understands that it should
+  look in the <span class="code">vtc</span> name space to resolve names because that function is
+  already inside that name space. This is like using a relative path on a filename.</p>
+
+<p>Here is an example of how I might use my money class. I'll put this in a file called
+  prog.cpp.</p>
+
+<pre class="code">
+// ----- prog.cpp ----
+
+#include "money.hpp"
+  // Include the header file so that the compiler knows what "vtc::Money" is.
+
+int main()
+{
+  vtc::money account_balance;
+    // Declare an object of type vtc::money.
+
+  account_balance.set(173, 53);
+    // ... and give it a value.
+
+  // etc...
+}
+</pre>
+
+<p>I don't need any name space qualifiers on <span class="code">account_balance</span> because
+  it's a local object or on <span class="code">set</span> because the compiler can see that it's a
+  member of <span class="code">vtc::money</span>. In practice the name space qualifiers are really
+  not much of a problem. They usually only appear on the type names used to declare objects. Of
+  course I could have also put a <span class="code">using
+        namespace vtc</span> at the top of my program instead. Then I wouldn't have needed to use
+  the <span class="code">vtc::</span> qualifier anywhere.</p>
+
+<p>This program consists of three files</p>
+
+<ol>
+
+  <li>
+    <p>money.hpp: The file containing the definition of class <span class="code"
+    >vtc::money</span>.</p>
+  </li>
+
+  <li>
+    <p>money.cpp: The file containing the implementation of class <span class="code"
+    >vtc::money</span> (or more specifically, the implementation of that class's methods).</p>
+  </li>
+
+  <li>
+    <p>prog.cpp: An application program that wishes to use <span class="code"
+    >vtc::money</span>.</p>
+  </li>
+
+</ol>
+
+<p>In a more realistic situation the application program would be huge and consist of hundreds of
+  source files. Any source file that needed to use <span class="code"
+  >vtc::money</span> would just <span class="code">#include "money.hpp"</span> and be on its way.
+  To compile this small program I would use a command such as</p>
+
+<pre class="terminal">
+$ g++ -o prog prog.cpp money.cpp
+</pre>
+
+<p>This instructs g++ to compile prog.cpp and money.cpp and put the combined result into the
+  executable file named prog. There is no need to compile money.hpp. That file is #included into
+  the other two files as needed.</p>
+
+<h3>Changing the implementation!</h3>
+
+<p>But wait! Suppose our system has 64 bit integers, I can represent <span class="code"
+>money</span> a bit differently. Instead of using two integers, I can just use a single long
+  integer to hold the total number of cents. This isn't feasible on a 32 bit machine because 2
+  billion cents (the maximum range on a 32 bit integer) is only 20 million dollars and that's not
+  enough. Nevertheless on a 64 bit system I can use this version:</p>
+
+<pre class="code">
+class money {
+  private:
+    long total_cents;
+
+  public:
+    void set(long D, int C);
+};
+</pre>
+
+<p>Notice how I have <em>not</em> changed the public method in any way. However, I do have to
+  change how <span class="code">set</span> works to take into account the modified internal
+  structure.</p>
+
+<pre class="code">
+void money::set(long D, int C)
+{
+  total_cents = (100 * D) + C;
+}
+</pre>
+
+<p>Since I have not changed either the declarations or the meanings of the public methods,
+  application programs that use <span class="code">money</span> will still work correctly. They
+  just need to be recompiled. This is what information hiding is all about.</p>
+
+<h3>Other operations.</h3>
+
+<p>My current definition of money only allows me to give it a value. That is pretty limited. Since
+  the users have no direct access to the members, I, as the class designer, need to create methods
+  for all operations I desire to support. This requires some thought. Creating class libraries is
+  about specifying the operations to be supported by each class type and then figuring out how to
+  implement them effectively. Typically the private section of a class is left blank while the
+  public methods are being specified. In fact, to emphasize the idea that the private section is
+  secondary, many programmers put the public section first in the class definition.</p>
+
+<p>I will show a more detailed example of how this looks in the next lesson.</p>
+
+<h2>Summary</h2>
+
+<ol id="summary-list">
+
+  <li>
+    <p>Classes are a lot like structures. Each class defines a new type and has data members that
+      are accessed with the '.' operator. Classes can also have methods. A method is a function
+      that is, conceptually, a member of the class. The methods have names that include the class
+      name followed by a '::'. However, methods are usually invoked on a particular object using
+      the same '.' (or '->') syntax as is used for data members.</p>
+    <p>Note: In C++ structures can also have methods. The only real difference between a class and
+      a structure is that a structure's members are all public by default. A class's members are
+      all private by default.</p>
+  </li>
+
+  <li>
+    <p>Normally only the methods of a class can access the private members. This means that you
+      can change the internal structure of a class and only have to update the methods. You should
+      not have to update any of the programs that use the class since those programs never
+      directly access the members. This is an example of information hiding and it is a very
+      important concept.</p>
+  </li>
+
+  <li>
+    <p>Normally classes are defined in header files so that any program that wants to use a class
+      can #include an appropriate header. The method bodies are normally defined in a separate
+      .cpp file that is compiled once and linked into the final executable.</p>
+  </li>
+
+</ol>
+
+<address>
+  &copy; Copyright 2007 by Peter C. Chapin.<br/> Last Revised: <b>July 23, 2007</b>
+</address>
+
+</body>
+</html>

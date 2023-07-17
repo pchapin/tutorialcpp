@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+
+<head>
+  <title>Review Lesson #3</title>
+  <meta name="Author" content="Peter Chapin"/>
+  <!-- <meta name="keywords" lang="en-US" content="..."> -->
+  <meta name="ROBOTS" content="NOARCHIVE"/>
+  <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
+</head>
+
+<body>
+<h1>Review Lesson #3</h1>
+<p class="subtitle">Structures</p>
+
+<h2>Overview</h2>
+
+<p>In this review lesson I will cover the following topics</p>
+
+<ol id="overview-list">
+  <li><p>What is a structure and how to define one.</p></li>
+  <li><p>Accessing structure members with the . operator.</p></li>
+  <li><p>Using structures with pointers and functions.</p></li>
+</ol>
+
+<h2>Body</h2>
+
+<h3>What is a structure?</h3>
+
+<p>Arrays are created by putting together a large number of objects that all have the same type.
+  Each object in the array is called an array element. Array elements don't have individual names.
+  Instead you specify an array element using an index into the array. Because the index can be
+  computed when the program runs, it is possible to write loops that easily look at or manipulate
+  every element in an array.</p>
+
+<p>Structures are also created by putting together a number of smaller things. Each object in a
+  structure is called a "member" of that structure. Unlike array elements, structure members all
+  have their own names. Furthermore, the members of a structure can be of different types. A
+  structure is useful for collecting together several different but related pieces of information
+  and holding them in a single place.</p>
+
+<p>Before you can use a structure, you have to tell the compiler about its members. The compiler
+  needs to know this in order to know how much memory to set aside for each structure you create.
+  The compiler also needs to know about the members so that it will understand what you write when
+  you try to access those members. When you tell the compiler about a structure, you are
+  "defining" the structure. Here is an example</p>
+
+<pre class="code">
+  struct example {
+      int    count;
+      char   name[128];
+      double key;
+  };
+</pre>
+
+<p>The above defines a structure type named "example". Such structures contain three members -- an
+  int, an array of characters, and a double, all with names as shown. Presumably these members are
+  related in some way and that is way they have been collected together into a single
+  structure.</p>
+
+<p>Typically, but not always, structure definitions are put into header files and #included into
+  the source files that need them. When the compiler sees the definition, it does not create any
+  structure variables. The definition, by itself, does not cause any memory to be allocated. It
+  merely tells the compiler what a particular structure type is like for future reference. To
+  actually create a structure variable, you need to do something like this</p>
+
+<pre class="code">
+  int main( void )
+  {
+      struct example my_example;
+      // etc
+  }
+</pre>
+
+<p>In order for the compiler to accept this, it must have already seen the definition of struct
+  example (probably in a #included header file). The variable my_example is of this structure type
+  and contains inside of it a "count" member, a "name" member, and a "key" member.</p>
+
+<p>You can create as many struct example variables as you want, just as you can create as many int
+  variables as you want. Each struct example that you create has its own "count", "name", and
+  "key" members. The count member of one struct example is independent of the count member of
+  another.</p>
+
+<pre class="code">
+  int main( void )
+  {
+      struct example X, Y;  // Creates two struct Example variables.
+
+      X.count = 10;
+        // Sets the count member in X to 10. Notice how the dot operator
+        // is needed to access a member of a structure variable.
+
+      if( Y.count == 10 ) { ...
+        // Setting the count member of X to 10 has no affect on the count
+        // member of Y. The count member of Y is still uninitialized.
+  }
+</pre>
+
+<p>The fact that every structure variable has its own copy of the members is essential to
+  understand.</p>
+
+<h3>Structure operations.</h3>
+
+<p>There are only a few operations that you can apply to the entire structure. You can</p>
+
+<ol>
+  <li><p>Take its address with the address-of operator. The result is a pointer to the
+    structure.</p>
+
+    <pre class="code">
+  int main(void)
+  {
+      struct example  X;
+      struct example *p; // This is a pointer to a struct example.
+
+      p = &amp;X;
+        // Puts the address of the entire structure into p.
+  }
+</pre>
+  </li>
+
+  <li><p>Assign one structure variable to another. For example if X and Y are both struct example
+    variables you can do:</p>
+
+    <pre class="code">
+  X = Y;
+</pre>
+
+    <p>All of the members of Y are copied into the corresponding members of X. This is true even
+      if some of the members are arrays (which you can't normally assign using an equals sign).
+      However, in order to assign on structure variable to another the two structure variables
+      need to have the same type. Otherwise they won't necessarily have the same members and the
+      assignment really wouldn't make any sense.</p>
+  </li>
+
+  <li>
+    <p>You can pass a structure variable into a function and you can return a structure variable
+      from a function. When you do this, all the members are copied as you would expect based on
+      the way structures can be assigned.</p>
+  </li>
+</ol>
+
+<p>These are the only operations (in C) that you can do with a structure. Everything else must be
+  done to one of the structure members. The operations that are allowed in that case will depend
+  on the type of the member. An integer member can be used in any way that any other integer might
+  be used.</p>
+
+<p>To access a structure member you must use the dot operator. Thus <span
+    class="code">X.count</span> represents the integer count in the structure variable X. It can
+  be used like any other integer variable.</p>
+
+<h3>Using structures with pointers and functions.</h3>
+
+<p>Although it is possible to pass a structure into a function, it is often not done. This is
+  because structures can be large and copying them (as required by C's "call by value" method of
+  passing function parameters) can be time consuming. Often functions will accept a pointer to a
+  structure instead. Using my structure example again</p>
+
+<pre class="code">
+  void f( struct example *p )
+  {
+      if( (*p).count == 10 ) { ...
+  }
+</pre>
+
+<p>Here I'm taking a parameter that will hold the address of a (possibly large) structure stored
+  elsewhere. Inside the function I want to see if the count member of that structure is 10 or not.
+  Since p is a pointer and not a structure, I can't do something like</p>
+
+<pre class="code">
+  if( p.count == 10 ) { ...
+</pre>
+
+<p>That just doesn't make sense. It's the thing p is pointing at that is the structure. Thus I
+  need to use the indirection operator. Yet if I do</p>
+
+<pre class="code">
+  if( *p.count == 10 ) { ...
+</pre>
+
+<p>the compiler treats that differently than what I want. Because of C's precedence rules the
+  expression <span class="code">*p.count</span> is treated as if I had written <span
+      class="code">*(p.count)</span>. That doesn't make sense because I can't apply the dot
+  operator to a pointer. Even if it did make sense, the expression is treating count as the
+  operand of the indirection operator, not p. Thus to get the effect I want, I must include the
+  "extra" parentheses:</p>
+
+<pre class="code">
+  (*p).count
+</pre>
+
+<p>Since this situation arises quite often, C has a special operator to help out. It is the arrow
+  operator. It looks like this</p>
+
+<pre class="code">
+  p->count
+</pre>
+
+<p>When you use the arrow operator, the left operand must be a pointer to a structure (as in this
+  case), and the right operand must be the name of one of that structure's members. The result of
+  the expression is the member thusly named.</p>
+
+<p>The arrow operator is technically not necessary. You could make do with the regular indirection
+  operator. However, since pointers to structures are very common it is helpful to have an easy
+  way to access a structure's members via a pointer. You will see the arrow operator being used
+  extensively in C programs.</p>
+
+<h2>Summary</h2>
+
+<ol id="summary-list">
+  <li><p>A structure is an aggregate object composed of several "members". Each member has its own
+    name and type. Two structure variables of the same structure type have independent members.
+    Changing the value of a member of one structure variable will not affect the value of the
+    similarly named member in any other structure variable.</p></li>
+
+  <li><p>There are only a few operations that can be done on entire structures. Most of the time
+    you have to access one of the members of a structure to do anything useful with the structure.
+    You can access a structure member using the dot operator.</p></li>
+
+  <li><p>Structures can be passed into functions and returned from functions. However, since
+    structures are often rather large, it is common for programmers to write functions taking
+    pointers to structures rather than the structures themselves. Inside such functions, it is
+    handy to use the arrow operator to access the members of a structure via a pointer. The arrow
+    operator is not technically necessary, but it is easier to use than the regular indirection
+    operator with extra parentheses.</p></li>
+</ol>
+
+<address>
+  &copy; Copyright 2016 by Peter C. Chapin.<br/> Last Revised: <b>January 12, 2016</b>
+</address>
+
+</body>
+</html>

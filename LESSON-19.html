@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+
+<head>
+  <title>Lesson #19</title>
+  <meta name="Author" content="Peter Chapin"/>
+  <!-- <meta name="keywords" lang="en-US" content="..."> -->
+  <meta name="ROBOTS" content="NOARCHIVE"/>
+  <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
+</head>
+
+<body>
+
+<h1>Lesson #19</h1>
+
+<p class="subtitle">Exception Safety</p>
+
+<h2>Overview</h2>
+
+<p>In this lesson I will cover the following topics</p>
+
+<ol id="overview-list">
+
+  <li>
+    <p>The difficulties involved in writing exception safe code.</p>
+  </li>
+
+  <li>
+    <p>What operations can't (or shouldn't) throw exceptions and why you should care.</p>
+  </li>
+
+  <li>
+    <p>Resource allocation is initialization (RAII) as a general technique to prevent resource
+      leaks when exceptions are being used.</p>
+  </li>
+
+</ol>
+
+<h2>Body</h2>
+
+<h3>The problem with exceptions</h3>
+
+<p>Throwing an exception is an alternate, and sometimes unexpected, way of returning from a
+  function. As a result programs must be written with care so that they operate in sensible ways
+  when exceptions are thrown. Even functions that do not contain any explicit exception handling
+  code must be reviewed for "exception safety." Although such functions do not need to include any
+  explicit error checks, the possibility of errors must still be considered in them. The purpose
+  of this lesson is to alert you to the issues involved so that you can write exception safe
+  code.</p>
+
+<p>The best way to appreciate the issues is to see an example of code that is not exception safe.
+  Consider a simple string class. Objects of this class hold a pointer to a dynamically allocated
+  buffer where the text of the string is located. They also hold an integer that specifies the
+  size of the string. (That allows the size can be returned in a short time independent of the
+  string's length).</p>
+
+<pre class="code">
+class String {
+  public:
+    String &amp;operator=(const String &amp;);
+      // Overloaded assignment operator lets you assign one string to another.
+
+  private:
+    char  *buffer;
+    size_t size;
+};
+</pre>
+
+<p>For brevity I left out of the above definition many other useful and necessary public
+  operations. Here's how String's <span class="code">operator=()</span> might look.</p>
+
+<pre class="code">
+String &amp;String::operator=(const String &amp;other)
+{
+  // Blow away the current string.
+  delete [] buffer;
+
+  // Allocate new space for a copy of the other string.
+  buffer = new char[other.size];
+
+  // Copy the other string.
+  std::memcpy(buffer, other.buffer, other.size);
+  size = other.size;
+
+  // Return a reference to the result object.
+  return *this;
+}
+</pre>
+
+<p>The function above looks fairly simple and straight forward. However, it has a serious flaw. It
+  is not exception safe. In particular, allocating memory might throw a <span
+      class="code">std::bad_alloc</span> exception if there is insufficient memory for the
+  requested allocation. Memory is a potentially scarce resource. You should never assume that
+  there will be enough of it whenever you need more. For example, consider the case where the
+  "other" String is extremely long.</p>
+
+<p>If the allocation throws then the function above aborts on the line</p>
+
+<pre class="code">
+buffer = new char[other.size];
+</pre>
+
+<p>The lines below this line are never executed. Instead the exception propagates to whatever
+  function called this one in its search for a <span class="code"
+  >std::bad_alloc</span> handler. What state does that leave the string that was the target of
+  this assignment? Its buffer has been deleted, but the value stored in the pointer member has not
+  been updated; it still points at the deleted block of memory. The result is a String that is
+  completely unusable. Any attempt to manipulate it will cause undefined behavior. In fact, even
+  destroying it will cause undefined behavior since the destructor for this string class (not
+  shown) must do <span class="code">delete []
+        buffer</span> in order to recover a String's memory. When a <span class="code"
+  >delete</span> is performed on the block that has already been deleted you will have problems.
+</p>
+
+<p>The function can be easily fixed, however, to make it exception safe. Here's how it looks</p>
+
+<pre class="code">
+String &amp;String::operator=(const String &amp;other)
+{
+  // Allocate memory for the copy.
+  char *temp = new char[other.size];
+
+  // If we got here, the allocation must have worked.
+  delete [] buffer;
+  buffer = temp;
+
+  std::memcpy(buffer, other.buffer, other.size);
+  size = other.size;
+
+  return *this;
+}
+</pre>
+
+<p>In this version I do the allocation before I commit myself to modifying the target object. If
+  the allocation throws, the target object is left in exactly the same state as it was before I
+  started. In effect, the target object is either completely updated correctly or not updated at
+  all. Once I know the allocation will succeed, I can then begin modifying the target object with
+  confidence. None of the other operations in the function will ever throw an exception.</p>
+
+<p>Both versions of the function seem superficially the same. Yet one has a serious problem and
+  the other one does not. Exception safety is a subtle issue. The difference between an exception
+  safe function and one that is not exception safe is often very minor. Typically just rearranging
+  a few lines is all that it takes to transform a function from one that works when exceptions are
+  thrown into one that causes major problems when exceptions are thrown.</p>
+
+<p>Notice that exception safety comes with a price. The exception safe version requires more
+  memory than the unsafe version. It holds on to the memory that the target string is using while
+  it allocates space for a copy of the source string. The original version first gave back memory
+  to the system before allocating space for the copy. If the strings are both very long, it is
+  quite possible that the exception safe version will fail when the original version might not.
+  This is often the case. Writing exception safe code often requires giving up some performance...
+  either in space or time.</p>
+
+<h3>The general problem</h3>
+
+<p>Now that you've seen a specific example, let me formulate the problem in more general
+  terms.</p>
+
+<p>When an object is updated the operation doing the update might require several steps. While the
+  update is in progress the object might thus go through several intermediate states that are
+  technically invalid. If the update completes normally the object will be put back into a valid
+  state before the update operation finishes. However, if an exception occurs while the object is
+  in an invalid state, the update will be aborted and the object will be left in an invalid state.
+  This is undesirable.</p>
+
+<p>Exception safety is not really a black and white issue. Saying an operation is exception safe
+  does not really say very much because there are several "levels" of safety one might talk about.
+  It is useful to distinguish between the following cases</p>
+
+<ol>
+
+  <li>
+    <p>The object is completely updated correctly or, if an exception occurs, the object is left
+      unmodified. This is the most desirable situation from the point of view of the user.
+      Stroustrup, the creator of C++, calls this the "strong gaurentee". Surprisingly it is often
+      possible to get this by simply arranging your code carefully. In general, try to do all
+      operations that might throw before committing to any changes of the target object. This is
+      what I did in my string example above. However, this is an infeasible approach in many
+      cases.</p>
+  </li>
+
+  <li>
+    <p>The object is left in a valid state, but with a "random" value. In this situation the
+      partial update leaves the object with a value that makes no sense to the application&mdash;it
+      is neither the original value nor the desired final value. It might not even resemble either
+      of those values. However, the object still "works" in the sense that all operations that you
+      might want to apply to the object will be well defined.</p>
+  </li>
+
+  <li>
+    <p>The object is left in an invalid state, but it is still destructable. Furthermore the
+      destruction of the object will correctly recover all resources that the object is using. In
+      this case, the object can't be used normally. The calling program must not touch it after
+      the exception has occurred. However, the object can be thrown away without causing the
+      program any problems.</p>
+  </li>
+
+  <li>
+    <p>The object is left in a completely invalid state; it can't even be destroyed. In this case
+      the program has a serious problem. If it is coded correctly it will try to destroy every
+      object it creates. When the invalid object is destroyed the program's behavior will become
+      undefined.</p>
+  </li>
+
+</ol>
+
+<p>Stroustrup regards cases #2 and #3 as basically equivalent and says that an object that
+  promises either case #2 or case #3 makes the "basic gaurentee". Treating those cases as the same
+  makes some sense. If an object has a "random" value, the best you can probably do with it is
+  throw it away. Knowing that it still works doesn't help you much. However, if the object still
+  works you could attempt to initialize it with a meaningful value again and retry the operation
+  that threw the exception (after correcting whatever situation caused the exception in the first
+  place). You wouldn't be able to do that with case #3 so I think there is some justification for
+  distinguishing those cases.</p>
+
+<p>When you write your own functions, try to build in the strong gaurentee (case #1). Think about
+  which operations you are doing might throw and arrange to do them all before committing to any
+  irreversible changes. Sometimes it will be impossible to honor the strong gaurentee without
+  making a superhuman effort (and reducing performance to an unacceptable degree). In that case,
+  you must fall back to supporting only the basic gaurentee&mdash;be sure your object is left in a
+  destructable state. If you can keep the object fully operational as well that is an added
+  bonus.</p>
+
+<p>In many cases you can get the exception safety you want by just arranging your code carefully.
+  Sometimes you'll have to catch exceptions yourself, back out some changes, and then rethrow the
+  exception you caught. Here is how that looks in C++</p>
+
+<pre class="code">
+void f()
+{
+  try {
+
+    // Do things that might throw.
+
+  }
+
+  // Catch anything.
+  catch (...) {
+
+    // Back out some changes to leave target objects in an acceptable
+    // state.
+
+    // Rethrow whatever exception you got so that it can be handled by
+    // a higher level function.
+    throw;
+  }
+}
+</pre>
+
+<p>You should only use this method when it is necessary to do so. Try blocks complicate your
+  function and also tend to slow it down. In a vast majority of cases, you can get the exception
+  safety you need by just arranging your code carefully.</p>
+
+<h3>So what operations don't throw?</h3>
+
+<p>When you start thinking about exception safety and start trying to arrange your code so that
+  your functions are exception safe, you quickly realize that it is essential to know which
+  operations <em>don't</em> throw exceptions. Ideally once you've committed yourself to modifying
+  objects, you should only do non-throwing operations. Thus knowing what those operations are is
+  very important.</p>
+
+<ol>
+
+  <li>
+    <p>No operation on a primitive object throws. Such operations include adding, subtracting,
+      multiplying, and dividing integers, manipulating pointers, and working with characters.</p>
+  </li>
+
+  <li>
+    <p>You can assume that no iterator operation throws. Most iterator operations are just
+      primitive operations. In theory a complicated iterator type might throw, but you can
+      consider that a problem with the iterator and not with your code.</p>
+  </li>
+
+  <li>
+    <p>Deallocating a block of memory does not throw. In theory a specialized deallocator function
+      might throw, but you can also consider that to be a problem with the deallocator. (The
+      standard delete function is gaurenteed by the standard not to throw).</p>
+  </li>
+
+  <li>
+    <p>Destructors do not throw. Again, in theory a destructor might throw, but it is a bad idea
+      to write such destructors. Most of what destructors do---give resources back to the system&mdash;do
+      not stimulate exceptions.</p>
+  </li>
+
+  <li>
+    <p>Any operation that treats an object as a constant (read only) does not throw. Again, in
+      theory such an operation might throw---particularly if the object has some internal state
+      that is updated by the read (a cache, for example). However, in practice such a situation
+      would be rare. If an object does update its internal state during a read, it should probably
+      absorb all of the exceptions that occur while doing so.</p>
+  </li>
+
+  <li>
+    <p>Any function explicitly declared to throw nothing (by way of an exception specification)
+      does not throw. C++ exception specifications are controversial and not widely used. I have
+      more to say about them in a later lesson.</p>
+  </li>
+
+  <li>
+    <p>Functions in the C standard library do not throw. Thus functions like <span
+        class="code">memcpy</span> used in the example above definitely does not throw any
+      exceptions.</p>
+  </li>
+
+</ol>
+
+<p>Here are some operations that definitely might throw. When you do these things, be wary of
+  exceptions.</p>
+
+<ol>
+
+  <li>
+    <p>Constructing objects---especially large or complicated objects. Constructors typically
+      acquire resources from the system (memory, handles, locks, etc) and they are prone to
+      throwing exceptions if they are unable to get the resources they need.</p>
+    <p>NOTE: When a constructor throws, the destructor for that object will not be executed. Thus
+      when writing a constructor, be sure that if an exception is thrown you release any resources
+      you've already acquired. You can't rely on the destructor to take care of that for you.</p>
+    <p>NOTE ALSO: When a constructor throws, the object will be left in an unusable state (it has,
+      in effect, been destroyed by the constructor's exception handling). This is not really a
+      problem though since the object will be inaccessible... the scope of its declaration will
+      have been exited by the exception.</p>
+    <p>NOTE ALSO: If an object contains subobjects with destructors (members or base class
+      objects), those objects *will* get destroyed if the constructor of the overall object
+      throws. The general rule is: only completely constructed objects, including members and base
+      subobjects are destroyed when an exception is thrown.</p>
+  </li>
+
+  <li>
+    <p>Allocating memory. Any operation you do that involves extending the size of an object might
+      throw.</p>
+  </li>
+
+  <li>
+    <p>Copying complicated objects. Typically the objects need to allocate memory internally to
+      make their copy. There are other reasons why making a copy might fail.</p>
+  </li>
+
+  <li>
+    <p>Passing an object into a function by value or returning an object from a function. These
+      operations involve copying objects. See item #3 above. Note that passing objects into a
+      function by reference will not throw since no copies are made.</p>
+    <p>Take a look at this example</p>
+    <pre class="code">
+x = y + z;
+</pre>
+    <p>If <span class="code">x</span>, <span class="code">y</span>, and <span class="code"
+    >z</span> are type integer, the expression can't throw. However, if <span
+        class="code">x</span>, <span class="code">y</span>, and <span class="code">z</span> are of
+      some more complex type (say <span class="code">very_long</span>), this expression involves
+      returning an object from <span class="code">operator+()</span>, and copying that object into
+      <span class="code">x</span> by way of <span class="code"
+      >operator=()</span>. Either of those operations might throw. Also the computation of <span
+          class="code">y + z</span> might throw internally even before the <span
+          class="code">operator+()</span> function tries to return. (What state will <span
+          class="code">x</span> be in if the expression above throws?)</p>
+  </li>
+
+  <li>
+    <p>Be especially wary of template type parameters. For example</p>
+    <pre class="code">
+template&lt;typename T&gt;
+void f()
+{
+  // Operations on objects of type T might throw. We don't know what
+  // the type T is right now!
+}
+</pre>
+  </li>
+
+</ol>
+
+<p>This list of operations that might throw is not exhaustive. It's just meant to give you a
+  feeling for what to watch out for when writing exception safe code.</p>
+
+<h3>Resource allocation is initialization (RAII)</h3>
+
+<p>Another important aspect of writing exception safe code is in the handling of resources. When
+  an exception is thrown all functions between the throw point and the handler are aborted. What
+  about the various resources those functions own? Here is an example</p>
+
+<pre class="code">
+void f()
+{
+  // Dynamically allocate an object.
+  std::string *p = new std::string;
+
+  g();
+
+  // Release the memory acquired above.
+  delete p;
+}
+</pre>
+
+<p>What if function <span class="code">g</span> throws? In that case, the string allocated at the
+  top of function <span class="code">f</span> is never released and the program has leaked memory.
+</p>
+
+<p>Memory is one of the most important and commonly used resources. However, there are many kinds
+  of resources that programs obtain and then later release. Here is a partial list</p>
+
+<ol>
+
+  <li>
+    <p>Memory. A long lived program (such as a server) that leaks memory will run out of memory
+      eventually.</p>
+  </li>
+
+  <li>
+    <p>Open files. Usually there is a limit to how many files a process can have open at once so
+      it is important to close files when they are no longer needed.</p>
+  </li>
+
+  <li>
+    <p>Network connections. Very similar to open files in some ways.</p>
+  </li>
+
+  <li>
+    <p>GUI handles. Most graphical systems require that you obtain a "handle" of some kind before
+      you use a graphical object. Those handles should be returned to the system when the object
+      is no longer needed. If you don't do this you'll run out of graphical resources.</p>
+  </li>
+
+  <li>
+    <p>Locks (mutexes, semaphores, file locks, etc). If you leave things locked when you don't
+      need to, you run the risk of deadlocking your program.</p>
+  </li>
+
+</ol>
+
+<p>In C++ the destructors of local objects are executed automatically when an exception pass
+  through a block. Thus the cleanest way (by far) of handling the resource allocation problem is
+  to acquire every resource in the constructor of some suitable object and then let that object's
+  destructor release the resource. This frees you from having to worry about releasing resources
+  and it works automatically when an exception is thrown. This technique is often called "resource
+  allocation is initialization" (or "RAII" on the newsgroups).</p>
+
+<p>The C++ standard even has a class specifically designed to help you manage dynamic memory. Here
+  is an exception safe version of the function above.</p>
+
+<pre class="code">
+#include &lt;memory&gt;  // Needed for std::auto_ptr
+
+void f()
+{
+  // Put the pointer to dynamic memory into an auto_ptr object. Notice
+  // that auto_ptr is a template so that it can handle pointers to
+  // various types.
+  //
+  std::auto_ptr&lt;std::string&gt; p(new std::string);
+
+  g();
+
+  // No need to explicitly release the dynamic memory. The auto_ptr
+  // destructor does that. If g() throws an exception, the auto_ptr
+  // destructor is also run and the memory is cleaned up.
+}
+</pre>
+
+<p>If you review the C++ standard library you will see that RAII is used extensively. The
+  destructors for <span class="code">std::string</span> and all the standard containers release
+  the memory owned by the object. The destructors for <span class="code"
+  >ifstream</span> and <span class="code">ofstream</span> objects close their associated files.
+  You should use the RAII technique in your own code. Be sure that any resource you are
+  manipulating is managed by an object with a destructor that cleans up the resource. This
+  practice is essential if your code is going to be exception safe.</p>
+
+<h3>Conclusion</h3>
+
+<p>Dealing with exceptions is much more than just throwing them here and catching them over there.
+  Even functions without a throw or a catch must think about exceptions if your program is going
+  to work properly. That is the central point of this lesson. However, if you stay aware of the
+  issues while you are writing your code you will find that dealing with exceptions correctly is
+  not that bad. Get in the habit of asking yourself: What happens if this expression throws? Will
+  any objects be left in an invalid state? Will I leak any resources? Once you get practiced
+  thinking about these issues it will become second nature.</p>
+
+<h2>Summary</h2>
+
+<ol id="summary-list">
+
+  <li>
+    <p>Even functions that don't throw exceptions and don't have catch clauses need to consider
+      the effects of exceptions. When a lower level function throws an exception, the current
+      function is aborted at once. This might leave one or more objects in an invalid state. In
+      general you want to arrange your code so that all resources you need are obtained first
+      before you commit yourself to irreversable changes. In this way you can leave objects
+      unchanged should an exception be thrown. In any case, you should never leave an object in a
+      non-destructable state. Every object will eventually be destroyed and thus no object can
+      ever be left in a state where destruction is impossible.</p>
+  </li>
+
+  <li>
+    <p>In general very simple operations do not throw exceptions (operations on primitive objects
+      or on iterators for example). Also operations that give resources back to the system usually
+      don't throw exceptions. Knowing which operations do not throw exceptions is essential when
+      evaluating the exception safety of your code.</p>
+  </li>
+
+  <li>
+    <p>Resource allocation is initialization (RAII) involves allocating resources in the
+      contructor of a suitable class and releasing those resources in the corresponding
+      destructor. Since destructors are executed both when a function ends normally and when a
+      function ends by way of an exception, releasing resources in a destructor will prevent
+      resource leaks regardless of the manner in which a function is terminated.</p>
+  </li>
+
+</ol>
+
+<address>
+  &copy; Copyright 2008 by Peter C. Chapin.<br/> Last Revised: <b>November 26, 2008</b>
+</address>
+
+</body>
+</html>

@@ -16,7 +16,7 @@
 
 <h2>Overview</h2>
 
-<p>In this lesson I will cover the following topics</p>
+<p>In this lesson I will cover the following topics:</p>
 
 <ol id="overview-list">
   <li><p>What are IOStreams and why bother learning about them.</p></li>
@@ -30,46 +30,43 @@
 <h3>What are IOStreams?</h3>
 
 <p>The IOStreams library is a very powerful library for doing input/output (I/O) operations. It
-  provides all the I/O features of the C standard library and it can be extended in four
-  significant ways that the C library can't.</p>
+  provides all the I/O features of the C standard library, and it can be extended in four
+  significant ways that the C library cannot.</p>
 
 <ol>
-  <li>
-    <p>C++ allows you to create your own data types. With IOStreams you can define how to do I/O
-      operations for your types and use those operations in your program in a natural way. This
-      would be like defining your own format specifiers (<span class="code">%d</span>, <span
-          class="code">%f</span>, etc) for <span class="code">printf</span>.</p>
-  </li>
+  <li><p>C++ allows you to create your own data types. With IOStreams you can define how to do I/O
+    operations for your types and use those operations in your program in a natural way. This
+    would be like defining your own format specifiers (<span class="code">%d</span>, <span
+        class="code">%f</span>, etc) for <span class="code">printf</span>.</p>
 
-  <li>
-    <p>You can arrange things so that the standard IOStreams functions will do I/O operations on
-      any I/O device you can imagine. The C standard library really only understands files or
-      things that look like files. That may cover a lot of ground, but it isn't as flexible as it
-      could be. The IOStreams library can be taught to use windows, network connections, raw
-      memory, or any other sequential device as an I/O device.</p>
-  </li>
+    <p>This is different from what is true for some other languages (Java) that allow you to
+      convert an object into a string representation, and then output the resulting string. C++
+      allows you to define string representations as well, but it also allows you to define the
+      way I/O is done differently from the way string conversions are done for cases where that is
+      useful.</p></li>
 
-  <li>
-    <p>When using IOStreams you can change the meaning of "character" so that the library
-      transfers not just simple characters of ASCII text but any other character-like entity you
-      might want.</p>
-  </li>
+  <li><p>You can arrange things so that the standard IOStreams functions will do I/O operations on
+    any I/O device you can imagine. The C standard library really only understands files or things
+    that look like files. That may cover a lot of ground, but it isn't as flexible as it could be.
+    The IOStreams library can be taught to use windows, network connections, raw memory, or any
+    other sequential device as an I/O device.</p></li>
 
-  <li>
-    <p>You can define your own "manipulators" to control the state of the I/O device without
-      resorting to specialized control functions.</p>
-  </li>
+  <li><p>When using IOStreams you can change the meaning of "character" so that the library
+    transfers not just simple characters of ASCII text but any other character-like entity you
+    might want.</p></li>
 
+  <li><p>You can define your own "manipulators" to control the state of the I/O device in a
+    convenient way without resorting to specialized control functions.</p></li>
 </ol>
 
 <p>If these features don't make sense to you, don't worry about it. They are, for the most part,
-  advanced topics. In this course we will do a bit of #1, but we won't talk further about the
-  other possibilities at all. My point here is to convince you that IOStreams is worth learning.
-  Later you may want to do some advanced things with it, and you'll need to understand the basics
-  that we will cover here first.</p>
+  advanced topics. In this course, we will do a bit of #1, but we won't talk further about the
+  other possibilities at all. My point is to convince you that IOStreams is worth learning. Later
+  you may want to do some advanced things with it, and you'll need to understand the basics that
+  we will cover here first.</p>
 
-<p>Keep in mind that IOStreams is just a library. It is not built into the language. Thus the
-  techniques used by IOStreams could be used in libraries of your own creation. Furthermore since
+<p>Keep in mind that IOStreams is just a library. It is not built into the language. Thus, the
+  techniques used by IOStreams could be used in libraries of your own creation. Furthermore, since
   IOStreams is a standard part of C++, using such techniques would actually make your own
   libraries easier to understand in the long run. All C++ programmers know at least something
   about IOStreams. Anything that uses IOStreams or resembles IOStreams will make sense to all C++
@@ -79,13 +76,13 @@
 
 <p>Unlike the standard C I/O library, IOStreams functions are declared in several header files. In
   C, you can just #include &lt;stdio.h&gt;, but to use IOStreams you may need to #include several
-  files. Here are the common ones.</p>
+  files. Here are the common ones:</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;  // Needed for the basic operations.
-  #include &lt;iomanip&gt;   // Manipulators with parameters.
-  #include &lt;fstream&gt;   // Needed for I/O to and from files.
-  #include &lt;sstream&gt;   // Needed for I/O to and from standard strings.
+#include &lt;iostream&gt;  // Needed for the basic operations and for cout and cin.
+#include &lt;iomanip&gt;   // Manipulators with parameters.
+#include &lt;fstream&gt;   // Needed for I/O to and from files.
+#include &lt;sstream&gt;   // Needed for I/O to and from standard strings.
 </pre>
 
 <p>There are other headers too, but they are mostly only needed for exotic operations. We won't
@@ -94,35 +91,35 @@
 <p>In C the operators <span class="code">&lt;&lt;</span> and <span
     class="code">&gt;&gt;</span> are used to do bit shift operations on integers. You can use them
   that way in C++ too, but C++ allows you to redefine the meaning of most operators when they are
-  applied to user defined types. The IOStreams library uses that facility extensively to change
-  the meaning of <span class="code">&lt;&lt;</span> and <span
-      class="code">&gt;&gt;</span> when they are applied to stream objects. In fact, because I/O
-  is much more common than bit shifting, under C++ the original meaning of those operators has
-  become secondary.</p>
+  applied to user-defined types. The IOStreams library uses that facility extensively to change
+  the meaning of <span class="code">&lt;&lt;</span> and <span class="code">&gt;&gt;</span> when
+  they are applied to stream objects. In fact, because I/O is much more common than bit shifting,
+  under C++, the original meaning of those operators has become secondary.</p>
 
 <p>The <span class="code">&lt;&lt;</span> operator is called the <i>inserter</i> operator because
   you use it to insert things into a stream. The <span class="code">&gt;&gt;</span> operator is
   called the <i>extractor</i> operator because you use it to extract things from a stream. Keep in
   mind that a stream is just a sequence of characters. When you insert a character into an output
-  stream that character is sent to the corresponding output device. When you extract a character
+  stream, that character is sent to the corresponding output device. When you extract a character
   from an input stream, you are getting the next character from the corresponding input device.
 </p>
 
-<p>When you #include &lt;iostream&gt; you make available several global stream objects.</p>
+<p>When you #include &lt;iostream&gt; you make available several global stream objects:</p>
 
 <pre class="code">
-  std::cout    // Standard output
-  std::cin     // Standard input
-  std::cerr    // Standard error
+std::cout    // Standard output
+std::cin     // Standard input
+std::cerr    // Standard error
+std::clog    // Standard logging
 </pre>
 
-<p>These objects are of user defined type (<span class="code">std::cout</span> and <span
-    class="code">std::cerr</span> are of type <span class="code">std::ostream</span>; <span
-    class="code">std::cin</span> is of type <span class="code">std::istream</span>). The exact
-  nature of these objects does not concern us. All we need to know is that we can insert things
-  into a <span class="code">std::ostream</span> and extract things from a <span
-      class="code">std::istream</span>. How that works exactly is part of the library and hidden
-  from the casual IOStreams user.</p>
+<p>These objects are of user-defined type (<span class="code">std::cout</span>, <span
+    class="code">std::cerr</span>, and <span class="code">std::clog</span> are of type <span
+    class="code">std::ostream</span>; <span class="code">std::cin</span> is of type <span
+    class="code">std::istream</span>). The exact nature of these objects does not concern us. All
+  we need to know is that we can insert things into a <span class="code">std::ostream</span> and
+  extract things from a <span class="code">std::istream</span>. How that works exactly is part of
+  the library and hidden from the casual IOStreams user.</p>
 
 <p>Keep in mind that the standard output device is normally the console's display, the standard
   input device is the console's keyboard, and the standard error device is also the console's
@@ -130,27 +127,35 @@
   I/O redirection is handled by the operating system and is not something the program even knows
   is happening (that is the beauty of it).</p>
 
+<p>The point of <span class="code">std::cerr</span> is to be a place where error messages can be
+  written. Even if the standard output is redirected (e.g., to a file), the standard error stream
+  typically is not. Thus, error messages will still appear on the console where the user can see
+  them. The <span class="code">std::clog</span> stream (the "log" stream) is also connected to the
+  standard error stream, but is buffered so that messages may not appear immediately, but I/O is
+  (potentially) more efficient. It is suitable for writing informational (log) messages that the
+  user will see even if the standard output is redirected.</p>
+
 <p>There are overloadings of <span class="code">&lt;&lt;</span> (for ostreams) and <span
-    class="code">&gt;&gt;</span> (for istreams) that apply to all the built in types.</p>
+    class="code">&gt;&gt;</span> (for istreams) that apply to all the built-in types:</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  int main( )
-  {
-      int   i = 10;
-      long  l = 20;
-      char  c = 'X';
-      float f = 3.14F;
-      const char *p = "Hello, World\n";
+int main( )
+{
+    int   i = 10;
+    long  l = 20;
+    char  c = 'X';
+    float f = 3.14F;
+    const char *p = "Hello, World\n";
 
-      std::cout &lt;&lt; i;  // Prints '10' on the standard output device.
-      std::cout &lt;&lt; l;  // Prints '20'
-      std::cout &lt;&lt; c;  // Prints 'X'
-      std::cout &lt;&lt; f;  // Prints '3.14000'
-      std::cout &lt;&lt; p;  // Prints 'Hello, World'
-      return 0;
-  }
+    std::cout &lt;&lt; i;  // Prints '10' on the standard output device.
+    std::cout &lt;&lt; l;  // Prints '20'
+    std::cout &lt;&lt; c;  // Prints 'X'
+    std::cout &lt;&lt; f;  // Prints '3.14000'
+    std::cout &lt;&lt; p;  // Prints 'Hello, World'
+    return 0;
+}
 </pre>
 
 <p>Unlike with <span class="code">printf</span>, you don't need to worry about picking the right
@@ -159,20 +164,20 @@
   insert. This is one advantage IOStreams has over the traditional C I/O library and is often
   called <i>type-safe I/O.</i></p>
 
-<p>You can also read values by extracting them from the input object.</p>
+<p>You can also read values by extracting them from the input object:</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  int main( )
-  {
-      int age;
+int main( )
+{
+    int age;
 
-      std::cout &lt;&lt; "How old are you? ";
-      std::cin  &gt;&gt; age;
-      std::cout &lt;&lt; "So you say that you are " &lt;&lt; age &lt;&lt; " years old?";
-      return 0;
-  }
+    std::cout &lt;&lt; "How old are you? ";
+    std::cin  &gt;&gt; age;
+    std::cout &lt;&lt; "So you say that you are " &lt;&lt; age &lt;&lt; " years old?";
+    return 0;
+}
 </pre>
 
 <p>The program above demonstrates several other features of IOStreams. Because of the way operator
@@ -180,20 +185,20 @@
   statement such as:</p>
 
 <pre class="code">
-  std::cout &lt;&lt; "So you say that you are " &lt;&lt; age &lt;&lt; " years old?";
+std::cout &lt;&lt; "So you say that you are " &lt;&lt; age &lt;&lt; " years old?";
 </pre>
 
 <p>is handled as:</p>
 
 <pre class="code">
-  ((std::cout &lt;&lt; "So you say that you are ") &lt;&lt; age) &lt;&lt; " years old?";
+((std::cout &lt;&lt; "So you say that you are ") &lt;&lt; age) &lt;&lt; " years old?";
 </pre>
 
 <p>Each application of <span class="code">&lt;&lt;</span> returns its left operand (by reference).
   Thus the value of:</p>
 
 <pre class="code">
-  (std::cout &lt;&lt; "So you say that you are ")
+(std::cout &lt;&lt; "So you say that you are ")
 </pre>
 
 <p>is just <span class="code">std::cout</span> again. This means that <span
@@ -201,26 +206,26 @@
     class="code">&lt;&lt;</span>.</p>
 
 <p>The extraction operator works somewhat like <span class="code">scanf</span> and has the same
-  sort of quirks. It will skip leading white space and it needs to look ahead by one character. As
+  sort of quirks. It will skip leading whitespace, and it needs to look ahead by one character. As
   a result, like <span class="code">scanf</span>, it can be somewhat difficult to use. However,
   you can also call <i>methods</i> of the stream classes in order to do things that are not
   possible with the inserter/extractor mechanism. I will talk about methods extensively in a later
-  lesson. For now note that the way I perform a named operation on a stream is by using a "."
+  lesson. For now, note that the way I perform a named operation on a stream is by using a "."
   operator (like accessing a member of a structure). Here is how you would read the standard input
   one character at a time.</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  int main( )
-  {
-      char ch;
+int main( )
+{
+    char ch;
 
-      while( std::cin.get( ch ) ) {
-          // Process ch
-      }
-      return 0;
-  }
+    while( std::cin.get( ch ) ) {
+        // Process ch
+    }
+    return 0;
+}
 </pre>
 
 <p>The <span class="code">get</span> method returns a character into <span
@@ -229,49 +234,49 @@
   of <span class="code">get</span> that can read an entire line.</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  int main( )
-  {
-      char line_buffer[256 + 1];
+int main( )
+{
+    char line_buffer[256 + 1];
 
-      while( std::cin.get( line_buffer, 256 + 1 ) ) {
-          // Process the line in line_buffer
-      }
-      return 0;
-  }
+    while( std::cin.get( line_buffer, 256 + 1 ) ) {
+        // Process the line in line_buffer
+    }
+    return 0;
+}
 </pre>
 
 <p>However, if you really wanted to read a file a line at a time, you would probably use the <span
-    class="code">std::string</span> type. Standard strings can grow to any size necessary so there
-  is no need to worry about overflowing buffers in that case. I will talk about <span
+    class="code">std::string</span> type. Standard strings can grow to any size necessary, so
+  there is no need to worry about overflowing buffers in that case. I will talk about <span
       class="code">std::string</span> in a later lesson.</p>
 
 <h3>Manipulators</h3>
 
 <p>There are also a number of special objects called <i>manipulators</i> that change the status of
   a stream. By inserting these manipulators into a stream, you can control the way the stream
-  behaves. It is possible to create your own manipulators if necessary but the standard library
+  behaves. It is possible to create your own manipulators if necessary, but the standard library
   provides a number of useful ones already.</p>
 
 <pre class="code">
-  std::flush // Flush the output buffer.
-  std::endl  // Inserts a '\n' into the output stream and flushes the output buffer.
-  std::ends  // Inserts a null character into an output stream.
-  std::ws	   // Extracts white space from an input stream and throws it away.
+std::flush // Flushes the output buffer.
+std::endl  // Inserts a '\n' into the output stream and flushes the output buffer.
+std::ends  // Inserts a null character into an output stream (useful when writing to strings).
+std::ws	   // Extracts white space from an input stream and throws it away.
 
-  std::setw(int)         // Sets the width of the next field only.
-  std::setfill(char)     // Sets the fill character.
-  std::setprecision(int) // Sets the number of significant digits for float numbers.
+std::setw(int)         // Sets the width of the next field only.
+std::setfill(char)     // Sets the fill character.
+std::setprecision(int) // Sets the number of significant digits for floating point numbers.
 </pre>
 
 <p>The manipulators without parameters are all declared in &lt;iostream&gt;. If you need to use a
   manipulator that takes parameters, you will need to also #include &lt;iomanip&gt;.</p>
 
-<p>Here is an example it illustrate how some of these manipulators work. This statement:</p>
+<p>Here is an example it illustrates how some of these manipulators work. This statement:</p>
 
 <pre class="code">
-  std::cout &lt;&lt; '(' &lt;&lt; std::setw(4) &lt;&lt; std::setfill('#') &lt;&lt; 12 &lt;&lt; ')';
+std::cout &lt;&lt; '(' &lt;&lt; std::setw(4) &lt;&lt; std::setfill('#') &lt;&lt; 12 &lt;&lt; ')';
 </pre>
 
 <p>produces: <span class="terminal">(##12)</span> on the output stream. The <span
@@ -281,7 +286,7 @@
   with '#'. Note that the <span class="code">std::setw</span> manipulator only affects the next
   field (single character output fields are not affected), but the <span
       class="code">std::setfill</span> manipulator affects all following fields until it is used
-  again to set the fill character to something else.</p>
+  again to set the fill character to something else (such as a space).</p>
 
 <p>As you can see, manipulators are used to control the format of the output and play a role
   similar to that played by the various control characters allowed in <span
@@ -303,33 +308,32 @@
       class="code">std::ofstream</span> or <span class="code">std::ifstream</span>.</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
-  #include &lt;fstream&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
 
-  int main( )
-  {
-      char          ch;
-      std::ifstream input_file( "input.txt" );
-          // Declare the object and open the file.
+int main( )
+{
+    char          ch;
+    std::ifstream input_file( "input.txt" );
+        // Declare the object and open the file.
 
-      // Did the open work?
-      if( !input_file ) {
-          std::cerr &lt;&lt; "Can't open input.txt for reading!\n";
-          return 1;
-      }
+    // Did the open work?
+    if( !input_file ) {
+        std::cerr &lt;&lt; "Can't open input.txt for reading!\n";
+        return 1;
+    }
 
-      // Read the input file one character at a time.
-      while( input_file.get( ch ) ) {
-          std::cout.put( ch );
-      }
-      return 0;
-  }
+    // Read the input file one character at a time.
+    while( input_file.get( ch ) ) {
+        std::cout.put( ch );
+    }
+    return 0;
+}
 </pre>
 
-<p>Notice how I print error messages to <span class="code">std::cerr</span>. This is the
-  traditional way to do it. I could have used <span class="code">std::cout</span> instead, but it
-  makes a difference when I/O redirection is being used (users typically want to see error
-  messages even if they have redirected the standard output to a file).</p>
+<p>Notice how I print error messages to <span class="code">std::cerr</span>. This is traditional.
+  I could have used <span class="code">std::cout</span> instead, but it makes a difference when
+  I/O redirection is being used.</p>
 
 <p>Notice also that I didn't have to use the <span class="code">std::</span> qualifier all that
   often. Once I declared <span class="code">input_file</span> to be type <span
@@ -346,47 +350,36 @@
   IOStreams library allows itself to be extended to cover any sequential storage device. Because
   strings are so important and commonly used, the standard provides the necessary facilities to do
   I/O to strings. However, in order to discuss that fully, you need to know something about the
-  <span class="code">std::string</span> type. I will thus wait and talk about how you can do I/O
-  to strings when I talk about strings in a later lesson.</p>
+  <span class="code">std::string</span> type. I will wait and talk about how you can do I/O to
+  strings when I talk about strings in a later lesson.</p>
 
 <h2>Summary</h2>
 
 <ol id="summary-list">
+  <li><p>Although C++ programs can use the C standard I/O library, the C++ IOStreams library is
+    much more powerful and extensible. You should get in the habit of using IOStreams in your C++
+    programs so that when you want to make use of its advanced features you will have the
+    experience to do so.</p></li>
 
-  <li>
-    <p>Although C++ programs can use the C standard I/O library, the C++ IOStreams library is much
-      more powerful and extensible. You should get in the habit of using IOStreams in your C++
-      programs now so that when you want to make use of its advanced features you will have the
-      experience to do so.</p>
-  </li>
+  <li><p>You can write to the standard output device by using the <span
+      class="code">&lt;&lt;</span> operator on the <span class="code">std::cout</span> object. You
+    can read from the standard input device by using the <span
+        class="code">&gt;&gt;</span> operator on the <span class="code">std::cin</span> object.
+    These operators behave similarly to C's <span class="code">printf</span> and <span
+        class="code">scanf</span> functions. They do formatted I/O. Unformatted,
+    character-at-a-time, I/O is also possible using stream method functions.</p></li>
 
-  <li>
-    <p>You can write to the standard output device by using the <span
-        class="code">&lt;&lt;</span> operator on the <span class="code">std::cout</span> object.
-      You can read from the standard input device by using the <span
-          class="code">&gt;&gt;</span> operator on the <span class="code">std::cin</span> object.
-      These operators behave similarly to C's <span class="code">printf</span> and <span
-          class="code">scanf</span> functions. They do formatted I/O. Unformatted,
-      character-at-a-time I/O is also possible using stream method functions.</p>
-  </li>
+  <li><p>I/O manipulators are special objects that can be pushed into a stream to change the
+    stream's state. They are typically used to control the formatting of other output.</p></li>
 
-  <li>
-    <p>I/O manipulators are special objects that can be pushed into a stream to change the
-      stream's state. They are typically used to control the formatting of other output.</p>
-  </li>
-
-  <li>
-    <p>Data can be read from a file by declaring a <span class="code">std::ifstream</span> object
-      and then using it like any other input stream. Data can be written to a file by declaring a
-      <span class="code">std::ofstream</span> object and then using it like any other output
-      stream. You must #include &lt;fstream&gt; to use these two library types.</p>
-  </li>
-
-
+  <li><p>Data can be read from a file by declaring a <span class="code">std::ifstream</span>
+    object and then using it like any other input stream. Data can be written to a file by
+    declaring a <span class="code">std::ofstream</span> object and then using it like any other
+    output stream. You must #include &lt;fstream&gt; to use these two library types.</p></li>
 </ol>
 
 <address>
-  &copy; Copyright 2016 by Peter C. Chapin.<br/> Last Revised: <b>January 13, 2016</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>July 18, 2023</b>
 </address>
 
 </body>

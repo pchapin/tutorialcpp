@@ -5,18 +5,17 @@
 <head>
   <title>Lesson #2</title>
   <meta name="Author" content="Peter Chapin"/>
-  <!-- <meta name="keywords" lang="en-US" content="..."> -->
   <meta name="ROBOTS" content="NOARCHIVE"/>
   <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
 </head>
 
 <body>
 <h1>Lesson #2</h1>
-<p class="subtitle">References and const</p>
+<p class="subtitle">References and Const</p>
 
 <h2>Overview</h2>
 
-<p>In this lesson I will cover the following topics</p>
+<p>In this lesson I will cover the following topics:</p>
 
 <ol id="overview-list">
   <li><p>How to write and compile the basic "Hello, World" program in C++.</p></li>
@@ -30,9 +29,9 @@
 <h3>"Hello, World!" in C++</h3>
 
 <p>To start things off, I will show you a program that prints "Hello, World!" on the terminal
-  using C++. Although this program is very simple, it is always a good idea, when working with a
-  new language or environment, to write this simple program first. There is no sense trying to
-  write anything more complicated until you can get something very simple working.</p>
+  using C++. Although this program is simple, it is always a good idea, when working with a new
+  language or environment, to write this simple program first. There is no sense trying to write
+  anything more complicated until you can get something basic working.</p>
 
 <p>Since C++ is a superset of C (approximately), the basic "Hello, World!" program in C will work.
   However, C++ comes with an entirely different library of I/O functions that you should get used
@@ -40,78 +39,91 @@
   IOStreams library:</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  int main( )
-  {
-      std::cout &lt;&lt; "Hello, World!\n";
-      return 0;
-  }
+int main( )
+{
+    std::cout &lt;&lt; "Hello, World!" << std::endl;
+    return 0;
+}
 </pre>
 
 <p>Let me point out a few things about this program.</p>
 
 <ol>
   <li><p>To declare the facilities in the IOStreams library you need to #include the header
-    &lt;iostream&gt;. Notice that there is no .h at the end of that header's name. This is normal.
-    The C++ standard library is declared in header files that do not have any extension. Note,
-    however, that is common for programmers to use .h or .hpp extensions on the header files they
+    &lt;iostream&gt;. Notice that there is no .h at the end of that header's name. The C++
+    standard library is declared in header files that do not have any extension. Note, however,
+    that is common for programmers to still use .h or .hpp extensions on the header files they
     create.</p></li>
 
   <li><p>Unlike in C, you do not need to declare main as taking a void parameter. The empty
-    parentheses indicates that there are no parameters. C++ compilers will accept void in the
-    parameter list, but it is not necessary and commonly left out.</p></li>
+    parentheses indicate that there are no parameters. C++ compilers will accept void in the
+    parameter list, but it is not necessary and commonly left out. Technically, the empty
+    parentheses in a C function declaration means "unspecified parameters," which is different
+    from "no parameters." Since C++ does not allow you to declare a function with unspecified
+    parameters, the empty parentheses can take on a more specific meaning in C++.</p></li>
 
   <li><p>The actual I/O operations are all done on the object named <span
       class="code">cout</span>. The <span class="code">cout</span> object represents the standard
     output device---the screen of your console. You can write characters to that device using the
-    <span class="code">&lt;&lt;</span> operator. The characters get written out one after another
-    in a sequential stream, and the <span class="code">&lt;&lt;</span> operator really just
-    inserts characters into that stream. For this reason it is often called an inserter.</p></li>
+    <span class="code">&lt;&lt;</span> operator. The characters get written one after another in a
+    sequential stream, and the <span class="code">&lt;&lt;</span> operator inserts characters into
+    that stream. For this reason it is often called an inserter.</p></li>
+
+  <li>The <span class="code">endl</span> at the end of the text being output is a
+    <i>manipulator</i>. It is used to manipulate the state of the stream. In the case of <span
+        class="code">endl</span>, the output moves to the next line, and the output is pushed
+    through to the console immediately (not buffered). The effect is similar to just printing a
+    newline character <span class="code">'\n'</span>. In fact, in a simple program like this one,
+    there is no real advantage to using <span class="code">endl</span>. However, it is probably
+    good practice to get in the habit of using it when appropriate. The C++ standard library
+    contains many other manipulators, as you will see. You can even write your own.
+  </li>
 </ol>
 
 <p>Now I want to say a few words about namespaces.</p>
 
 <p>C++ is designed for very large programs. One of the problems very large programs have is
   coordinating names. In C, every function in a program must have a unique name. In a large
-  program there might be thousands of functions written by people who don't know each other (for
-  example in competing libraries). If any two of those functions have the same name there are
+  program, there might be thousands of functions written by people who don't know each other (for
+  example, in competing libraries). If any two of those functions have the same name, there are
   problems.</p>
 
-<p>To avoid naming problems, C++ allows you to put functions and anything else with a name into a
-  "namespace". Each namespace might contain hundreds of names, but since a single library supplier
-  controls the entire name space associated with that library, that supplier can ensure that no
-  two names in it collide.</p>
+<p>To avoid naming problems, C++ allows you to put functions, and anything else with a name, into
+  a "namespace." Each namespace might contain hundreds of names, but since a single library
+  supplier controls the entire name space associated with that library, that supplier can ensure
+  that no two names in it conflict.</p>
 
-<p>An application might use several different namespaces. If two functions in different namespaces
-  happen to have the same name, it is not an error because the functions can be distinguished by
-  which namespace they are from. This is exactly the same reason why operating systems allow users
-  to create directories. Two files with the same name can exist on the disk provided they are in
-  different directories.</p>
+<p>An application might use several namespaces. If two functions in different namespaces happen to
+  have the same name, it is not an error because the functions can be distinguished by which
+  namespace they are from. This is exactly the same reason why operating systems allow users to
+  create folders. Two files with the same name can exist on the disk provided they are in
+  different folders.</p>
 
 <p>It happens that the entire standard C++ library is in a namespace called <span
-    class="code">std</span>. Thus whenever I wish to use a name from the library I must prefix
-  that name with a suitable namespace qualifier. That's why I have <span class="code"
-  >std::</span> in front of <span class="code">cout</span> in my sample program above. That tells
-  the compiler (and the programmer) that I'm interested in the <span class="code"
-  >cout</span> name in the <span class="code">std</span> namespace.</p>
+    class="code">std</span>. Thus, whenever I wish to use a name from the library, I must prefix
+  that name with a suitable namespace qualifier. That's why I have <span class="code">std::</span>
+  in front of <span class="code">cout</span> in my sample program above. That tells the compiler
+  (and the programmer) that I'm interested in the <span class="code">cout</span> name in the <span
+      class="code">std</span> namespace.</p>
 
 <p>It might seem like an annoyance to prefix names from the standard library with <span
-    class="code">std::</span>. In fact, at times it is. However, for reasons that will become
-  clear later, you don't need to use namespace qualifiers as much as you might think. If you find
-  yourself accessing names in a particular namespace frequently you can include a <i>using
-    directive</i> at the top of your source file. For example</p>
+    class="code">std::</span>. At times, it is. However, for reasons that will become clear later,
+  you don't need to use namespace qualifiers as much as you might think. If you find yourself
+  accessing names in a particular namespace frequently you can include a <i>using directive</i> at
+  the top of your source file. For example</p>
 
 <pre class="code">
-  #include &lt;iostream&gt;
+#include &lt;iostream&gt;
 
-  using namespace std;
+using namespace std;
 
-  int main( )
-  {
-      cout &lt;&lt; "Hello, World!\n";
-      return 0;
-  }
+int main( )
+{
+    cout &lt;&lt; "Hello, World!" << endl;
+    return 0;
+}
 </pre>
 
 <p>In this version I tell the compiler that it should treat all names in namespace <span
@@ -119,42 +131,41 @@
   names can then be accessed without the <span class="code">std::</span> qualifier. Note that the
   using directive should come after the #include &lt;iostream&gt;. If you put it before the
   #include the compiler will not know about the name <span class="code">std</span> when it sees
-  the using directive and it will produce an error message.</p>
+  the using directive, and it will produce an error message.</p>
 
-<p>In some older texts you might see the "Hello, World" program like this:</p>
+<p>In some texts you might see the "Hello, World" program like this:</p>
 
 <pre class="code">
-  #include &lt;iostream.h&gt;
+#include &lt;iostream.h&gt;
 
-  int main( )
-  {
-      cout &lt;&lt; "Hello, World!\n";
-      return 0;
-  }
+int main( )
+{
+    cout &lt;&lt; "Hello, World!" << endl;
+    return 0;
+}
 </pre>
 
 <p>This version #includes &lt;iostream.h&gt; instead of &lt;iostream&gt; and does not bother with
-  the namespace stuff at all. This may work, particularly if you are using an old compiler.
-  Namespaces were added to C++ relatively recently. Old compilers do not support them. To maintain
-  compatibility with old programs, modern C++ compilers often distinguish between headers like
-  &lt;iostream&gt; and &lt;iostream.h&gt;. The header with the .h declares things in the global
-  namespace as it was done in the days before namespaces. The header without the .h declares
-  things in namespace <span class="code">std</span>. In this tutorial I will follow the official
-  C++ standard and use namespace std as appropriate. You should do the same in your own programs
-  unless you have some specific reason to do otherwise.</p>
+  the namespace at all. This may work, particularly if you are using an old compiler. Namespaces
+  were added to C++ as part of the 1998 standardization process. Ancient C++ compilers may not
+  support them. To maintain compatibility with old programs, some C++ compilers often distinguish
+  between headers like &lt;iostream&gt; and &lt;iostream.h&gt;. The header with the .h declares
+  things in the global namespace as it was done in the days before namespaces. The header without
+  the .h declares things in namespace <span class="code">std</span>. In this tutorial, I will
+  follow the official C++ standard and use namespace std as appropriate. You should do the same in
+  your own programs unless you have some specific reason to do otherwise.</p>
 
 <h3>Compiling C++ programs</h3>
 
 <p>To compile the basic "Hello, World!" program, you must first put the program into a file. While
-  C programs always end with a .c extension, the convention for C++ programs is less well defined.
+  C programs always end with a .c extension, the convention for C++ programs is less well-defined.
   Different systems tend to use different extensions, although the most common extensions are
-  .cpp, .cc, .cxx, and .C (note the uppercase letter). In the Windows world, the .cpp extension is
-  pretty universal. That is also fine to use on many Unix systems so that is what I will use in
-  this tutorial. Use your favorite text editor to create the file <span
+  .cpp, .cc, .cxx, and .C (note the uppercase letter). The .cpp extension tends to be the dominant
+  one, but you may see the others as well. Use your favorite text editor to create the file <span
       class="terminal">hello.cpp</span> and type in the basic "Hello, World!" program I showed
   above.</p>
 
-<p>To compile it on a Unix system using gcc do something like:</p>
+<p>To compile it on a Unix system using the GNU Compiler Collection do something like:</p>
 
 <pre class="terminal">
   $ g++ -o hello hello.cpp
@@ -166,7 +177,7 @@
   compiler finishes do:</p>
 
 <pre class="terminal">
-  $ hello
+  $ ./hello
 </pre>
 
 <p>to run the program. It should print "Hello, World!" on the terminal. Congratulations, you have
@@ -177,22 +188,22 @@
 <p>There are two C++ features that I want to introduce right away. We will use them quite a bit.
   The first feature is <i>references</i>.</p>
 
-<p>A reference is really just another name for something else. It is like an alias. Here is a
-  simple example.</p>
+<p>A reference is just another name for something else. It is like an alias. Here is a simple
+  example.</p>
 
 <pre class="code">
-  //
-  // The following function illustrates a simple way to use a reference.
-  //
-  void example( )
-  {
-      int  number;        // Your typical integer.
-      int &amp;ref = number;  // This declares ref to be of type "reference to int"
-                          //   and "binds" it to the variable number.
+//
+// The following function illustrates a simple way to use a reference.
+//
+void example( )
+{
+    int  number;        // Your typical integer.
+    int &amp;ref = number;  // This declares ref to be of type "reference to int"
+                        //   and "binds" it to the variable number.
 
-      number = 1;    // Puts 1 into number.
-      ref    = 2;    // Puts 2 into number!
-  }
+    number = 1;    // Puts 1 into number.
+    ref    = 2;    // Puts 2 into number!
+}
 </pre>
 
 <p>The expression <span class="code">ref = 2</span> puts 2 into the variable <span
@@ -200,120 +211,125 @@
     class="code">number</span>. The reference <span class="code">ref</span> is like an alternate
   name for <span class="code">number</span>. Anything that you do to <span
       class="code">ref</span>, you are really doing to <span class="code">number</span>. In my
-  example above there is really only one variable: <span class="code">number</span>. The reference
-  does not actually exist as an entity in memory. It is just a label for something that does
-  exist.</p>
+  example above there is really only one variable: <span class="code">number</span>. Conceptually,
+  the reference is not an object of on its own. It is just a label for something that does exist.
+</p>
 
-<p>When you declare a reference like I did above you must "bind" it to a real variable. You must
-  tell the compiler to which variable the reference refers. It is an error to declare a reference
-  and not attach it to a variable. Null references do not exist.</p>
+<p>When you declare a reference like I did above you must <i>bind</i> it to a real variable. You
+  must tell the compiler to which variable the reference refers. It is an error to declare a
+  reference and not attach it to a variable. Null references do not exist. Furthermore, once a
+  reference is bound to something, it can never be changed to bind to anything else. Any attempt
+  to modify the reference, or manipulate the reference in any way, will actually modify or
+  manipulate the variable to which the reference binds. The reference is simply another name for
+  the variable.</p>
 
 <p>My example above is not very interesting. References are hardly ever used this way. In real
-  life, references are mostly used as function parameters. Consider this example</p>
+  life, references are mostly used as function parameters. Consider this example:</p>
 
 <pre class="code">
-  //
-  // This function has reference parameters. This is very common.
-  //
-  void swap( int &amp;A, int &amp;B )
-  {
-      int temp = A;   // Save a copy of A aside for later.
+//
+// This function has reference parameters. This is very common.
+//
+void swap( int &amp;A, int &amp;B )
+{
+    int temp = A;   // Save a copy of A aside for later.
 
-      A = B;          // Put B into A.
-      B = temp;       // Put the old A into B.
-  }
+    A = B;          // Put B into A.
+    B = temp;       // Put the old A into B.
+}
 </pre>
 
-<p>This function might be used like this</p>
+<p>This function might be used like this:</p>
 
 <pre class="code">
-  int main( )
-  {
-      int X, Y;
+int main( )
+{
+    int X, Y;
 
-      // ... Put values into X and Y.
+    // ... Put values into X and Y.
 
-      swap( X, Y );
-      return 0;
-  }
+    swap( X, Y );
+    return 0;
+}
 </pre>
 
-<p>When <span class="code">swap</span> is called, the parameters <span class="code">A</span> and
-  <span class="code">B</span> are bound to the real variables <span class="code">X</span> and
-  <span class="code">Y</span>. Inside the function <span class="code">A</span> refers to the
-  caller's <span class="code">X</span> and <span class="code">B</span> refers to the caller's
-  <span class="code">Y</span>. The <span class="code">swap</span> function exchanges the values
-  stored in <span class="code">X</span> and <span class="code">Y</span> (via the references) as
-  desired and then returns.</p>
+<p>When <span class="code">swap</span> is called, the reference parameters <span
+    class="code">A</span> and <span class="code">B</span> are bound to the real variables <span
+    class="code">X</span> and <span class="code">Y</span>. Inside the function, <span
+    class="code">A</span> refers to the caller's <span class="code">X</span> and <span
+    class="code">B</span> refers to the caller's <span class="code">Y</span>. The <span
+    class="code">swap</span> function exchanges the values stored in <span class="code">X</span>
+  and <span class="code">Y</span> (via the references) as desired and then returns.</p>
 
-<p>To understand the significance of this, look at this version of swap</p>
+<p>To understand the significance of this, look at this version of swap:</p>
 
 <pre class="code">
-  //
-  // This function takes integer parameters
-  //
-  void swap( int A, int B )
-  {
-      // Same as before
-      int temp = A;
+//
+// This function takes integer parameters
+//
+void swap( int A, int B )
+{
+    // Same as before
+    int temp = A;
 
-      A = B;
-      B = temp;
-  }
+    A = B;
+    B = temp;
+}
 </pre>
 
 <p>This does not work as expected. When the caller does <span class="code">swap(X,
-    Y)</span>, the values of arguments <span class="code">X</span> and <span class="code"
->Y</span> are <em>copied</em> into the parameters <span class="code">A</span> and <span
-    class="code">B</span>. The function exchanges the copies, but does absolutely nothing with the
-  original variables. C++, like C, passes arguments to functions "by value." This means the
-  arguments are copied into the function parameters when the function is called.</p>
+    Y)</span>, the values of arguments <span class="code">X</span> and <span class="code">Y</span>
+  are <em>copied</em> into the parameters <span class="code">A</span> and <span
+      class="code">B</span>. The function exchanges the copies, but does absolutely nothing with
+  the original variables. C++, like C, passes arguments to functions <i>by value</i>. This means
+  the arguments are copied into the function parameters when the function is called.</p>
 
 <p>However, reference parameters work differently. When a function with a reference parameter is
   called, the reference is bound to the argument and no copy of anything is made. Inside the
   function the reference refers back to the variable that was used by the caller. This facility is
-  often called "pass by reference". In some languages it is the only way parameters are
+  often called <i>pass by reference</i>. In some languages it is the only way parameters are
   passed.</p>
 
 <p>You can get a similar effect in plain C using pointers like this:</p>
 
 <pre class="code">
-  //
-  // This function takes pointer parameters
-  //
-  void swap( int *A, int *B )
-  {
-      // Same idea as before.
-      int temp = *A;
+//
+// This function takes pointer parameters
+//
+void swap( int *A, int *B )
+{
+    // Same idea as before.
+    int temp = *A;
 
-      *A = *B;
-      *B = temp;
-  }
+    *A = *B;
+    *B = temp;
+}
 </pre>
 
 <p>In this example <span class="code">A</span>, and <span class="code">B</span>, are pointers to
   integers that exist elsewhere. Inside the function I have to use the indirection operator (the
   <span class="code">*</span>) to get at the integers pointed at by those pointers. Notice that
   <span class="code">temp</span> must still be an integer (not a pointer) since it has to hold a
-  temporary integer value. I am not trying to swap pointers after all! (If that does not make
-  sense to you, reread the above paragraph and think about it awhile until it does).</p>
+  temporary integer value. I am not trying to swap pointers after all! If that does not make sense
+  to you, reread the above paragraph and think about it awhile until it does. You can also read my
+  <a href="REVIEW-02.html">Review Lesson #2</a> on C pointers.</p>
 
 <p>With my pointer oriented swap function I have to call it like this:</p>
 
 <pre class="code">
-  int main( )
-  {
-      int X, Y;
+int main( )
+{
+    int X, Y;
 
-      // Put values into X and Y.
+    // Put values into X and Y.
 
-      swap( &amp;X, &amp;Y );
-      return 0;
-  }
+    swap( &amp;X, &amp;Y );
+    return 0;
+}
 </pre>
 
 <p>This works, but it is annoying to have to put those ampersands ("address of") in there. With
-  references the call is more natural. You will see later that reference parameters are very
+  references, the call is more natural. You will see later that reference parameters are very
   important in C++. There are certain areas where you must use them to get the effects you
   want.</p>
 
@@ -325,11 +341,11 @@
 <p>The second C++ feature I'd like to introduce now is C++'s handling of const, particularly how
   it interacts with references.</p>
 
-<p>Both C and C++ allow you to declare constants by putting the word <span class="code"
->const</span> in front of the declaration.</p>
+<p>Both C and C++ allow you to declare constants by putting the word <span
+    class="code">const</span> in front of the declaration.</p>
 
 <pre class="code">
-  const int MAX = 100;
+const int max = 100;
 </pre>
 
 <p>When you declare a constant you must initialize it. This is because you can't modify the value
@@ -337,112 +353,110 @@
   it a value.</p>
 
 <pre class="code">
-  const int MAX;
-  MAX = 100;      // Error. Can't modify a constant.
+  const int max;
+  max = 100;      // Error. Can't modify a constant.
 </pre>
 
-<p>In my example above I used all uppercase letters for the name of my constant. That is common,
-  but not universal.</p>
-
-<p>In many courses people speak of "variables". However, that word is imprecise. Not all so-called
+<p>In many courses people speak of "variables." However, that word is imprecise. Not all so-called
   variables can vary. In my example above would you call <span
-      class="code">MAX</span> a constant variable? That really doesn't make any sense.</p>
+      class="code">max</span> a constant variable? That really doesn't make any sense.</p>
 
-<p>A more accurate term is "object". In my example above, <span class="code">MAX</span> is a
+<p>A more accurate term is "object." In my example above, <span class="code">max</span> is a
   constant integer object. Using the word object may sound awkward and overly formal, but it
-  really is better. In this course I will use "object" from now on to talk about objects. I will
-  drop the word variable. The important thing for you to remember is that objects are things that
-  occupy memory and that can hold values. Every object in a C++ program has a type and you have to
-  specify that type when you create the object.</p>
+  really is better. In this course, I will use "object" from now on to talk about objects. I will
+  drop the word variable (unless I really do mean to emphasize that something can vary). The
+  important thing for you to remember is that objects are things that occupy memory and that can
+  hold values. Every object in a C++ program has a type, and you have to specify that type when
+  you create the object.</p>
 
-<p>References are not objects, by the way, because they don't generally occupy any memory and they
-  don't have values. The object a reference refers to has a value, but the reference itself does
-  not. This distinction between references and objects is a subtle one but it is a distinction
-  that will prove important in your later study.</p>
+<p>References are not objects, by the way, because they don't generally occupy any memory, and
+  they don't have values the way a real object does. The object a reference refers to has a value,
+  but the reference itself does not. This distinction between references and objects is subtle,
+  but it is a distinction that will prove important in your later study.</p>
 
 <p>Okay... declaring constant objects is neat, but the real beauty of const is as it applies to
   pointer and reference parameters. I'll leave pointers alone for the moment (but they are handled
   in an analogous manner) and just talk about references. Consider this example:</p>
 
 <pre class="code">
-  //
-  // This function annoys the user.
-  //
-  void silly( int &amp;count )
-  {
-      int i;
+//
+// This function annoys the user.
+//
+void silly( int &amp;count )
+{
+    int i;
 
-      for( i = 0; i &lt; count; i++ ) {
-          std::cout &lt;&lt; "I am silly!\n";
-      }
-  }
+    for( i = 0; i &lt; count; i++ ) {
+        std::cout &lt;&lt; "I am silly!\n";
+    }
+}
 </pre>
 
-<p>Suppose the main function looked like</p>
+<p>Suppose the main function looked like:</p>
 
 <pre class="code">
-  int main( )
-  {
-      silly( 100 );
-      return 0;
-  }
+int main( )
+{
+    silly( 100 );
+    return 0;
+}
 </pre>
 
-<p>It seems like this would print the silly message 100 times. In fact, it produces a compile
+<p>It seems like this would print the silly message 100 times. In fact, it produces a compile-time
   error. Why? The function <span class="code">silly</span> takes its parameter by reference. The
-  compiler assumes that the function might therefor want to modify the object referred to by that
+  compiler assumes that the function might therefore want to modify the object referred to by that
   reference. Yet in my main function above, I am giving <span
       class="code">silly</span> a literal number. That doesn't make sense. How could <span
-      class="code">silly</span> possibly modify the literal constant "100"? This issue doesn't
-  come up when you pass parameters by value because in that case the 100 is copied into the
+      class="code">silly</span> possibly modify the literal constant "100?" This issue doesn't
+  come up when you pass parameters by value because in that case, the 100 is copied into the
   parameter. The function couldn't change the original 100 even if it wanted to.</p>
 
-<p>Now it happens that <span class="code">silly</span> does not really try to modify its
-  parameter. It only reads the value of <span class="code">count</span>. It never writes to it. I
-  can express this fact by defining <span class="code">silly</span> so that it takes a reference
-  to a const. It looks like this</p>
+<p>It happens that <span class="code">silly</span> does not really try to modify its parameter. It
+  only reads the value of <span class="code">count</span>. It never writes to it. I can express
+  this fact by defining <span class="code">silly</span> so that it takes a reference to a const.
+  It looks like this:</p>
 
 <pre class="code">
-  //
-  // This function annoys the user.
-  //
-  void silly( const int &amp;count )
-  {
-      int i;
+//
+// This function annoys the user.
+//
+void silly( const int &amp;count )
+{
+    int i;
 
-      for( i = 0; i &lt; count; i++ ) {
-          std::cout &lt;&lt; "I am silly!\n";
-      }
-  }
+    for( i = 0; i &lt; count; i++ ) {
+        std::cout &lt;&lt; "I am silly!\n";
+    }
+}
 </pre>
 
 <p>The only difference is in the <span class="code">const</span> that appears in the parameter
   list. Read <span class="code">const int &amp;count</span> as "<span
-      class="code">count</span> is a reference to a constant int". This declaration tells the
+      class="code">count</span> is a reference to a constant int." This declaration tells the
   compiler that the function never writes to the object referred to by that reference. The
   compiler will enforce this; inside the function <span class="code">count</span> is treated as a
   constant int. It also means that when you do <span class="code">silly(100)</span> the compiler
-  allows it since it knows for sure that <span class="code">silly</span> will not try to modify
+  allows it, since it knows for sure that <span class="code">silly</span> will not try to modify
   the 100.</p>
 
 <p>This is all very fine, but you might wonder what happens when you try to give silly a "normal"
-  (non-const) object like this</p>
+  (non-const) object like this:</p>
 
 <pre class="code">
-  int main( )
-  {
-      int annoyance = 100;
+int main( )
+{
+    int annoyance = 100;
 
-      silly( annoyance );
-      return 0;
-  }
+    silly( annoyance );
+    return 0;
+}
 </pre>
 
 <p>Here <span class="code">annoyance</span> is an ordinary integer object that could be modified.
   Yet when <span class="code">silly</span> is called, it is not an error. Just because <span
       class="code">silly</span> takes a reference to a constant does not mean it must be used only
   with constants. It just means that <span class="code">silly</span> promises to not write to the
-  object it is given. If the object is writable that is fine. The function <span class="code">silly</span>
+  object it is given. If the object is writable, that is fine. The function <span class="code">silly</span>
   doesn't care.</p>
 
 <p>In general if you write a function with a reference parameter and if that function does not
@@ -450,27 +464,40 @@
   reference to a const. You will see many, many examples of this in the future. In a later lesson
   I will explain why it is essential that you follow this rule.</p>
 
+<p>You might be wondering why we should bother with the reference at all. What's wrong with just
+  passing the <span class="code">count</span> parameter by value as you would no doubt do in C? In
+  this case, there is nothing wrong with that approach. However, when a reference is bound to an
+  object, that object is not copied. If you wanted to pass a large object to the function,
+  something much larger than an integer, using a reference parameter avoids copying the object. In
+  C, you would use pointers to get the same effect by declaring the function to take a pointer
+  parameter and passing the address of the object. However, since references can be treated as
+  aliases for the objects to which they refer, the C++ approach involves less confusing
+  indirection syntax. As you will see later, there are other reasons why you should prefer
+  reference parameters over function parameters in most cases. The simplified syntax is more than
+  just convenient; it enables some of C++'s other enhanced features.</p>
+
 <h2>Summary</h2>
 
 <ol id="summary-list">
-  <li><p>C++ is approximately a super set of C and thus most C programs will compile without
-    changes as C++ programs.</p></li>
+  <li><p>C++ is approximately a super set of C, thus most C programs will compile without changes
+    as C++ programs.</p></li>
 
   <li><p>The entire C++ standard library is in namespace <span class="code">std</span>. When you
-    include a header without the .h extension you need to qualify all library names with <span
-        class="code">std::</span>.</p></li>
+    include a standard library header without the .h extension, you need to qualify all library
+    names with <span class="code">std::</span>.</p></li>
 
-  <li><p>A reference is an alias for something else. When you declare a stand-alone reference you
+  <li><p>A reference is an alias for something else. When you declare a stand-alone reference, you
     must bind it to an object. Reference parameters are bound to a function's arguments when that
     function is called.</p></li>
 
   <li><p>If a function takes a reference parameter and the function does not change that
     parameter, then the parameter should be declared as a reference to const. This allows the
-    function to be used in situations where the compiler would otherwise prohibit it.</p></li>
+    function to be used in situations where the compiler would otherwise prohibit it, making the
+    function more general.</p></li>
 </ol>
 
 <address>
-  &copy; Copyright 2016 by Peter C. Chapin.<br/> Last Revised: <b>January 12, 2016</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>July 18, 2023</b>
 </address>
 
 </body>

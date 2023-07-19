@@ -5,7 +5,6 @@
 <head>
   <title>Lesson #11</title>
   <meta name="Author" content="Peter Chapin"/>
-  <!-- <meta name="keywords" lang="en-US" content="..."> -->
   <meta name="ROBOTS" content="NOARCHIVE"/>
   <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
 </head>
@@ -18,64 +17,62 @@
 
 <h2>Overview</h2>
 
-<p>In this lesson I will cover the following topics</p>
+<p>In this lesson I will cover the following topics:</p>
 
 <ol id="overview-list">
+  <li><p>What are templates and what is a container type.</p></li>
 
-  <li>
-    <p>What are templates and what is a container type.</p>
+  <li><p>The C++ standard vector template and the basic operations that can be applied to it.</p>
   </li>
 
-  <li>
-    <p>The C++ standard vector template and the basic operations that can be applied to it.</p>
-  </li>
-
-  <li>
-    <p>Value vs reference semantics.</p>
-  </li>
-
+  <li><p>Value vs reference semantics.</p></li>
 </ol>
 
 <h2>Body</h2>
 
 <h3>Templates</h3>
 
-<p>The C++ language provides a very powerful feature called "templates". This feature allows you
-  to define generic classes and functions and then have the compiler fill in the specific types
-  involved later. When a template is defined, one or more of the types used are just placeholders.
-  When you use a template, you must specify which types to substitute for those placeholders. The
-  compiler then "instantiates" the template using the specific types you want.</p>
+<p>The C++ language provides a very powerful feature called <i>templates</i>. This feature allows
+  you to define generic classes and functions and then have the compiler fill in the specific
+  types involved later. When a template is defined, one or more of the types used are just
+  placeholders. When you use a template, you must specify which types to substitute for those
+  placeholders. The compiler then "specializes" the template using the specific types you want.
+</p>
 
 <p>Right now you don't need to worry about how to create a template. But you should be aware, at
   least, that a large part of the C++ standard library is really a library of templates. This
   makes it much more general and much more powerful. It also means that you need to know something
   about how to use templates in order to use the C++ standard library.</p>
 
-<p>Long ago, C++ did not have the template feature. In those days there were, naturally, no
-  templates in the library. Modern C++ has supported templates for some time, but the heavily
-  templatized library it currently has is a relatively new invention. It was first developed at
-  Hewlett-Packard as part of a research project in generic programming. The author of the original
-  template library is now at Silicon Graphics where he is still doing research in generic
-  programming. When C++ was standardized his library, known as the "Standard Template Library" or
-  STL, was adopted as part of the C++ standard. Technically STL and the C++ standard library are
-  slightly different. However, most people use "STL" whenever they talk about the standard library
-  templates anyway. The two are very close and for most practical purposes identical.</p>
+<p>Here is a little history: Long ago, in ancient times, C++ did not have a template feature. In
+  those days there were, naturally, no templates in the library (and the library was much smaller
+  and simpler than it is today).</p>
+
+<p>Modern C++ has supported templates for some time, but the heavily templated library it
+  currently has was added during the standardization of C++ 1998. It was first developed by
+  Alexander Stepanov at Hewlett-Packard as part of a research project in generic programming. When
+  C++ was standardized, his library, known as the "Standard Template Library" or STL, was adopted
+  as part of the C++ standard. Technically, STL and the C++ standard library templates are
+  slightly different because some changes were made to Stepanov's work when the library was
+  incorporated into the standard. However, most people use "STL" whenever they talk about the
+  standard library templates anyway. The two are very close and for most practical purposes
+  identical.</p>
 
 <h3>Standard containers</h3>
 
 <p>Okay, sounds good so far. But before I can show you some concrete examples, I need to talk a
   little about the standard containers in general terms. So far most of the objects you have used
-  are of types like <span class="code">int</span>, <span class="code"
-  >long</span>, pointer to character and so forth. Such objects just hold a single value. In real
-  programs, however, you often need to use objects that hold many values. Such objects are, in
-  general, called "containers".</p>
+  are of types like <span class="code">int</span>, <span class="code">long</span>, pointer to
+  character and so forth. Such objects just hold a single value. In real programs, however, you
+  often need to use objects that hold many values. Such objects are, in general, called <i>containers</i>.
+</p>
 
-<p>You are already familiar with some containers. In C you can use an array to hold many different
-  values. An array is a kind of container. The problem is that arrays in C (and C++) are rather
-  primitive. The C++ standard library contains several, much more powerful container types.</p>
+<p>You are already familiar with some containers. In C, you can use an array to hold many
+  different values. An array is a kind of container. The problem is that arrays in C (and C++) are
+  rather primitive. The C++ standard library contains several, much more powerful containers.</p>
 
 <p>Each container in the standard library has its own special features, advantages, and
-  disadvantages. They are organized differently internally and as a result have different
+  disadvantages. They are organized differently internally, and as a result have different
   efficiency characteristics. We could spend a lot of time talking about the standard library
   containers, but in this course I will focus on only one: vector.</p>
 
@@ -83,25 +80,25 @@
 
 <p>What is a vector? A vector is a powerful replacement for simple C-style arrays. The word
   "vector" is being used here in its pure mathematical sense. Physicists and engineers use the
-  word a bit differently so don't be confused! Here is a short program to illustrate how to create
-  and use a vector.</p>
+  word a bit differently, so don't be confused! Here is a short program to illustrate how to
+  create and use a vector.</p>
 
 <pre class="code">
 #include &lt;vector&gt;
   // You must include this header so that the compiler sees the vector
   // template definition.
 
-int main()
+int main( )
 {
-  std::vector&lt;int&gt; my_array(100);
-    // Declares my_array to be a vector of 100 integers.
+    std::vector&lt;int&gt; my_array( 100 );
+      // Declares my_array to be a vector of 100 integers.
 
-  for (int i = 0; i &lt; 100; i++) {
-    my_array[i] = ...;
-  }
+    for( int i = 0; i &lt; 100; i++ ) {
+      my_array[i] = ...;
+    }
 
-  // etc...
-  return 0;
+    // etc...
+    return 0;
 }
 </pre>
 
@@ -114,47 +111,48 @@ int              i;
 </pre>
 
 <p>The first part is the type: <span class="code">vector&lt;int&gt;</span>. This notation means
-  that you are asking the compiler to instantiate the vector template using the type <span
-      class="code">int</span> to fill in the placeholder. The compiler understands this and
-  generates the requested type on the fly. A vector of integers is like an array of integers. It
-  is a container that holds integers.</p>
+  that you are asking the compiler to specialize the vector template using the type <span
+      class="code">int</span> to fill in the placeholder type used when the template was defined.
+  The compiler understands this and generates the requested type on the fly. A vector of integers
+  is like an array of integers. It is a container that holds integers in a contiguous sequence.
+</p>
 
-<p>You can ask the compiler to generate any kind of vector you want. For example</p>
+<p>You can ask the compiler to generate any kind of vector you want. For example:</p>
 
 <pre class="code">
-std::vector&lt;int&gt;                 my_array1;
-std::vector&lt;double&gt;              my_array2;
-std::vector&lt;char *&gt;              my_array3;
-std::vector&lt;std::string&gt;         my_array4;
-std::vector&lt; std::vector&lt;int&gt; &gt;  my_array5;
+std::vector&lt;int&gt;               my_array1;
+std::vector&lt;double&gt;            my_array2;
+std::vector&lt;char *&gt;            my_array3;
+std::vector&lt;std::string&gt;       my_array4;
+std::vector&lt;std::vector&lt;int&gt;&gt;  my_array5;
 </pre>
 
-<p>Each of the vectors above are of a different type. The type "vector of int" is not the same as
-  the type "vector of double". The compiler uses the template to "stamp out" each of these types
-  on demand. That is the instantiation process. Notice that I can create a vector of any type I
+<p>Each of the vectors above is of a different type. The type "vector of int" is not the same as
+  the type "vector of double." The compiler uses the template to "stamp out" each of these types
+  on demand. That is the specialization process. Notice that I can create a vector of any type I
   like: including the library string type. In fact, I can create a vector of vectors!</p>
 
-<p>In the declaration</p>
+<p>In the declaration:</p>
 
 <pre class="code">
-std::vector&lt;int&gt; my_array(100);
+std::vector&lt;int&gt; my_array( 100 );
 </pre>
 
-<p>I'm passing 100 to the vector's constructor using the new style initialization syntax. The
+<p>I'm passing 100 to the vector's constructor using the function style initialization syntax. The
   constructor allocates enough memory to hold the specified number of (in this case) integers.
   Since the constructor only takes one parameter, I could have written this declaration using the
-  old style syntax</p>
+  C-style syntax:</p>
 
 <pre class="code">
 std::vector&lt;int&gt; my_array = 100;
 </pre>
 
 <p>But I think that looks misleading. It makes it look like I'm putting 100 into the vector and
-  that is not what is happening at all. To prevent confusion I always use the new style syntax
-  when I construct my vectors.</p>
+  that is not what is happening at all. To prevent confusion, I always use the function style
+  syntax when I construct my vectors.</p>
 
-<p>Once the vector has been created, you can use it just like an ordinary array. In particular you
-  can apply square brackets to it to access its individual elements. This works thanks to an
+<p>Once the vector has been created, you can use it just like an ordinary array. In particular,
+  you can apply square brackets to it to access its individual elements. This works thanks to an
   overloaded <span class="code">operator[]</span> in the vector template.</p>
 
 <pre class="code">
@@ -162,45 +160,45 @@ my_array[i] = ...;
 </pre>
 
 <p>Because <span class="code">operator[]</span> for vectors returns a reference to the appropriate
-  element, there is no problem using it on the left hand side of an equals sign.</p>
+  element, there is no problem using it on the left-hand side of an equals sign.</p>
 
-<p>Just like ordinary C arrays, if you try to access an element that doesn't exist, undefined
-  things happen. This allows <span class="code">operator[]</span> to be very fast. In fact, it is
-  reasonable for you to expect accessing a vector element to be essentially as fast as accessing
-  an array element. Vectors are the fastest containers in the C++ library. You should use them
-  unless you have some specific reason to do otherwise.</p>
+<p>Just like ordinary C arrays, if you try to access an element that doesn't exist, you will get
+  undefined behaivor. This allows <span class="code">operator[]</span> to be very fast. In fact,
+  it is reasonable for you to expect accessing a vector element to be essentially as fast as
+  accessing an array element. Vectors are the fastest containers in the C++ library. You should
+  use them unless you have some specific reason to do otherwise.</p>
 
 <h3>Okay, but so what?</h3>
 
 <p>So far you might wonder what advantage there is to using vectors over C style arrays. I've made
   it sound as if the two containers are basically identical. In fact, there are many significant
-  advantages to vector. For one thing, like <span class="code"
-  >std::string</span>, vectors can grow and shrink dynamically. The simplest way to expand the
-  size of a vector is using the <span class="code">push_back</span> method. Here is how it might
-  look</p>
+  advantages to vector. For one thing, like <span class="code">std::string</span>, vectors can
+  grow and shrink dynamically. The simplest way to expand the size of a vector is using the <span
+      class="code">push_back</span> method. Here is how it might look:</p>
 
 <pre class="code">
+#include &lt;string&gt;
 #include &lt;vector&gt;
 
-int main()
+int main( )
 {
-  std::vector&lt;std::string&gt; text;
-    // No size specified. The vector initially has no elements.
+    std::vector&lt;std::string&gt; text;
+      // No size specified. The vector initially has no elements.
 
-  text.push_back("Hello, World!");
-    // Puts a "Hello, World" at "the back" of the vector. Currently the only element.
+    text.push_back( "Hello, World!" );
+      // Puts a "Hello, World" at "the back" of the vector. Currently the only element.
 
-  text.push_back("Goodbye World!");
-    // Puts "Goodbye World!" in the next slot after the "Hello, World!"
+    text.push_back( "Goodbye World!" );
+      // Puts "Goodbye World!" in the next slot after the "Hello, World!"
 
-  return 0;
+    return 0;
 }
 </pre>
 
-<p>After the two <span class="code">push_back</span> operations, <span class="code"
->text[0]</span> contains "Hello, World!" and <span class="code">text[1]</span> contains "Goodbye
-  World!" The "back" of the vector is the end with the highest index. The zeroth element of the
-  vector would be the "front".</p>
+<p>After the two <span class="code">push_back</span> operations, <span class="code">text[0]</span>
+  contains "Hello, World!" and <span class="code">text[1]</span> contains "Goodbye World!" The
+  "back" of the vector is the end with the highest index. The zeroth element of the vector is
+  called the "front".</p>
 
 <p>Let's put this to work. Here is a program that reads the standard input device a line at a time
   and then, when it comes to the end of the file, it prints out all the lines in the reverse
@@ -211,81 +209,82 @@ int main()
 #include &lt;string&gt;
 #include &lt;vector&gt;
 
-int main()
+int main( )
 {
-  std::vector&lt;std::string&gt; text;
-  std::string              line;
+    std::vector&lt;std::string&gt; text;
+    std::string              line;
 
-  // Read the input a line at a time and store in the vector text.
-  while (std::getline(std::cin, line)) text.push_back(line);
+    // Read the input a line at a time and store in the vector text.
+    while( std::getline( std::cin, line ) ) text.push_back( line );
 
-  // Output the lines in reverse order.
-  for (int i = text.size() - 1; i &gt;= 0; i--)
-    std::cout &lt;&lt; text[i] &lt;&lt; "\n";
+    // Output the lines in reverse order.
+    for( int i = text.size( ) - 1; i &gt;= 0; --i )
+        std::cout &lt;&lt; text[i] &lt;&lt; "\n";
 
-  return 0;
+    return 0;
 }
 </pre>
 
-<p>The size method returns the number of elements currently in the vector. In this example each
-  vector element is a <span class="code">std::string</span> so <span class="code"
-  >text[i]</span> is being output to <span class="code">std::cout</span> using the <span
+<p>The size method returns the number of elements currently in the vector. In this example, each
+  vector element is a <span class="code">std::string</span> so <span class="code">text[i]</span>
+  is being output to <span class="code">std::cout</span> using the <span
       class="code">operator&lt;&lt;</span> that applies to class string.</p>
 
 <p>Because both vector and string are dynamic, this little program will correctly process a file
-  of any size, containing lines of any length---as long as the system doesn't run out of memory.
-  Not bad, huh?</p>
+  of any size, containing lines of any length---as long as the system doesn't run out of
+  memory.</p>
 
 <p>You can also change the size of a vector with the <span class="code">resize</span> method. It
   works the way you might expect.</p>
 
 <pre class="code">
 std::vector&lt;std::string&gt; text;
-
-text.resize(1024);
+. . .
+text.resize( 1024 );
 </pre>
 
 <p>The argument to <span class="code">resize</span> specifies the new number of elements. If this
-  expands the vector, the new elements will be initialized with the default constructor. If this
-  contracts the vector, the elements that are removed will be destroyed with the destructor. This
-  is just what you want. As always, C++ insures that objects are initialized and cleaned up in
-  accordance to the methods defined in the object's class.</p>
+  expands the vector, the new elements will be initialized with the default constructor (meaning
+  empty strings in the case of a vector of strings). If this contracts the vector, the elements
+  that are removed will be destroyed with the destructor. This is just what you want. As always,
+  C++ ensures that objects are initialized and cleaned up in accordance to the methods defined in
+  the object's class.</p>
 
 <h3>Vectors hold copies</h3>
 
-<p>It is important to realize that vectors, like C arrays, keep COPIES of the objects they are
-  given. When you <span class="code">push_back</span> a string onto the end of a vector of
-  strings, a copy of that string is made (using the copy constructor) and the copy goes into the
-  vector. If you change the original string, the copy in the vector is not affected. We say that
-  vectors have "value semantics". In fact, all the C++ standard containers have value semantics.
-  It is what C programmers tend to expect and it is consistent with the very "value-oriented"
-  approach C and C++ have in other areas as well.</p>
+<p>It is important to realize that vectors, like C arrays, keep <em>copies</em> of the objects
+  they are given. When you <span class="code">push_back</span> a string onto the end of a vector
+  of strings, a copy of that string is made (using the copy constructor), and the copy goes into
+  the vector. If you change the original string, the copy in the vector is not affected. We say
+  that vectors have "value semantics." In fact, all the C++ standard containers have value
+  semantics. It is what C programmers tend to expect, and it is consistent with the very
+  value-oriented approach C and C++ have in other areas as well.</p>
 
 <p>One disadvantage to value semantics is that you can't keep the same object in two different
-  containers. Take a look at this example</p>
+  containers. Take a look at this example:</p>
 
 <pre class="code">
 #include &lt;string&gt;
 #include &lt;vector&gt;
 
-int main()
+int main( )
 {
-  std::string              message;
-  std::vector&lt;std::string&gt; text1, text2;  // I'm declaring two vectors here.
+    std::string              message;
+    std::vector&lt;std::string&gt; text1, text2;  // I'm declaring two vectors here.
 
-  message = "Hello, World!";
-  text1.push_back(message);     // A copy is made for the vector.
-  text2.push_back(message);     // Another copy is made.
+    message = "Hello, World!";
+    text1.push_back( message );     // A copy is made for the vector.
+    text2.push_back( message );     // Another copy is made.
 
-  message = "Goodbye, World!";  // The vector elements are not changed.
-  text1[0] = "Whatever!";       // This does not change text2[0].
-  return 0;
+    message = "Goodbye, World!";    // The vector elements are not changed.
+    text1[0] = "Whatever!";         // This does not change text2[0].
+    return 0;
 }
 </pre>
 
 <p>Often the behavior above is exactly what you want. However, there are cases where you want one
-  message to be somehow shared by both vectors so that when it is changed in one place it
-  automatically changes everywhere else. If vectors acted that way (and they don't) we would say
+  message to be somehow shared by both vectors so that when it is changed in one place, it
+  automatically changes everywhere else. If vectors acted that way (and they don't), we would say
   they had "reference semantics".</p>
 
 <p>You might think you could get the sharing effect by creating vectors of references.</p>
@@ -295,16 +294,16 @@ std::vector&lt;std::string &amp;&gt; text1, text2;
 </pre>
 
 <p>But you can't do this. References are not objects and thus can't be put in containers (you
-  can't make an array of references either). However... pointers ARE objects. There is no problem
-  creating a vector of pointers.</p>
+  can't make an array of references either). However, pointers <em>are</em> objects. There is no
+  problem creating a vector of pointers.</p>
 
 <pre class="code">
 std::string                message;
 std::vector&lt;std::string *&gt; text1, text2;
 
 message = "Hello, World!";
-text1.push_back(&amp;message);    // Store the address of message.
-text2.push_back(&amp;message);    // Store the address again.
+text1.push_back( &amp;message );    // Store the address of message.
+text2.push_back( &amp;message );    // Store the address again.
 
 // There is only one copy of the message. The vectors just hold
 // pointers to it.
@@ -314,12 +313,12 @@ message = "Goodbye, World!";
 </pre>
 
 <p>The problem with this is that you have to be sure message exists for as long as the vectors do.
-  If message gets destroyed before the vectors are destroyed, the vectors will be holding an
-  invalid pointer. Getting this right is error prone. Nevertheless in C and C++, which have
-  comprehensive pointers, value semantics are more general. If you need reference semantics (and
-  sometimes you do), you can use pointer values to get it. In other languages without explicit
-  pointers, such as Java, the situation is different. Think about this issue when you learn those
-  languages.</p>
+  If <span class="code">message</span> gets destroyed before the vectors are destroyed, the
+  vectors will be holding an invalid pointer. Getting this right is error-prone. Nevertheless, in
+  C and C++, which have comprehensive pointers, value semantics are more general. If you need
+  reference semantics (and sometimes you do), you can use pointer values to get it. In other
+  languages without explicit pointers, such as Java, the situation is different. Think about this
+  issue when you learn those languages.</p>
 
 <h3>Other vector operations</h3>
 
@@ -331,55 +330,55 @@ message = "Goodbye, World!";
 
 int main()
 {
-  std::vector&lt;std::string&gt; text1(128);
-    // Vector of 128 strings. Initially all The strings are constructed
-    // by the default constructor in class string. This sets them to
-    // valid, empty strings.
+    std::vector&lt;std::string&gt; text1( 128 );
+      // Vector of 128 strings. Initially all The strings are constructed
+      // by the default constructor in class string. This sets them to
+      // valid, empty strings.
 
-  std::string message = "Hello, World!";
+    std::string message = "Hello, World!";
 
-  text1.push_back(message); // Adds a new element to the end of the vector.
-  text1.pop_back();         // Erases the last element in the vector.
+    text1.push_back( message ); // Adds a new element to the end of the vector.
+    text1.pop_back( );          // Erases the last element in the vector.
 
-  // The pop_back function contracts the vector by one element. It
-  // doesn't just set the last element to a blank string.
+    // The pop_back method contracts the vector by one element. It
+    // doesn't just set the last element to a blank string.
 
-  text1[10] = "This is text";              // Accesses an element.
-  text1.at(10) = "This is different text"; // Accesses an element.
+    text1[10] = "This is text";                // Accesses an element.
+    text1.at( 10 ) = "This is different text"; // Accesses an element.
 
-  // The at function does bounds checking and throws an exception if
-  // the index is out of range. The operator[] is likely to be faster.
+    // The at method does bounds checking and throws an exception if
+    // the index is out of range. The operator[] is likely to be faster.
 
-  std::vector&lt;std::string&gt; text2;
+    std::vector&lt;std::string&gt; text2;
 
-  text2 = text1;
-    // You can assign (and copy) one vector to another. All the elements
-    // are copied just like you would want. The destination vector is
-    // made to be the same size as the source vector.
+    text2 = text1;
+      // You can assign (and copy) one vector to another. All the elements
+      // are copied just like you would want. The destination vector is
+      // made to be the same size as the source vector.
 
-  if (text1 == text2) {
-    ...
-  }
-    // You can compare two vectors with ==. The result is true only if
-    // the vectors are the same size and if == returns true when
-    // applied to all the corresponding elements.
+    if( text1 == text2 ) {
+      ...
+    }
+      // You can compare two vectors with ==. The result is true only if
+      // the vectors are the same size and if == returns true when
+      // applied to all the corresponding elements.
 
-  std::swap(text1, text2);
-    // This exchanges the contents of the two vectors. There is no
-    // problem if they have different sizes.
+    std::swap(text1, text2);
+      // This exchanges the contents of the two vectors. There is no
+      // problem if they have different sizes.
 
-  return 0;
+    return 0;
 }
 </pre>
 
 <p>The <span class="code">swap</span> method is surprisingly fast. It works by swapping pointers
-  inside the two vectors. The actual elements in the vectors are not copied. As a result it runs
+  inside the two vectors. The actual elements in the vectors are not copied. As a result, it runs
   quickly and in a time that is independent of the vector's sizes. Compare:</p>
 
 <pre class="code">
 std::vector&lt;std::string&gt; text1, text2;
 
-std::swap(text1, text2);
+std::swap( text1, text2 );
   // Even if the vectors have millions of elements this is almost
   // instantaneous.
 
@@ -395,68 +394,61 @@ text2 = temp;
   rule to follow everywhere in the standard template library.</p>
 
 <p>There are also <span class="code">insert</span> and <span class="code">erase</span> methods
-  that you can apply to a vector. The insert methods allow you to inject a new element into the
-  middle of a vector. They expand the vector accordingly. The erase methods allow you to remove an
-  element from the vector and contract the vector accordingly. These operations shuffle vector
-  elements around and they can be time consuming to execute on long vectors. Using these methods
-  also requires that you know something about iterators, and we aren't ready to talk about that
-  subject yet.</p>
+  that you can apply to a vector. The <span class="code">insert</span> methods allow you to inject
+  a new element into the middle of a vector. They expand the vector accordingly. The <span
+      class="code">erase</span> methods allow you to remove an element from the vector and
+  contract the vector accordingly. These operations move vector elements around, and they can be
+  time-consuming to execute on long vectors. Using these methods also requires that you know
+  something about iterators, and we aren't ready to talk about that subject yet.</p>
 
-<p>It is useful to know, however, that there is a <span class="code">clear</span> method that
+<p>However, it is useful to know that there is a <span class="code">clear</span> method that
   erases the entire vector.</p>
 
 <pre class="code">
-text.clear();
+text.clear( );
   // After this, text has no elements.
 </pre>
 
 <h3>Do I ever need arrays?</h3>
 
-<p>Just as <span class="code">std::string</span> largely replaces the need for C style arrays of
-  characters, <span class="code">std::vector</span> largely replaces the need for C style arrays
+<p>Just as <span class="code">std::string</span> largely replaces the need for C-style arrays of
+  characters, <span class="code">std::vector</span> largely replaces the need for C-style arrays
   of other types. In general, if you are writing a C++ program and find yourself declaring an
-  array ask yourself: why not use a vector? Unlike C style arrays, vectors are dynamic and (just
+  array, ask yourself: why not use a vector? Unlike C-style arrays, vectors are dynamic and (just
   as with <span class="code">std::strings</span>) they manage their memory automatically for you.
-  Furthermore a good implementation of the standard library should provide you with vectors that
-  are nearly as fast as plain C style arrays. You should not have to suffer a significant
-  performance penalty for using vectors.</p>
+  Furthermore, a good implementation of the standard library should provide you with vectors that
+  are nearly as fast as C-style arrays. You should not have to suffer a significant performance
+  penalty for using vectors.</p>
 
 <h2>Summary</h2>
 
 <ol id="summary-list">
+  <li><p>A template is a class (or a function) where the compiler can later fill in some types
+    involved. For example, the vector template allows you to specify the type of object in the
+    vector when you declare the vector. The compiler uses this information to specialize the
+    template when it compiles your program.</p>
 
-  <li>
-    <p>A template is a class (or function) where some of the types involved can be later filled in
-      by the compiler. For example, the vector template allows you to specify the type of object
-      in the vector when you declare the vector. The compiler uses this information to
-      "instantiate" a specific vector type when it compiles your program.</p>
     <p>A container is an object that holds other objects. The C-style array is a container,
       although a simple one. The C++ standard library contains several, more elaborate containers
-      all implemented as templates (so they can contain any type of object you wish).</p>
-  </li>
+      all implemented as templates (so they can contain any type of object you wish).</p></li>
 
-  <li>
-    <p>The C++ standard vector is a replacement for C-style arrays. It allows you to access
-      individual elements using the <span class="code">[]</span> operator just like arrays.
-      However, unlike arrays, vectors also support the ability to grow and shrink dynamically.
-      Vectors can also be assigned and compared in their entirity using the usual operators.</p>
-  </li>
+  <li><p>The C++ standard vector is a replacement for C-style arrays. It allows you to access
+    individual elements using the <span class="code">[]</span> operator just like arrays. However,
+    unlike arrays, vectors also support the ability to grow and shrink dynamically. Vectors can
+    also be assigned and compared in their entirety using the usual operators.</p></li>
 
-  <li>
-    <p>Vectors, and for that matter all of the standard C++ containers, have value semantics. This
-      means that they hold copies of the objects you place in them. After you have added an object
-      to a vector, you can change (or destroy) the original object without affecting the copy in
-      the vector. A container with reference semantics would not "own" the objects it contains but
-      rather just have some way of getting at the objects. Such containers would allow you to
-      effectively share objects between containers. Although C++ standard containers don't have
-      reference semantics, you can get much the same effect, when you need it, by creating a
-      container of pointers.</p>
-  </li>
-
+  <li><p>Vectors, and for that matter all the standard C++ containers, have value semantics. This
+    means that they hold copies of the objects you place in them. After you have added an object
+    to a vector, you can change (or destroy) the original object without affecting the copy in the
+    vector. A container with reference semantics would not own the objects it contains but rather
+    just have some way of getting at the objects. Such containers would allow you to effectively
+    share objects between containers. Although C++ standard containers don't have reference
+    semantics, you can get much the same effect, when you need it, by creating a container of
+    pointers.</p></li>
 </ol>
 
 <address>
-  &copy; Copyright 2007 by Peter C. Chapin.<br/> Last Revised: <b>July 25, 2007</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>July 19, 2023</b>
 </address>
 
 </body>

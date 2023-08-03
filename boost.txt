@@ -1,0 +1,48 @@
+Set Up Boost
+============
+
+This document describes the way in which I prepared the Boost archive for use in VTC's Parallel
+Programming class. It contains specific instructions for compiling the Boost thread libraries in
+both 32 bit and 64 bit form.
+
+YOU PROBABLY DON'T NEED TO READ THIS! I can provide a Boost distribution that contains the
+necessary libraries pre-compiled. This document is a log of what I did. It will be useful in
+case you (or I) need to do it again.
+
+These instructions pertain to Windows, but the instructions for compiling Boost on Linux are
+similar.
+
+Install Boost.
+  1. Unpack the 7z file containing the source code to some suitable location.
+  2. Create a BOOST_HOME environment variable that points to the top level folder.
+  
+Build b2/bjam.
+  1. Open a "Developer Command Prompt for VS2013" window.
+  2. cd into %BOOST_HOME%\tools\build\v2
+  3. Execute: .\bootstrap.bat. No arguments are necessary.
+  4. Execute: .\b2 install --prefix=PREFIX. Here PREFIX is the directory to install b2.
+     It should be on the path.
+  
+Build Boost libraries for Microsoft Visual C++:
+  1. Open a "Developer Command Prompt for VS2013" window.
+  2. cd to %BOOST_HOME% 
+  3. Execute: b2 address-model=32 toolset=msvc --build-type=complete stage
+  4. Create a folder %BOOST_HOME%\lib\32. Move everything from 'stage' into that folder.
+  5. Remove the now empty 'stage' folder.
+  
+  1. Open a "VS2013 x64 Cross Tools Command Prompt" window.
+  2. cd to %BOOST_HOME%
+  3. Execute: b2 address-model=64 toolset=msvc --build-type=complete stage
+  4. Create a folder %BOOST_HOME%\lib\64. Move everything from 'stage' into that folder.
+  5. Remove the now empty 'stage' folder.
+
+Build Boost libraries for Intel C++:
+  1. Open a "Intel Parallel Studio XE 2013 IA-32 Visual Studio 2013" window.
+  2. cd to %BOOST_HOME%
+  3. Execute: b2 address-model=32 toolset=intel --build-type=complete stage
+
+  1. Open a "Intel Parallel Studio XE 2013 Intel 64 Visual Studio 2013" window.
+  2. cd to %BOOST_HOME%
+  3. Execute: b2 address-model=64 toolset=intel --build-type=complete stage
+
+Remove the bin.v2 folder.

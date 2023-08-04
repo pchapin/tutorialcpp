@@ -30,7 +30,7 @@
 
 <p>Arrays are created by putting together a large number of objects that all have the same type.
   Each object in the array is called an array element. Array elements don't have individual names.
-  Instead you specify an array element using an index into the array. Because the index can be
+  Instead, you specify an array element using an index into the array. Because the index can be
   computed when the program runs, it is possible to write loops that easily look at or manipulate
   every element in an array.</p>
 
@@ -47,16 +47,16 @@
   "defining" the structure. Here is an example</p>
 
 <pre class="code">
-  struct example {
-      int    count;
-      char   name[128];
-      double key;
-  };
+struct example {
+    int    count;
+    char   name[128];
+    double key;
+};
 </pre>
 
-<p>The above defines a structure type named "example". Such structures contain three members -- an
-  int, an array of characters, and a double, all with names as shown. Presumably these members are
-  related in some way and that is way they have been collected together into a single
+<p>The above defines a structure type named "example." Such structures contain three members—an
+  int, an array of characters, and a double, all with names as shown. Presumably, these members
+  are related in some way and that is why they have been collected together into a single
   structure.</p>
 
 <p>Typically, but not always, structure definitions are put into header files and #included into
@@ -66,11 +66,11 @@
   actually create a structure variable, you need to do something like this</p>
 
 <pre class="code">
-  int main( void )
-  {
-      struct example my_example;
-      // etc
-  }
+int main( void )
+{
+    struct example my_example;
+    // etc
+}
 </pre>
 
 <p>In order for the compiler to accept this, it must have already seen the definition of struct
@@ -83,18 +83,18 @@
   another.</p>
 
 <pre class="code">
-  int main( void )
-  {
-      struct example X, Y;  // Creates two struct Example variables.
+int main( void )
+{
+    struct example X, Y;  // Creates two struct Example variables.
 
-      X.count = 10;
-        // Sets the count member in X to 10. Notice how the dot operator
-        // is needed to access a member of a structure variable.
+    X.count = 10;
+      // Sets the count member in X to 10. Notice how the dot operator
+      // is needed to access a member of a structure variable.
 
-      if( Y.count == 10 ) { ...
-        // Setting the count member of X to 10 has no affect on the count
-        // member of Y. The count member of Y is still uninitialized.
-  }
+    if( Y.count == 10 ) { ...
+      // Setting the count member of X to 10 has no affect on the count
+      // member of Y. The count member of Y is still uninitialized.
+}
 </pre>
 
 <p>The fact that every structure variable has its own copy of the members is essential to
@@ -109,33 +109,33 @@
     structure.</p>
 
     <pre class="code">
-  int main(void)
-  {
-      struct example  X;
-      struct example *p; // This is a pointer to a struct example.
+int main(void)
+{
+    struct example  X;
+    struct example *p; // This is a pointer to a struct example.
 
-      p = &amp;X;
-        // Puts the address of the entire structure into p.
-  }
+    p = &amp;X;
+      // Puts the address of the entire structure into p.
+}
 </pre>
   </li>
 
-  <li><p>Assign one structure variable to another. For example if X and Y are both struct example
-    variables you can do:</p>
+  <li><p>Assign one structure variable to another. For example, if X and Y are both struct example
+    variables, you can do:</p>
 
     <pre class="code">
-  X = Y;
+X = Y;
 </pre>
 
-    <p>All of the members of Y are copied into the corresponding members of X. This is true even
-      if some of the members are arrays (which you can't normally assign using an equals sign).
-      However, in order to assign on structure variable to another the two structure variables
-      need to have the same type. Otherwise they won't necessarily have the same members and the
-      assignment really wouldn't make any sense.</p>
+    <p>All the members of Y are copied into the corresponding members of X. This is true even if
+      some members are arrays (which you can't normally assign using an equals sign). However, in
+      order to assign on structure variable to another, the two structure variables need to have
+      the same type. Otherwise, they won't necessarily have the same members and the assignment
+      really wouldn't make any sense.</p>
   </li>
 
   <li>
-    <p>You can pass a structure variable into a function and you can return a structure variable
+    <p>You can pass a structure variable into a function, and you can return a structure variable
       from a function. When you do this, all the members are copied as you would expect based on
       the way structures can be assigned.</p>
   </li>
@@ -146,7 +146,7 @@
   on the type of the member. An integer member can be used in any way that any other integer might
   be used.</p>
 
-<p>To access a structure member you must use the dot operator. Thus <span
+<p>To access a structure member, you must use the dot operator. Thus, <span
     class="code">X.count</span> represents the integer count in the structure variable X. It can
   be used like any other integer variable.</p>
 
@@ -154,29 +154,29 @@
 
 <p>Although it is possible to pass a structure into a function, it is often not done. This is
   because structures can be large and copying them (as required by C's "call by value" method of
-  passing function parameters) can be time consuming. Often functions will accept a pointer to a
+  passing function parameters) can be time-consuming. Often functions will accept a pointer to a
   structure instead. Using my structure example again</p>
 
 <pre class="code">
-  void f( struct example *p )
-  {
-      if( (*p).count == 10 ) { ...
-  }
+void f( struct example *p )
+{
+    if( (*p).count == 10 ) { ...
+}
 </pre>
 
 <p>Here I'm taking a parameter that will hold the address of a (possibly large) structure stored
-  elsewhere. Inside the function I want to see if the count member of that structure is 10 or not.
-  Since p is a pointer and not a structure, I can't do something like</p>
+  elsewhere. Inside the function, I want to see if the count member of that structure is 10 or
+  not. Since p is a pointer and not a structure, I can't do something like</p>
 
 <pre class="code">
-  if( p.count == 10 ) { ...
+if( p.count == 10 ) { ...
 </pre>
 
-<p>That just doesn't make sense. It's the thing p is pointing at that is the structure. Thus I
+<p>That just doesn't make sense. It's the thing p is pointing at that is the structure. Thus, I
   need to use the indirection operator. Yet if I do</p>
 
 <pre class="code">
-  if( *p.count == 10 ) { ...
+if( *p.count == 10 ) { ...
 </pre>
 
 <p>the compiler treats that differently than what I want. Because of C's precedence rules the
@@ -187,29 +187,29 @@
   "extra" parentheses:</p>
 
 <pre class="code">
-  (*p).count
+(*p).count
 </pre>
 
 <p>Since this situation arises quite often, C has a special operator to help out. It is the arrow
   operator. It looks like this</p>
 
 <pre class="code">
-  p->count
+p->count
 </pre>
 
 <p>When you use the arrow operator, the left operand must be a pointer to a structure (as in this
   case), and the right operand must be the name of one of that structure's members. The result of
-  the expression is the member thusly named.</p>
+  the expression is the member thus named.</p>
 
 <p>The arrow operator is technically not necessary. You could make do with the regular indirection
-  operator. However, since pointers to structures are very common it is helpful to have an easy
+  operator. However, since pointers to structures are very common, it is helpful to have an easy
   way to access a structure's members via a pointer. You will see the arrow operator being used
   extensively in C programs.</p>
 
 <h2>Summary</h2>
 
 <ol id="summary-list">
-  <li><p>A structure is an aggregate object composed of several "members". Each member has its own
+  <li><p>A structure is an aggregate object composed of several "members." Each member has its own
     name and type. Two structure variables of the same structure type have independent members.
     Changing the value of a member of one structure variable will not affect the value of the
     similarly named member in any other structure variable.</p></li>
@@ -227,7 +227,7 @@
 </ol>
 
 <address>
-  &copy; Copyright 2016 by Peter C. Chapin.<br/> Last Revised: <b>January 12, 2016</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/> Last Revised: <b>August 4, 2023</b>
 </address>
 
 </body>

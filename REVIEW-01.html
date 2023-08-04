@@ -41,13 +41,13 @@
   reason the function is used. Here is a picture that illustrates the ideas:</p>
 
 <pre class="figure">
-                    +----------+
-     x   ----->     |          |
-                    |          |
-     y   ----->     |  func()  |     -----> result
-                    |          |
-     x   ----->     |          |
-                    +----------+
+               +----------+
+x   ----->     |          |
+               |          |
+y   ----->     |  func()  |     -----> result
+               |          |
+x   ----->     |          |
+               +----------+
 </pre>
 
 <p>This function, named <span class="code">func</span>, is shown taking three parameters and
@@ -71,17 +71,17 @@
   of its parameter. It might be used like this:</p>
 
 <pre class="code">
-  #include &lt;math.h&gt;
-  #include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#include &lt;stdio.h&gt;
 
-  int main( void )
-  {
-      double result;
+int main( void )
+{
+    double result;
 
-      result = sqrt( 2.0 );
-      printf( "The square root of 2 is: %f\n", result );
-      return 0;
-  }
+    result = sqrt( 2.0 );
+    printf( "The square root of 2 is: %f\n", result );
+    return 0;
+}
 </pre>
 
 <p>Here I'm sending the value 2.0 into the function and putting what the function returns into the
@@ -110,10 +110,10 @@
   example:</p>
 
 <pre class="code">
-  int count_items(char *buffer, char ch)
-  {
-      ...
-  }
+int count_items(char *buffer, char ch)
+{
+    ...
+}
 </pre>
 
 <p>The return type is show first. In the example above it is <span class="code">int</span>. Next
@@ -125,24 +125,24 @@
   character.</p>
 
 <p>Before this function can be used or written, however, the programmers must know what it does.
-  Thus every function must be accompanied by appropriate documentation that describes it. A more
+  Thus, every function must be accompanied by appropriate documentation that describes it. A more
   correct header for this function is:</p>
 
 <pre class="code">
-  /*
-   * Scans the null terminated string pointed at by buffer and counts the
-   * number of times the character ch is found in that string. It returns
-   * the resulting count.
-   *
-   */
-  int count_items( char *buffer, char ch )
-  {
-      ...
-  }
+/*
+ * Scans the null terminated string pointed at by buffer and counts the
+ * number of times the character ch is found in that string. It returns
+ * the resulting count.
+ *
+ */
+int count_items( char *buffer, char ch )
+{
+    ...
+}
 </pre>
 
-<p>It is important to understand that without documentation a function is incomplete. The
-  programmers who use a function need to know more about it than the compiler does. Thus even
+<p>It is important to understand that without documentation, a function is incomplete. The
+  programmers who use a function need to know more about it than the compiler does. Thus, even
   though the compiler ignores the documentation, it is still a necessary part of the function.</p>
 
 <p>The parameters to the function, <span class="code">buffer</span> and <span
@@ -155,16 +155,16 @@
       class="code">count_items</span> might look:</p>
 
 <pre class="code">
-  int count_items( char *buffer, char ch )
-  {
-      int count = 0;
+int count_items( char *buffer, char ch )
+{
+    int count = 0;
 
-      while( *buffer ) {
-          if( *buffer == ch ) count++;
-          buffer++;
-      }
-      return count;
-  }
+    while( *buffer ) {
+        if( *buffer == ch ) count++;
+        buffer++;
+    }
+    return count;
+}
 </pre>
 
 <p>This function works by stepping the given pointer down the string until the null byte (which
@@ -185,19 +185,19 @@
   a declaration for <span class="code">count_items</span>:</p>
 
 <pre class="code">
-  int count_items( char *buffer, char ch );
+int count_items( char *buffer, char ch );
 </pre>
 
 <p>This declaration merely informs the compiler that this function exists someplace and allows the
   compiler to process calls to the function. The declaration does not, by itself, cause the
   function to become part of your program.</p>
 
-<p>Actually in a function declaration, the names of the parameters are not significant in any way.
+<p>Actually, in a function declaration, the names of the parameters are not significant in any way.
   They are ignored by the compiler and can be left out. Some programmers would write the
   declaration of <span class="code">count_items</span> like this:</p>
 
 <pre class="code">
-  int count_items( char *, char );
+int count_items( char *, char );
 </pre>
 
 <p>Other programmers prefer to keep the names in the declaration because they help to document the
@@ -216,25 +216,25 @@
   Here is an example of how <span class="code">count_items</span> might be called:</p>
 
 <pre class="code">
-  // Show the compiler the declarations of printf and strcpy.
-  #include &lt;stdio.h&gt;
-  #include &lt;string.h&gt;
+// Show the compiler the declarations of printf and strcpy.
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
 
-  // Declaration allows compiler to process call properly.
-  // This would normally be in a header file.
-  int count_items( char *, char );
+// Declaration allows compiler to process call properly.
+// This would normally be in a header file.
+int count_items( char *, char );
 
-  int main( void )
-  {
-      char name[128];
-      int  e_count;
+int main( void )
+{
+    char name[128];
+    int  e_count;
 
-      strcpy( name, "Peter C. Chapin" );
-      e_count = count_items( name, 'e' );
+    strcpy( name, "Peter C. Chapin" );
+    e_count = count_items( name, 'e' );
 
-      printf( "There are %d 'e' characters in the string.\n", e_count );
-      return 0;
-  }
+    printf( "There are %d 'e' characters in the string.\n", e_count );
+    return 0;
+}
 </pre>
 
 <p>When a function is called the values given to it are called the arguments to the function. In
@@ -272,26 +272,26 @@
   local to the function. Here is <span class="code">count_items</span> again:</p>
 
 <pre class="code">
-  int count_items( char *buffer, char ch )
-  {
-      int count = 0;
+int count_items( char *buffer, char ch )
+{
+    int count = 0;
 
-      while( *buffer ) {
-          if( *buffer == ch ) count++;
-          buffer++;
-      }
-      return count;
-  }
+    while( *buffer ) {
+        if( *buffer == ch ) count++;
+        buffer++;
+    }
+    return count;
+}
 </pre>
 
 <p>The variable <span class="code">count</span> is a local variable. It only exists while <span
     class="code">count_items</span> is running. When <span class="code"
->count_items</span> returns that variable will cease to exist. Furthermore any use of <span
+>count_items</span> returns that variable will cease to exist. Furthermore, any use of <span
     class="code">count</span> inside of <span class="code">count_items</span> will refer to the
   local variable. If a variable named <span class="code">count</span> exists outside the function,
   it will be temporarily hidden.</p>
 
-<p>In this way the programmer who creates <span class="code">count_items</span> can choose
+<p>In this way, the programmer who creates <span class="code">count_items</span> can choose
   whatever variable names he/she likes without worrying about how they might conflict with
   variable names chosen elsewhere in the program. Without this facility, constructing large
   programs would be nearly impossible to do correctly.</p>
@@ -300,7 +300,7 @@
 
 <ol id="summary-list">
   <li><p>A function is a body of code that performs a particular task. Functions take inputs,
-    called parameters, and produce a single result. In addition many functions have side effects.
+    called parameters, and produce a single result. In addition, many functions have side effects.
     In some cases, the function exists entirely for its side effects. Function definitions consist
     of a header that specifies the function's return type, name, parameters, and an attached body
     that specifies the action of the function. Function definitions are normally placed in .c
@@ -319,7 +319,7 @@
 </ol>
 
 <address>
-  &copy; Copyright 2016 by Peter C. Chapin.<br/> Last Revised: <b>January 12, 2016</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/> Last Revised: <b>August 4, 2023</b>
 </address>
 
 </body>

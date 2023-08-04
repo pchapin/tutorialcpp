@@ -1,0 +1,132 @@
+
+Emacs
+(C) Copyright 2023 by Peter Chapin
+
+OVERVIEW
+
+In this lesson I will cover the following topics.
+
+1. What Emacs is and why you might want to use it.
+
+2. How to use Emacs to do basic editing tasks.
+
+
+BODY
+
+*** What is Emacs?
+
+Emacs is a text editor. It is a very powerful editor with a long and venerable history. Some
+people think Emacs is the best text editor ever created. Some people think Emacs is a horrible
+mistake. No matter what you think, it is a fact that Emacs is very widely known and very
+influential. You should become familiar with it. Knowledge of Emacs is something you can put on
+your resume. Even though you may have used another editor in the past, I believe that you should
+use Emacs for most of your editing tasks in this course. It will take some time for you to learn
+Emacs, but once you do you may discover that you like it. Emacs grows on you.
+
+There are actually several flavors of emacs in existence. GNU Emacs is the original. It was
+first created in the 1980s and has gone through many versions. Although Emacs was created
+originally for Unix, and reaches its full potential under Unix, it has been ported to virtually
+every operating system known. I have used Emacs for OS/2 and I use Emacs for Windows and macOS.
+This is one advantage of Emacs: once you learn it, you can use it on any computer system you
+might have. You don't need to switch editors when you switch operating systems. In fact, once
+you start using Emacs, you might want to use it everywhere. Emacs has a steep learning curve.
+Using it on all your systems makes the high investment in learning Emacs more worthwhile.
+
+*** Learning to use Emacs.
+
+Emacs comes with a very servicable tutorial. You should read it. Consider the tutorial as part
+of this lesson (a #include if you will). To access it, do this
+
+1. Start Emacs by typing its name at the Unix prompt
+
+	$ emacs
+
+2. After Emacs has started type ^H (that's CTRL+H) and then 't'. This command, usually shown as
+   "C-H t" in the Emacs literature, runs the tutorial.
+
+The tutorial is really just a special file that emacs loads. As you read the file you can try
+out the various commands on the file. You don't need to finish the entire tutorial all at once.
+You can save it, and it will be saved in your home directory. You won't overwrite the original
+file. Thus don't be afraid to edit the tutorial file itself in order to practice with Emacs.
+
+The tutorial talks about using control keys to move the cursor. These control keys work and they
+are worth knowing. Emacs uses control keys for these things because not all terminals have arrow
+keys (believe it or not). However, on terminals that do have arrow keys Emacs usually recognizes
+them and allows you to use them. Depending on your terminal emulation more or less of the
+special keys may work. You will have to experiment. You can always fall back on the control keys
+if necessary.
+
+The tutorial also talks a lot about a "meta" key. It goes on to say that on some terminals this
+key is marked as "Alt". It happens that the PC keyboard does have an "Alt" key, but that may or
+may not work as a meta key in emacs (usually it doesn't). Thus to access the commands that use
+the meta key you will have to press the ESC key and let it go to simulate the action of the meta
+key. This is explained in the tutorial, but I wanted to mention it here so that you would watch
+for it.
+
+It is helpful to have a "quick reference card" of useful Emacs commands. However, instead of me
+just giving you one, I suggest you write your own. That will help you to remember the commands.
+As you read the tutorial, jot down how to execute the commands that you think you would use a
+lot. Keep the number small enough to fit on a single page. Keep your quick reference card handy
+when you are first learning Emacs so that you can refer to it easily.
+
+If you are using a graphical version of Emacs (Windows, or X Windows), you will get scroll bars,
+mouse support, and pull down menus. Emacs might not impress you much on a text mode terminal,
+but keep in mind that it can handle either text or graphical terminals appropriately depending
+on what it is given to work with.
+
+During this course I will mention now and then some of Emacs's more interesting features that
+you might find useful. Despite its somewhat difficult interface, you will see as time goes on
+that it is actually quite a powerful editor. Once you get used to the commands they will seem
+natural. I often find myself typing emacs commands into other programs and then getting
+frustrated because they don't work!
+
+*** Online help.
+
+Emacs has an extensive online help system. You will probably want to know how to use it.
+Actually the help system Emacs uses is fairly general. It was created by the GNU people as a way
+of documenting any program and the information in it can be read outside of Emacs with an
+appropriate viewer.
+
+The main problem with this "info system" is that it is somewhat old (it predates HTML) and not
+as easy to use as you might like. If you want to use Emacs's help system effectively -- and you
+do -- you should read over the tutorial on it. To access this tutorial from inside Emacs do "C-h
+i" to get into the info system and then follow the instructions at the top of the screen. You
+should consider this tutorial as another #include in this lesson. This lesson has a lot of
+reading!
+
+*** Where can I get Emacs?
+
+If you are running a Windows machine, you can download a very nice version of Emacs and install
+it for free. You can get the latest version and read the installation instructions at
+
+	http://www.gnu.org/software/emacs/windows/ntemacs.html
+
+If you are running macOS, try
+
+	http://www.csis.hku.hk/~choi/emacs/
+
+I am not familar with the Mac version, but I would be interested to hear from anyone who tries
+it.
+
+*** Other editors.
+
+You may already have an editor that you know and that you like. It is not my intention here to
+bad mouth your favorite editor. My only goal is to encourage you to explore Emacs. If you would
+rather not bother learning a new editor at this time, that is okay. However as your programming
+skills become more sophisticated you will need a progressively more sophisticated editor as
+well. There are many suitable choices, but many simple editors are inadequate for "serious"
+programming. Notepad (Windows) and pico (Unix), for example, are really not up to the task of
+writing major works of software. If you are using one of those editors I believe that you really
+should move on to something else. I suggest Emacs.
+
+SUMMARY
+
+1. Emacs is a powerful, popular, open source text editor that is has many features to support
+   programming.
+
+2. The best way to start learning Emacs is to read over the Emacs tutorial by typing "C-h t"
+   (that's Ctrl+H, then "t") while in Emacs.
+
+3. There are many other editors that are suitable for serious programming, but some are not.
+   Even if you don't want to bother with Emacs, please move away from notepad or pico if you are
+   using those.

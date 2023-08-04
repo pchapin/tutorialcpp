@@ -12,7 +12,8 @@
 <body>
 <div class="primary-title-header">
   <h1>C++ Tutorial</h1>
-  <p>&copy; Copyright 2016 by Peter Chapin<br/> Last Revised: <b>January 2016</b><br/></p>
+  <p style="text-align: center;">&copy; Copyright 2023 by Peter Chapin<br/> Last Revised: <b>August
+    2023</b><br/></p>
 </div>
 <hr/>
 <h2>Introduction</h2>
@@ -34,20 +35,20 @@
 <h2>Lessons</h2>
 
 <p>This course assumes as a prerequisite that you are familiar with C. Teaching C++ on top of a C
-  background is somewhat controversial. Some C++ instructors believe that C++ is best taught on
-  its own terms and not as an enhancement to C. Such an approach makes sense because C++ offers
-  different (and better) ways of handling certain problems as compared to C. It can take a while
-  for a seasoned C programmer to break old habits and really start using C++ to its full
-  potential. However, at Vermont Technical College we teach plain C in our introductory course
-  because we believe there are still many contexts where plain C is all that is available and thus
-  worth learning for its own sake. As a result, our C++ course assumes a C background.</p>
+  background is controversial. Some C++ instructors believe that C++ is best taught on its own
+  terms and not as an enhancement to C. Such an approach makes sense because C++ offers different
+  (and better) ways of handling certain problems as compared to C. It can take a while for a
+  seasoned C programmer to break old habits and really start using C++ to its full potential.
+  However, at Vermont State University we teach plain C in an introductory course because we
+  believe there are still many contexts where plain C is all that is available and thus worth
+  learning for its own sake. As a result, our C++ course assumes a C background.</p>
 
 <p>C++ is an enormous language that can be used in many ways. It would be impossible for a single
   course to cover all of what is C++. In this course, I focus on C++'s support for user-defined
   types and object-oriented programming. These are important facilities that are in wide use.
   However, there are many C++ features that I do not describe in detail here. In particular, this
   course is light on templates and generic programming. It is my hope, however, that after working
-  through the lessons in this course you will be in a good position to study C++ templates from
+  through the lessons in this course, you will be in a good position to study C++ templates from
   other sources.</p>
 
 <p>I have broken all of this material into 30 lessons along with some supporting files. Each
@@ -57,7 +58,7 @@
   In addition, this course assumes you are comfortable editing source code files with a good
   programmer's editor.</p>
 
-<p>In addition to the lessons themselves I have also prepared several example programs to help
+<p>In addition to the lessons themselves, I have also prepared several example programs to help
   illustrate some points and to show the features of C++ in a more realistic way. In the list
   below, I show links to these examples as well as to the lesson text. Each example is associated
   with a particular lesson. You should review an example after you've read the corresponding
@@ -68,13 +69,20 @@
   lessons are shown below just before the main list of lessons for this course. If you are
   interested in my full C course, see the links at the bottom of this page.</p>
 
+<p>Finally, I have prepared a couple of supplementary lessons on using the <kbd>gdb</kbd> debugger
+  and the <kbd>Emacs</kbd> text editor. These lessons are not about C++ directly, but may be of
+  interest if you are using those tools. The supplementary lessons are at the bottom of the
+  numbered lesson list.</p>
+
+<p>Lessons that review certain topics from C:</p>
+
 <ul>
   <li><a href="REVIEW-01.html">Review Lesson 1</a>: Functions.</li>
   <li><a href="REVIEW-02.html">Review Lesson 2</a>: Pointers.</li>
   <li><a href="REVIEW-03.html">Review Lesson 3</a>: Structures.</li>
 </ul>
 
-<p>The following lessons contain the content of this course</p>
+<p>Lessons containing the content of this course:</p>
 
 <ul>
   <li><a href="LESSON-01.html">Lesson 1</a>: Overview of C++.</li>
@@ -126,6 +134,13 @@
   <li>Lesson 30: Generic programming.</li>
 </ul>
 
+<p>Lessons containing supplementary material:</p>
+
+<ol>
+  <li><a href="LESSON-EMACS.txt">Lesson EMACS</a>: Using the Emacs text editor.</li>
+  <li><a href="LESSON-DEBUG.txt">Lesson DEBUG</a>: Using the gdb debugger.</li>
+</ol>
+
 <hr/>
 <h2>Videos</h2>
 
@@ -161,74 +176,72 @@
 <h3>Compilers</h3>
 
 <ul>
-  <li><p>Here is Microsoft's page about <a href="http://www.visualstudio.com">Visual Studio</a>,
-    and the official <a href="http://blogs.msdn.com/b/visualstudio/">Visual Studio blog</a>.</p>
-  </li>
+  <li>Here is Microsoft's page about <a href="http://www.visualstudio.com">Visual Studio</a>,
+    and the official <a href="http://blogs.msdn.com/b/visualstudio/">Visual Studio blog</a>.</li>
 
-  <li><p>The <a href="http://gcc.gnu.org/">Gcc home page</a> contains all the latest about the Gnu
-    Compiler Collection.</p></li>
+  <li>The <a href="http://gcc.gnu.org/">Gcc home page</a> contains all the latest about the Gnu
+    Compiler Collection.</li>
 
-  <li><p>The official websites of <a href="http://llvm.org">LLVM</a> and <a
+  <li>The official websites of <a href="http://llvm.org">LLVM</a> and <a
       href="http://clang.llvm.org/">clang</a>. I've written some <a
-      href="clang.html">instructions for installing clang from source</a> on Linux systems.</p>
-  </li>
+      href="clang.html">instructions for installing clang from source</a> on Linux systems.</li>
 
-  <li><p><a
+  <li><a
       href="http://www.openwatcom.org/">Open Watcom</a> only supports C++ 1998, and even that
     support is incomplete, but it does still support various legacy targets such as MS-DOS, 16-bit
-    Windows, and OS/2 (as well as modern Windows and Linux).</p></li>
+    Windows, and OS/2 (as well as modern Windows and Linux).</li>
 </ul>
 
 <h3>Tutorials</h3>
 
 <ul>
-  <li><p>My <a href="https://github.com/pchapin/tutorialc">C tutorial</a> is useful background
-    information.</p></li>
+  <li>My <a href="https://github.com/pchapin/tutorialc">C tutorial</a> is useful background
+    information.</li>
 
-  <li><p><a href="http://www.learncpp.com/">LearnCpp.Com</a> contains an extensive tutorial on
-    C++.</p></li>
+  <li><a href="http://www.learncpp.com/">LearnCpp.Com</a> contains an extensive tutorial on
+    C++.</li>
 
-  <li><p><a href="http://www.tutorialspoint.com/cplusplus/">C++ tutorial on tutorialspoint</a>. It
-    looks fairly polished but only appears to cover C++ 1998.</p></li>
+  <li><a href="http://www.tutorialspoint.com/cplusplus/">C++ tutorial on tutorialspoint</a>. It
+    looks fairly polished but only appears to cover C++ 1998.</li>
 </ul>
 
 <h3>References</h3>
 
 <ul>
-  <li><p>The <a href="http://en.cppreference.com/w/">cppreference.com</a> website contains
+  <li>The <a href="http://en.cppreference.com/w/">cppreference.com</a> website contains
     reference material for C++. Although not an "official" source of information about the
-    language, it nevertheless seems useful and well maintained.</p></li>
+    language, it nevertheless seems useful and well maintained.</li>
 
-  <li><p>The <a href="http://www.cplusplus.com/">cplusplus.com</a> website also contains
+  <li>The <a href="http://www.cplusplus.com/">cplusplus.com</a> website also contains
     documentation and unofficial reference material for C++. Let me know which of these two sites
-    seems better; perhaps I should only link to one.</p></li>
+    seems better; perhaps I should only link to one.</li>
 
-  <li><p><a href="http://msdn.microsoft.com/en-us/library/hh875057.aspx">Microsoft's reference
+  <li><a href="http://msdn.microsoft.com/en-us/library/hh875057.aspx">Microsoft's reference
     material on C++</a>. Most directly applicable to Visual Studio users, but much of what is
-    described is entirely standard.</p></li>
+    described is entirely standard.</li>
 
-  <li><p>The <a href="https://isocpp.github.io/CppCoreGuidelines/">C++ Core Guidelines</a> is an
-    attempt to describe rules for writing modern, high quality C++. Some tools (e.g, Visual
-    Studio) can check your program against these guidelines and report on violations.</p></li>
+  <li>The <a href="https://isocpp.github.io/CppCoreGuidelines/">C++ Core Guidelines</a> is an
+    attempt to describe rules for writing modern, high-quality C++. Some tools (e.g., Visual
+    Studio) can check your program against these guidelines and report on violations.</li>
 
-  <li><p>My <a href="String-Reference-Card.odt"><code>std::string</code> Quick Reference Card</a>
-    is a cheat sheet for <code>std::string</code> methods.</p></li>
+  <li>My <a href="String-Reference-Card.odt"><code>std::string</code> Quick Reference Card</a>
+    is a cheat sheet for <code>std::string</code> methods.</li>
 
-  <li><p>Here is the <a href="C++-Style.odt">C++ Style Guide</a> that I use for my own
-    programming, and that I used for the samples in this tutorial..</p></li>
+  <li>Here is the <a href="C++-Style.odt">C++ Style Guide</a> that I use for my own
+    programming, and that I used for the samples in this tutorial.</li>
 
 </ul>
 
 <h3>Libraries</h3>
 
 <ul>
-  <li><p>The official website of <a href="http://www.boost.org/">Boost</a>. Many people feel boost
-    is an essential add-on to any C++ project.</p></li>
+  <li>The official website of <a href="http://www.boost.org/">Boost</a>. Many people feel boost
+    is an essential add-on to any C++ project.</li>
 </ul>
 
 <hr/>
 <address>
-  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>July 19, 2023</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/>Last Revised: <b>August 4, 2023</b>
 </address>
 </body>
 </html>

@@ -1,3 +1,44 @@
+html {
+  color      : black;
+  text-align : left;
+  /* font-family: Calibri, Verdana, sans-serif; */
+}
+
+body { background: white; }
+
+p {
+  text-align  : justify;
+  margin-left : 1cm;
+  margin-right: 1cm;
+  /*  color      : black; */
+  /*  font-size  : small; */
+  /*  font-family: Arial, Helvetica, sans-serif; */
+}
+p.signature {
+  margin-left: 0;
+}
+
+pre {
+  margin-left: 1cm;
+}
+
+dl,
+dt,
+ol,
+ul {
+  /* color       : black; */
+  /* font-size   : small; */
+  text-align  : left;
+  margin-left : 1cm;
+  margin-right: 1cm;
+}
+
+ul {
+  list-style: circle;
+}
+
+li p,
+li pre { margin-left: 0; }
 
 div.primary-title-header {
   background: rgba(255, 221, 0, 0.28);

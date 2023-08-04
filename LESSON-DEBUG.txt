@@ -1,6 +1,6 @@
 
-CS-212: Lesson #16: Using the debugger.
-(C) Copyright 2000 by Peter Chapin
+Lesson #23: Using the debugger.
+(C) Copyright 2023 by Peter Chapin
 
 There is no reading in the text for this lesson.
 
@@ -16,176 +16,151 @@ BODY
 
 *** Source level debuggers.
 
-Often bugs can be found by just thinking carefully about a program and
-inserting a few carefully placed output statements. However, some bugs
-are very difficult to figure out and require a heavier approach. To help
-you with this, virtually every compiler comes with a "source level
+Often bugs can be found by just thinking carefully about a program and inserting a few carefully
+placed output statements. However, some bugs are very difficult to figure out and require a
+heavier approach. To help you with this, virtually every compiler comes with a "source level
 debugger" that helps you study your program.
 
-The gcc compiler has an associated debugger named gdb. It can be used to
-debug both C and C++ programs. As with gcc, the gdb debugger is free,
-yet powerful. Like all source level debuggers, gdb allows you to view
-the source code of your program as you are debugging it, set breakpoints
-in your program, view and modify the values of objects, etc. It gives
-you a way of executing your program in slow motion and watching exactly
-how it works. It is a powerful tool and you should get used to using it.
+The gcc compiler has an associated debugger named gdb. It can be used to debug both C and C++
+programs. As with gcc, the gdb debugger is free, yet powerful. Like all source level debuggers,
+gdb allows you to view the source code of your program as you are debugging it, set breakpoints
+in your program, view and modify the values of objects, etc. It gives you a way of executing
+your program in slow motion and watching exactly how it works. It is a powerful tool and you
+should get used to using it.
 
-Keep in mind that gdb, like all debuggers, is a fairly complicated piece
-of software. It will take time for you to get comfortable with it. You
-may find that the first few times you use gdb that you are spending more
-time learning it than you are debugging your program! This is normal.
-Don't let it discourage you. After a few sessions with gdb you will
-start to get some advantage to using it and once you are comfortable
-with it, you won't be able to imagine life without it.
+Keep in mind that gdb, like all debuggers, is a fairly complicated piece of software. It will
+take time for you to get comfortable with it. You may find that the first few times you use gdb
+that you are spending more time learning it than you are debugging your program! This is normal.
+Don't let it discourage you. After a few sessions with gdb you will start to get some advantage
+to using it and once you are comfortable with it, you won't be able to imagine life without it.
 
-You should also keep in mind that gdb is a purely text mode program. It
-required that you type commands at a prompt and it displays its results
-on the terminal a line at a time. Most modern debuggers are very
-graphically oriented and show you different "views" of your program in
-different windows all at once. That is nice. But gdb has the advantage
-of being able to work over a simple terminal. Its interface may strike
-you as archane at first, but it is actually pretty well thought out. It
-won't be long before you'll be able to move around in gdb fairly easily.
+You should also keep in mind that gdb is a purely text mode program. It required that you type
+commands at a prompt and it displays its results on the terminal a line at a time. Most modern
+debuggers are very graphically oriented and show you different "views" of your program in
+different windows all at once. That is nice. But gdb has the advantage of being able to work
+over a simple terminal. Its interface may strike you as archane at first, but it is actually
+well thought out. It won't be long before you'll be able to move around in gdb fairly easily.
 
 *** gdb basics.
 
-Before you can debug your program, you have to compile it in a special
-way. In particular, you have to add the -g option to the compiler's
-command line
+Before you can debug your program, you have to compile it in a special way. In particular, you
+have to add the -g option to the compiler's command line
 
         $ g++ -g -o myprog myprog.cpp
 
-This causes g++ to add extra "symbolic debugging information" to your
-final executable. Gdb uses this information to to corrolate the source
-code with what is happening in the executable. You can debug programs
-without this extra information, but doing so requires that you interact
-with the program using assembly language.
+The -g option causes g++ to add extra "symbolic debugging information" to your final executable.
+Gdb uses this information to to corrolate the source code with what is happening in the
+executable. You can debug programs without this extra information, but doing so requires that
+you interact with the program using assembly language.
 
-The debugging information causes your program's executable file to
-become larger than normal. For this reason programmers typically
-recompile their programs without the debugging option just before they
-ship them. In our case, that is not an issue. If you are using make to
-control the compilation of your programs, you can just put the -g option
-into your makefiles and that way it will always be there if you need it.
+The debugging information causes your program's executable file to become larger than normal.
+For this reason programmers typically recompile their programs without the debugging option just
+before they ship them. In our case, that is not an issue. If you are using `make` to control the
+compilation of your programs, you can just put the -g option into your makefiles and that way it
+will always be there if you need it.
 
 To actually run the program under the control of the debugger, you must
 start gdb and tell gdb to start your program.
 
       $ gdb myprog
 
-Notice how I specify the name of the executable file on gdb's command
-line and not the source file (not myprog.cpp). Gdb will locate the
-source file automatically. It then prints out an opening message and a
-prompt that looks like
+Notice how I specify the name of the executable file on gdb's command line and not the source
+file (i.e., not myprog.cpp). Gdb will locate the source file automatically. It then prints out
+an opening message and a prompt that looks like
 
        (gdb)
 
-You can exit gdb and terminate your program (if its running) by typing
-the "quit" command:
+You can exit gdb and terminate your program (if its running) by typing the "quit" command:
 
        (gdb) quit
 
-Gdb has many commands and options. You can read the help on them while
-in gdb by using the "help" command. By default help prints out a list of
-catagories. You can then type "help catagory-name" to get help on the
-commands in a specific catagory. If you want help on a specific command,
-type "help command-name." The help is not always too helpful. It tries
-to be useful to novices and experts alike and thus tends to tell you
-more than you really want to know. However, by spending time carefully
-reading the help you can learn a great deal about how gdb works.
+Gdb has many commands and options. You can read the help on them while in gdb by using the
+"help" command. By default help prints out a list of catagories. You can then type "help
+catagory-name" to get help on the commands in a specific catagory. If you want help on a
+specific command, type "help command-name." The help is not always too helpful. It tries to be
+useful to novices and experts alike and thus tends to tell you more than you really want to
+know. However, by spending time carefully reading the help you can learn a great deal about how
+gdb works.
 
-Most gdb commands can be abbreviated. You only need to type as many
-letters as are necessary to specify a command uniquely. For example, the
-"list" command shows you a section of your program's source. It happens
-that it is the only command that starts with "l". Thus you can type
+Most gdb commands can be abbreviated. You only need to type as many letters as are necessary to
+specify a command uniquely. For example, the "list" command shows you a section of your
+program's source. It happens that it is the only command that starts with "l". Thus you can type
 just
 
         (gdb) l
 
-to invoke the list command. By default list shows you about 10 lines of
-your program. The first time you use it, it shows you the 10 lines
-around the start of main. After that it shows you the next 10 lines. If
-you hit ENTER without typing any command at all, gdb always re-executes
-the last command without any arguments. Thus after you type "l" once,
-you can just hit ENTER over and over again to repeat the list command
-several times in a row. This applies to all gdb commands and it is a
-great time saver.
+to invoke the list command. By default list shows you about 10 lines of your program. The first
+time you use it, it shows you the 10 lines around the start of main. After that it shows you the
+next 10 lines. If you type ENTER without typing any command at all, gdb always re-executes the
+last command without any arguments. Thus after you type "l" once, you can just hit ENTER over
+and over again to repeat the list command several times in a row. This applies to all gdb
+commands and it is a great time saver.
 
-You can force list to jump to other parts of your program by specifying
-a line number
+You can force list to jump to other parts of your program by specifying a line number
 
         (gdb) l 125
 
-In this example I am listing 10 lines around line number 125. You can
-also specify function names.
+In this example I am listing 10 lines around line number 125. You can also specify function
+names.
 
         (gdb) l main
 
-Here I'm listing 10 lines around the start of function main. This is a
-very handy facility. It actually makes jumping around in your program
-*easier* than scrolling a pretty graphical window.
+Here I'm listing 10 lines around the start of function main. This is a very handy facility. It
+actually makes jumping around in your program *easier* than scrolling a pretty graphical window.
 
 *** Running your program.
 
-There are several essential gdb commands you should know to control the
-operation of your program. The first is the "break" command. You use
-this command to set a breakpoint where your program will stop executing.
-If you don't set a breakpoint the program will run at full speed all the
-way to the end and that probably won't help you much. Here is the
-typical way to set breakpoints:
+There are several essential gdb commands you should know to control the operation of your
+program. The first is the "break" command. You use this command to set a breakpoint where your
+program will stop executing. If you don't set a breakpoint the program will run at full speed
+all the way to the end and that probably won't help you much. Here is the typical way to set
+breakpoints:
 
         (gdb) break main
 
-This sets a breakpoint at the start of main. You can, of course break at
-any function you like. Typically you set a breakpoint just before the
-place where you suspect the bug lies. That way you can run the program
-normally until that point. You can also set breakpoints at specific line
+This sets a breakpoint at the start of main. You can, of course break at any function you like.
+Typically you set a breakpoint just before the place where you suspect the bug lies. That way
+you can run the program normally until that point. You can also set breakpoints at specific line
 numbers.
 
 To start the program running, use the run command.
 
          (gdb) run
 
-Once the program has stopped at a breakpoint, you can then execute it
-one line at a time to watch what happens. There are two ways to execute
-a single line. The "next" command goes to the next line. If the current
-line contains a function call, the entire function is executed at full
-speed. The "step" command is just like the next command except that if
-the current line contains a function call, that function is entered and
-only one line of that function is executed. You should probably use
-"next" most of the time. Use "step" only when you want to investigate
-how a particular function is working. Once you are convinced that a
-function works, you can "next" over it from then on.
+Once the program has stopped at a breakpoint, you can then execute it one line at a time to
+watch what happens. There are two ways to execute a single line. The "next" command goes to the
+next line. If the current line contains a function call, the entire function is executed at full
+speed. The "step" command is just like the next command except that if the current line contains
+a function call, that function is entered and only one line of that function is executed. You
+should probably use "next" most of the time. Use "step" only when you want to investigate how a
+particular function is working. Once you are convinced that a function works, you can "next"
+over it from then on.
 
-Most of the time you will just use "n" for next and "s" for step.
-Furthermore since you can repeat the last command by just hitting ENTER,
-you can advance through your program one line at a time by just hitting
-ENTER repeatedly once you have entered your first "n" or "s" command.
-Gdb prints out the line that it is about to execute after each command
-so you can see what you are going to do when you execute that line.
+Most of the time you will just use "n" for next and "s" for step. Furthermore since you can
+repeat the last command by just hitting ENTER, you can advance through your program one line at
+a time by just hitting ENTER repeatedly once you have entered your first "n" or "s" command. Gdb
+prints out the line that it is about to execute after each command so you can see what you are
+going to do when you execute that line.
 
-Just stepping through your program one line at a time is sometimes
-enough to find the bug ("Why did I get here? It must be that such-and-
-such a condition failed. That means..."). However, often you need more
-information than just that. You can print out the value stored in any
-object with the print command. For example
+Just stepping through your program one line at a time is sometimes enough to find the bug ("Why
+did I get here? It must be that such-and-such a condition failed. That means..."). However,
+often you need more information than just that. You can print out the value stored in any object
+with the print command. For example
 
          (gdb) print Number
 
-Will cause gdb to print the value of the object "Number." Gdb will
-locate Number using the same scope rules that the compiler uses. This is
-normally what you want. Gdb will also print out Number in a manner
-appropriate for its type. This is also normally what you want.
+Will cause gdb to print the value of the object "Number." Gdb will locate Number using the same
+scope rules that the compiler uses. This is normally what you want. Gdb will also print out
+Number in a manner appropriate for its type. This is also normally what you want.
 
 *** C++ specific issues.
 
-So far everything that I've said applies to both C and C++ debugging.
-However, C++ is a complex language and there are some special issues
-that pertain to debugging C++ programs.
+So far everything that I've said applies to both C and C++ debugging. However, C++ is a complex
+language and there are some special issues that pertain to debugging C++ programs.
 
-First, if you are in a class member function you can view the members of
-the implicit object you are currently working on by just printing them
-directly. For example, if you are working with a class Date like this
+First, if you are in a class member function you can view the members of the implicit object you
+are currently working on by just printing them directly. For example, if you are working with a
+class Date like this
 
 class Date {
   private:
@@ -194,67 +169,58 @@ class Date {
     // etc...
 };
 
-and if you are inside one of Date's member functions, you can view the
-current value of Day by just doing
+and if you are inside one of Date's member functions, you can view the current value of Day by
+just doing
 
         (gdb) print Day
 
-However, if you are outside a member function and you want to look at
-the value of a member, you have to access it "in the usual way." For
-example
+However, if you are outside a member function and you want to look at the value of a member, you
+have to access it "in the usual way." For example
 
         (gdb) print My_Birthday.Day
 
-This is consistent with gdb's rule of looking up names the same way the
-compiler does. However, unlike the compiler, gdb will allow you to view
-the private members of an object at any time. Private does not mean
-secret!
+This is consistent with gdb's rule of looking up names the same way the compiler does. However,
+unlike the compiler, gdb will allow you to view the private members of an object at any time.
+Private does not mean secret!
 
-You can have gdb print an entire object. For example suppose you are
-working with a std::string named Username. You can do
+You can have gdb print an entire object. For example suppose you are working with a std::string
+named Username. You can do
 
         (gdb) print Username
 
-Since objects are really just structures, gdb will print out the
-std::string the same way it prints any structure: it will show you the
-values of all the members inside curly braces. The problem is that, in
-general, that information is not very useful to you. In order to make
-sense out of it, you need to know what the private members of
-std::string are and how they are normally used. My experience has been
-that it is often possible to guess what is going on well enough to get
-useful information even out of classes you didn't write. But in general
-that is not always true.
+Since objects are really just structures, gdb will print out the std::string the same way it
+prints any structure: it will show you the values of all the members inside curly braces. The
+problem is that, in general, that information is not very useful to you. In order to make sense
+out of it, you need to know what the private members of std::string are and how they are
+normally used. My experience has been that it is often possible to guess what is going on well
+enough to get useful information even out of classes you didn't write. But in general that is
+not always true.
 
-C++ supports features like templates and in-line functions that tend to
-confuse debuggers. Of course, a very good debugger would not be confused
-by these things. However, C++ debugger technology is still evolving. I
-notice that g++ on twilight, for example, produces very strange messages
-if you try to "next" over an application of the << operator that uses
-the standard library.
+C++ supports features like templates and in-line functions that tend to confuse debuggers. Of
+course, a very good debugger would not be confused by these things. However, C++ debugger
+technology is still evolving. I notice that g++ on twilight, for example, produces very strange
+messages if you try to "next" over an application of the << operator that uses the standard
+library.
 
-You can have gdb execute any expression you like. This includes invoking
-member functions against objects. Suppose you are working with that
-std::string named Username again. You can do something like
+You can have gdb execute any expression you like. This includes invoking member functions
+against objects. Suppose you are working with that std::string named Username again. You can do
+something like
 
          (gdb) print Username.length()
 
-to find out how long the string is. This is often a better way of
-looking at the value stored in an object than just printing the object
-"raw." Most classes provide a complete set of "access functions" and you
-can use them while working in the debugger too.
+to find out how long the string is. This is often a better way of looking at the value stored in
+an object than just printing the object "raw." Most classes provide a complete set of "access
+functions" and you can use them while working in the debugger too.
 
 SUMMARY
 
-1. The debugger is a very powerful tool that allows you to examine the
-   way your program is (or is not) working. To use the debugger, you
-   must first compile your program with the -g option. To invoke the
-   debugger type "gdb" followed by the name of your executable file.
-   Then you can view the source of your program, set breakpoints, and
-   single step through your program.
+1. The debugger is a very powerful tool that allows you to examine the way your program is (or
+   is not) working. To use the debugger, you must first compile your program with the -g option.
+   To invoke the debugger type "gdb" followed by the name of your executable file. Then you can
+   view the source of your program, set breakpoints, and single step through your program.
 
-2. Viewing the value of C++ objects in the debugger can be unsatisfying
-   because the debugger tends to show you the private members. If you
-   don't know anything about how a class was designed this information
-   is not always very helpful. However, you can have gdb execute the
-   public access members for you and output the results. That is
-   sometimes an effective alternative to printing raw objects.
+2. Viewing the value of C++ objects in the debugger can be unsatisfying because the debugger
+   tends to show you the private members. If you don't know anything about how a class was
+   designed this information is not always very helpful. However, you can have gdb execute the
+   public access members for you and output the results. That is sometimes an effective
+   alternative to printing raw objects.

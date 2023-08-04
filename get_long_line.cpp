@@ -1,7 +1,6 @@
 /**************************************************************************
 FILE          : getlongline.cpp
-PROGRAMMER    : Peter C. Chapin
-LAST REVISION : 2007-07-25
+PROGRAMMER    : Peter Chapin
 
 (C) Copyright 2007 by Peter C. Chapin
 
@@ -10,22 +9,14 @@ standard input device. It returns a pointer to a buffer containing the line. The
 must do a delete on that pointer when it no longer needs the line. If the calling program fails
 to delete the pointer appropriately, memory leaks will occur. This function returns the null
 pointer if there is no more input.
-
-Please send comments or bug reports to
-
-     Peter C. Chapin
-     Computer Information Systems
-     Vermont Technical College
-     Williston, VT 05495
-     PChapin@vtc.vsc.edu
 **************************************************************************/
 
 #include <cstring>  // Same as C's <string.h> but with everything in std::
 #include <iostream>
 
-namespace vtc {
+namespace vtsu {
 
-    char *get_long_line()
+    char *get_long_line( )
     {
         char ch;               // A single character of input.
 
@@ -40,11 +31,11 @@ namespace vtc {
         character_count = 0;
 
         // Read the input.
-        while (std::cin.get(ch)) {
-            if (ch == '\n') break;
+        while( std::cin.get( ch )) {
+            if( ch == '\n' ) break;
 
             // If there is more space in the buffer...
-            if (character_count != buffer_size) {
+            if( character_count != buffer_size ) {
                 buffer[character_count++] = ch;
             }
 
@@ -52,7 +43,7 @@ namespace vtc {
             else {
                 buffer_size *= 2;
                 new_buffer = new char[buffer_size];
-                std::memcpy(new_buffer, buffer, character_count);
+                std::memcpy( new_buffer, buffer, character_count );
                 delete [] buffer;
                 buffer = new_buffer;
                 
@@ -66,7 +57,7 @@ namespace vtc {
         // characters into the buffer at all, I should tell my caller that there is nothing
         // more.
         //
-        if (std::cin.eof() && character_count == 0) {
+        if( std::cin.eof( ) && character_count == 0 ) {
             delete [] buffer;
             return 0;
         }
@@ -76,7 +67,7 @@ namespace vtc {
         // memory is wasted.
         //
         new_buffer = new char[character_count + 1];
-        std::memcpy(new_buffer, buffer, character_count);
+        std::memcpy( new_buffer, buffer, character_count );
         delete [] buffer;
         buffer = new_buffer;
         buffer[character_count] = '\0';

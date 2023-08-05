@@ -1,6 +1,6 @@
 /*! \file   Probe.hpp
  *  \brief  A class that makes visible the action of the various special methods.
- *  \author Peter C. Chapin <PChapin@vtc.vsc.edu>
+ *  \author Peter Chapin <peter.chapin@vermontstate.edu>
  *
  * This file contains a class that does nothing other than print messages whenever anything
  * interesting happens to one of its objects. It is (hopefully) a useful learning aid. It may

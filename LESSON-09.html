@@ -242,10 +242,10 @@ private:
 </pre>
 
 <p>I've modified the definition of class <span class="code">Skeleton</span> to include an
-  overloaded <span class="code">operator=</span> function. The way that I have declared that
-  function is traditional and highly recommended. It should take its right parameter by reference
+  overloaded <span class="code">operator=</span> function. The way I have declared that function
+  is traditional and highly recommended. It should take its right parameter by reference
   (specifically, a reference to a const since assignment should not change the source object). It
-  should return a reference as well so that assignments can be chained in the usual way.</p>
+  should return a reference so that assignments can be chained in the usual way.</p>
 
 <pre class="code">
 X = Y = Z;
@@ -257,6 +257,10 @@ X = Y = Z;
 <pre class="code">
 Skeleton &amp;Skeleton::operator=( const Skeleton &amp;right )
 {
+    if( this == &amp;right ) return *this;
+      // If I'm trying to assign myself to myself, just return
+      // a reference to myself. This is a common optimization.
+
     delete [] workspace;
       // Free my current workspace so that I don't leak memory.
 
@@ -283,8 +287,51 @@ Skeleton &amp;Skeleton::operator=( const Skeleton &amp;right )
   and <span class="code">Y</span>'s data is properly copied into <span
       class="code">X</span>. Pretty cool, huh?</p>
 
-<p>But there is another context where objects get copied: initialization. Consider this
-  example</p>
+<p>Notice that my copy assignment operator specifically checks to see if the source of the
+  assignment is the same as the target. In that special case, it does nothing. This step is
+  important because many copy assignment operators will malfunction in a self-assignment context.
+  For example, <span class="code">Skeleton</span>'s copy assignment above, first deallocates the
+  target's workspace. However, if that target and the source are the same, that deallocates the
+  source's workspace as well, leaving us with no workspace at all!</p>
+
+<p>Even in cases where there is no problem in theory with self-assignment, it can still entail a
+  lot of extra copying which is inefficient. For this reason, it is a best practice to check for
+  self-assignment right away as shown in this example.</p>
+
+<p>You might wonder why anyone would purposely assign and object to itself. It is true that
+  programmers do not normally write code such as <span class="code">X = X</span>. However,
+  self-assignment can arise in less obvious ways. For example, consider this function that fills
+  an array of integers with a value provided indirectly via a pointer:</p>
+
+<pre class="code">
+void fill( int *array, int size, const int *value )
+{
+    for( int i = 0; i &lt; size; ++i )
+        array[i] = *value;
+}
+</pre>
+
+<p>Now consider this code that uses the <span class="code">fill</span> function:</p>
+
+<pre class="code">
+int main( )
+{
+    int array[10];
+
+    fill( array, 10, &amp;array[7] );
+      // Fill the array with copies of array[7].
+</pre>
+
+<p>In the process of executing the fill, one of the loop iterations will self-assign <span
+    class="code">array[7]</span>. However, this is not obvious by looking at the <span
+    class="code">fill</span> function definition. Self-assigning an integer is harmless. You
+  should make sure your copy assignment operators are also harmless in this case.</p>
+
+<p>The copy assignment operator I show above still has a problem: it is not exception safe.
+  Exception safety is a big topic. I discuss exception safety in detail in <a
+      href="LESSON-19.html">Lesson 19</a>.</p>
+
+<p>There is another context where objects get copied: initialization. Consider this example</p>
 
 <pre class="code">
 Skeleton X;
@@ -357,6 +404,10 @@ Skeleton::Skeleton( const Skeleton &amp;other )
   it has less to do than the assignment operator. Consequently, it is normally faster. Remember:
   Initialization is usually faster than assignment. Initialize all your objects when you declare
   them!</p>
+
+<p>Finally, I did not need to deal with self-assignment. An object can't be used until after it
+  has been declared. The copy constructor executes as part of the declaration. There is no way to
+  initialize an object with itself.</p>
 
 <p style="text-align: center;">!!! NOTE !!!</p>
 

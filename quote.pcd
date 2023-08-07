@@ -1,15 +1,14 @@
 ##########################################################################
-FILE          : quote.pcd
-LAST REVISION : December 2001
-AUTHOR        : Peter C. Chapin
-SUBJECT       : Pseudo code for the text quoter program.
-
-(C) Copyright 2001 by Peter C. Chapin
-
-This file contains the p-code for a program that demonstrates the C++
-standard string class. The details of what this program does is
-described in the associated file EXAMPLE-02.txt.
-
+# FILE  : quote.pcd
+# AUTHOR: Peter Chapin
+#
+# (C) Copyright 2001 by Peter C. Chapin
+#
+# Pseudo code for the text quoter program.
+#
+# This file contains the p-code for a program that demonstrates the C++
+# standard string class. The details of what this program does is
+# described in the associated file EXAMPLE-02.html.
 ##########################################################################
 
 FUNCTION <Main>(VOID) RETURN int

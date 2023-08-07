@@ -5,7 +5,6 @@
 <head>
   <title>Example #2</title>
   <meta name="Author" content="Peter Chapin"/>
-  <!-- <meta name="keywords" lang="en-US" content="..."> -->
   <meta name="ROBOTS" content="NOARCHIVE"/>
   <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
 </head>
@@ -32,21 +31,21 @@
 This is a line of text.
 </pre>
 
-<p>becomes</p>
+<p>becomes:</p>
 
 <pre class="terminal">
 > This is a line of text.
 </pre>
 
-<p>To make the program more interesting (and more useful) it should also deal with word wrapping.
+<p>To make the program more interesting (and more useful), it should also deal with word wrapping.
   This is important because the extra two characters added to each line will, in general, cause
   some lines to extend too far to the right. In any case, many text files have excessively long
-  lines anyway so it would be helpful if the program wrapped lines regardless.</p>
+  lines anyway, so it would be helpful if the program wrapped lines.</p>
 
 <p>The program will distinguish one paragraph from the next by one (or more) blank lines between
   them. Within each paragraph it will attempt to fill each line as much as possible (with the
   added "> " at the start of each line), wrapping to the next line after the previous one is
-  filled. The following shows the effect I'm talking about. For purposes of illustration I'll use
+  filled. The following shows the effect I'm talking about. For purposes of illustration, I'll use
   a narrow line length.</p>
 
 <pre class="terminal">
@@ -59,7 +58,7 @@ This is the next paragraph. Here I blather on and on.
 Still more.
 </pre>
 
-<p>The text above should be transformed by the program into</p>
+<p>The program should transform the text above into:</p>
 
 <pre class="terminal">
 > This is my first line of text. This is short.
@@ -73,16 +72,16 @@ Still more.
 
 <p>For the sake of standard 80 column terminals, the real program will consider a line "too long"
   if it is longer than 76 characters. This will fill the width of the screen and minimize the
-  apparent degree of raggedness. on the right hand side.</p>
+  apparent degree of raggedness. on the right-hand side.</p>
 
 <p>The program that I'm going to write here will not be very smart. It won't handle preformatted
-  text and it will believe that there should be exactly one space between every word. This will
+  text, and it will believe that there should be exactly one space between every word. This will
   limit its usefulness considerably. I invite you to enhance the program to make it better!</p>
 
-<p>The first step in creating a program is to understand exactly what must be done. Hopefully my
-  informal description above sufficies to explain that in this case. The next step is to design
-  the program's logic and data. I use a pseudo language to design my programs. It is easier to
-  work with than C++ itself because it resembles normal English, yet it is still fairly easy to
+<p>The first step in creating a program is to understand exactly what must be done. Hopefully, my
+  informal description above suffices to explain that in this case. The next step is to design the
+  program's logic and data. I use a pseudo language to design my programs. It is easier to work
+  with than C++ itself because it resembles normal English, yet it is still fairly easy to
   translate into a working program. Those of you who have had me as an instructor before will
   recognize my pseudo language. Yet even if you have never seen it before, you should have enough
   programming experience to be able to understand what I'm getting at. The point here is to make
@@ -97,15 +96,15 @@ WHILE &lt;Getting the next line from the input file works> LOOP
 END
 </pre>
 
-<p>Naturally we have to open the input and output files first. What should their names be? I think
-  we should take the name of the input file from the command line (much more useful than having it
-  fixed in the program) and make the output file have the same name as the input except with a
-  ".q" at the end (the 'q' is for "quoted"). This decision should really be part of the
+<p>Naturally, we have to open the input and output files first. What should their names be? I
+  think we should take the name of the input file from the command line (much more useful than
+  having it fixed in the program) and make the output file have the same name as the input except
+  with a ".q" at the end (the 'q' is for "quoted"). This decision should really be part of the
   specification above. However, when creating a program informally, one often finds it necessary
   to fill in some details of the specification as one goes along. In a serious effort, the
   specification would be a formal document and would have already spelled out these points.</p>
 
-<p>In any case, the enhanced pseudo-code now looks like</p>
+<p>In any case, the enhanced pseudocode now looks like</p>
 
 <pre class="pcode">
 &lt;Get the name of the input file>
@@ -124,15 +123,15 @@ WHILE &lt;Getting the next line from the input file works> LOOP
 END
 </pre>
 
-<p>Notice in my pseudo-code above I don't worry about closing the files. I know that I'm going to
-  be using the C++ iostream library to implement this and I know that iostreams will close files
-  automatically. In theory pseudo-code is independent of the language you use to finally write the
-  program. In practice it's never really 100% like that.</p>
+<p>Notice in my pseudocode above I don't worry about closing the files. I know that I'm going to
+  be using the C++ iostream library to implement this, and I know that iostreams will close files
+  automatically. In theory, pseudocode is independent of the language you use to finally write the
+  program. In practice, it's never really 100% like that.</p>
 
 <p>Now the hard part: how should I process each line of input? I think the proper approach is to
   maintain an output line that is in the process of being filled. Each time a paragraph break
-  occurs, the output line needs to be "flushed" even if it's not filled completely. Otherwise each
-  word on the input line needs to be added to the output line (flushing the output line when
+  occurs, the output line needs to be "flushed" even if it's not filled completely. Otherwise,
+  each word on the input line needs to be added to the output line (flushing the output line when
   necessary). Hmmm. Let's see.</p>
 
 <pre class="pcode">
@@ -153,12 +152,12 @@ WHILE &lt;Getting the next line from the input file works> LOOP
 END
 </pre>
 
-<p>Okay... this logic looks promising, but it has some problems. First it writes output lines that
-  are always too long since if fills lines until they become oversized. Instead I should check the
-  sizes before I do the append and perhaps write the current output line first. This is trickier
-  to do than it sounds, however, because in the preverse case where a line contains a single word
-  that is longer than the allowed line length, I don't want to go into an infinite loop. Let me
-  modify the inner FOR loop.</p>
+<p>Okay... this logic looks promising, but it has some problems. First, it writes output lines
+  that are always too long since if fills lines until they become oversized. Instead, I should
+  check the sizes before I do the appending and perhaps write the current output line first. This
+  is trickier to do than it sounds, however, because in the perverse case where a line contains a
+  single word that is longer than the allowed line length, I don't want to go into an infinite
+  loop. Let me modify the inner FOR loop.</p>
 
 <pre class="pcode">
 FOR &lt;Each word of the input line> LOOP
@@ -173,7 +172,7 @@ END
 <p>Let me check this in the case of a very long word. When that word is encountered, it will cause
   the output line to be written (even if it is not very far filled at that time). This is fine.
   Then that word WILL be appended onto the next output line. Since the append operation is not in
-  an ELSE clause the very long word is gaurenteed to be output and the next word will be
+  an ELSE clause, the very long word is guaranteed to be output and the next word will be
   processed. This is good. There will be no infinite loop. The long word will mess up the output,
   but that's okay. It isn't every day when you find words 76+ characters long.</p>
 
@@ -197,7 +196,7 @@ ELSE
   well.</p>
 
 <p>The problem is that I need to do something special on the first blank line after a paragraph,
-  but not on every blank line after a paragraph. Thus I have to keep track of when I'm in a
+  but not on every blank line after a paragraph. Thus, I have to keep track of when I'm in a
   paragraph and when I'm not. This will require a flag. To generate this logic, I will cut and
   past my original p-code and edit it. I get the following result:</p>
 
@@ -231,14 +230,14 @@ END
   added some comments to that file. The act of writing the comments helped me to further check my
   work by forcing me to go over the logic one more time.</p>
 
-<p>Ah ha! In fact, while preparing the comments in that file I noticed that I don't really need
-  the in-paragraph flag at all. I can use the fact that there is text in the output line to signal
+<p>Aha! In fact, while preparing the comments in that file, I noticed that I don't really need the
+  in-paragraph flag at all. I can use the fact that there is a text in the output line to signal
   if it should be output. That is much cleaner and nicer. The p-code in quote.pcd reflects this
   enhancement.</p>
 
-<p>Okay. Now I'm ready to actually write the program. As I look over the p-code I can see that
-  most operations that are called for are straightforward. There are two exceptions. In one place
-  I need to know if a line is blank. In another place I need to break individual words off of a
+<p>Okay. Now I'm ready to actually write the program. As I look over the p-code, I can see that
+  most operations that are called for are straightforward. There are two exceptions. In one place,
+  I need to know if a line is blank. In another place, I need to break individual words off of a
   line. I will write two separate functions for those operations. The first is not too bad.</p>
 
 <pre class="code">
@@ -246,67 +245,67 @@ END
 // This function returns true of the given line contains only white
 // space. If there is a "word" on that line, it will return false.
 //
-bool is_blank(const std::string &amp;line)
+bool is_blank( const string &amp;line )
 {
-  // Empty lines are blank.
-  if (line.length() == 0) return true;
+    // Empty lines are blank.
+    if( line.length( ) == 0 ) return true;
 
-  // Lines containing only spaces, tabs, formfeeds, carriage returns,
-  // and new lines are also blank. Here I see if there is even one
-  // character in the line that is not one of those that I mentioned.
-  //
-  if (line.find_first_not_of(" \t\f\r\n", 0) == std::string::npos)
-    return true;
+    // Lines containing only spaces, tabs, formfeeds, carriage returns,
+    // and new lines are also blank. Here I see if there is even one
+    // character in the line that is not one of those that I mentioned.
+    //
+    if( line.find_first_not_of( " \t\f\r\n", 0 ) == string::npos )
+        return true;
 
-  return false;
+    return false;
 }
 </pre>
 
-<p>Actually the second test should also cover the first case. However, the first test is very fast
-  and probably often true so it might be better to leave it there anyway. I don't expect to see
-  any '\n' characters in these lines because when I read them from the file the function I use
-  will strip them out. However, I'll include it in the check above just to make the function a bit
-  more general.</p>
+<p>Actually, the second test should also cover the first case. However, the first test is very
+  fast and probably often true, so it might be better to leave it there anyway. I don't expect to
+  see any '\n' characters in these lines because when I read them from the file, the function I
+  use will strip them out. However, I'll include it in the check above just to make the function a
+  bit more general.</p>
 
 <p>The other function is trickier.</p>
 
 <pre class="code">
 //
 // This function takes the next white space delimited word out of line.
-// It modifes line to delete the word and returns the word in "word".
+// It modifies line to delete the word and returns the word in "word".
 // It returns true if it found a word and false otherwise.
 //
-bool get_next_word(std::string &amp;line, std::string &amp;word)
+bool get_next_word( string &amp;line, string &amp;word )
 {
-  // Find the first non white space character.
-  int non_white = line.find_first_not_of(" \t\f\r\n", 0);
+    // Find the first non white space character.
+    int non_white = line.find_first_not_of( " \t\f\r\n", 0 );
 
-  // If there wasn't any, we have no word.
-  if (non_white == std::string::npos) return false;
+    // If there wasn't any, we have no word.
+    if( non_white == string::npos ) return false;
 
-  // Otherwise locate the next white space. It is possible that this
-  // will return std::string::npos if this is the last word on the
-  // line. That shouldn't cause a problem with what follows since
-  // excessive values will be taken as "all" in these contexts. (The
-  // npos value is the highest possible string index).
-  //
-  int white = line.find_first_of(" \t\f\r\n", non_white + 1);
+    // Otherwise locate the next white space. It is possible that this
+    // will return string::npos if this is the last word on the line.
+    // That shouldn't cause a problem with what follows since excessive
+    // values will be taken as "all" in these contexts. (The npos value
+    // is the highest possible string index).
+    //
+    int white = line.find_first_of( " \t\f\r\n", non_white + 1 );
 
-  word = line.substr(non_white, white - non_white);
-  line.erase(0, white);
-  return true;
+    word = line.substr( non_white, white - non_white );
+    line.erase( 0, white );
+    return true;
 }
 </pre>
 
 <p>The rest of the program is straightforward. See quote.cpp for the final version.</p>
 
 <p>NOTE! During testing of the program developed above, I found a bug. In particular, if there is
-  a partially filled line after the last input line is processed (and this would happen often) it
+  a partially filled line after the last input line is processed (and this would often happen), it
   is never outputted. I corrected this by putting some additional code just after the main while
   loop. The final version that is attached should be correct (as far as I know).</p>
 
 <address>
-  &copy; Copyright 2006 by Peter C. Chapin.<br/> Last Revised: <b>May 28, 2006</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/> Last Revised: <b>August 7, 2023</b>
 </address>
 
 </body>

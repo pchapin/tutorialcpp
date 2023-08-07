@@ -5,7 +5,6 @@
 <head>
   <title>Lesson #20</title>
   <meta name="Author" content="Peter Chapin"/>
-  <!-- <meta name="keywords" lang="en-US" content="..."> -->
   <meta name="ROBOTS" content="NOARCHIVE"/>
   <link rel="stylesheet" href="cpp-tutorial.css" type="text/css"/>
 </head>
@@ -22,17 +21,11 @@
 
 <ol id="overview-list">
 
-  <li>
-    <p>Exception hierarchies.</p>
-  </li>
+  <li><p>Exception hierarchies.</p></li>
 
-  <li>
-    <p>The exception classes defined by Standard C++.</p>
-  </li>
+  <li><p>The exception classes defined by Standard C++.</p></li>
 
-  <li>
-    <p>Exceptions vs assertions.</p>
-  </li>
+  <li><p>Exceptions vs assertions.</p></li>
 
 </ol>
 
@@ -40,119 +33,120 @@
 
 <h3>Exception hierarchies</h3>
 
-<p>Since it is possible to catch exceptions by reference it is often desirable to define a
-  hierarchy of related exception classes. To see why consider the following example. Suppose a
-  library of network functions defined a class <span class="code">network_error</span> to use as a
+<p>Since it is possible to catch exceptions by reference, it is often desirable to define a
+  hierarchy of related exception classes. To see why, consider the following example. Suppose a
+  library of network functions defined a class <span class="code">NetworkError</span> to use as a
   general purpose exception type. Users of the library might write</p>
 
 <pre class="code">
 try {
-  // Call the network library functions.
+    // Call the network library functions.
 }
-catch (network_error &amp;bad_thing) {
-  std::cerr &lt;&lt; bad_thing.get_message(); &lt;&lt; "\n";
+catch(NetworkError &amp;bad_thing ) {
+    std::cerr &lt;&lt; bad_thing.get_message( ); &lt;&lt; endl;
 }
 </pre>
 
-<p>Here I'm assuming that the <span class="code">network_error</span> class has a method named
-  <span class="code">get_message</span> that returns a message describing the error. Thus the
+<p>Here I'm assuming that the <span class="code">NetworkError</span> class has a method named
+  <span class="code">get_message</span> that returns a message describing the error. Thus, the
   handler above simply prints out that message whenever it catches a network related exception.
-</p>
+  The exception object may contain additional information about the error and other methods for
+  accessing that information.</p>
 
-<p>The library might derive a number of different classes from <span class="code"
->network_error</span> with each class representing a specific type of error condition. Here is how
-  the network library might define these classes.</p>
+<p>The library might derive a number of different classes from <span
+    class="code">NetworkError</span> with each class representing a specific type of error
+  condition. Here is how the network library might define these classes.</p>
 
 <pre class="code">
 // Generic exception class.
-class network_error {
-  private:
+class NetworkError {
+private:
     const char *message;
 
-  public:
-    network_error(const char *m) : message(m) { }
-    virtual const char *get_message() { return message; }
+public:
+    NetworkError( const char *m ) : message( m ) { }
+    virtual const char *get_message( ) { return message; }
 };
 
 // Specific type of network error.
-class connect_error : public network_error {
-  public:
-    connect_error(const char *m) : network_error(m) { }
+class ConnectError : public NetworkError {
+public:
+    ConnectError( const char *m ) : NetworkError( m ) { }
 };
 
 // Another specific type of network error.
-class tx_error : public network_error {
-  public:
-    tx_error(const char *m) : network_error(m) { }
+class TXError : public NetworkError {
+public:
+    TXError( const char *m ) : NetworkError( m ) { }
 };
 </pre>
 
-<p>Now when the library code wants to throw an exception it will create a suitable object, include
-  an appropriate message, and send it on its way.</p>
+<p>Now when the library code wants to throw an exception, it will create a suitable object,
+  include an appropriate message, and send it on its way.</p>
 
 <pre class="code">
-if (bad_thing_happened()) {
-  throw connect_error(
+if( bad_thing_happened( ) ) {
+  throw ConnectError(
     "Unable to connect. File: " __FILE__ "; Line: " __LINE__);
 }
 </pre>
 
-<p>This example uses the <span class="code">__FILE__</span> and <span class="code"
->__LINE__</span> preprocessor macros to embed the source file name and line number into the
-  message. This isn't always appropriate. Such information would only be confusing to the end user
-  but it might be quite useful to a developer. Exactly when it is reasonable to include such
-  internal information in an error message is a topic of ongoing debate amoung programmers.</p>
+<p>This example uses the <span class="code">__FILE__</span> and <span class="code">__LINE__</span>
+  preprocessor macros to embed the source file name and line number into the message. This isn't
+  always appropriate. Such information would only be confusing to the end user, but it might be
+  quite useful to a developer. Exactly when it is reasonable to include such internal information
+  in an error message is a topic of ongoing debate among programmers.</p>
 
-<p>Notice that my example library code creates a <span class="code">connect_error</span> object to
-  throw. However, since <span class="code">connect_error</span> is derived from <span
-      class="code">network_error</span>, the handler for <span class="code"
-  >network_error</span> will catch this exception. When the application's exception handler calls
-  <span class="code">get_message</span> against the <span class="code"
-  >network_error</span> reference, the message used to construct the <span class="code"
-  >connect_error</span> object will be displayed.</p>
+<p>Notice that my example library code creates a <span class="code">ConnectError</span> object to
+  throw. However, since <span class="code">ConnectError</span> is derived from <span
+      class="code">NetworkError</span>, the handler for <span class="code">NetworkError</span>
+  will catch this exception. When the application's exception handler calls <span class="code">get_message</span>
+  against the <span class="code">NetworkError</span> reference, the message used to construct the
+  <span class="code">ConnectError</span> object will be displayed.</p>
 
-<p>In general serious libraries might define a large number of exceptions. However, if the
+<p>In general, serious libraries might define a large number of exceptions. However, if the
   application catches the base exception, the application does not need to be aware of all the
   individual exception types. Of course, the application is free to catch the specific types if it
   desires. For example, the application might do</p>
 
 <pre class="code">
 try {
-  // Call the network library functions.
+    // Call the network library functions.
 }
-catch (connect_error &amp;bad_thing) {
-  // Handle the specific case of a connect_error.
+catch( connect_error &amp;bad_thing ) {
+    // Handle the specific case of a connect_error.
 }
-catch (network_error &amp;bad_thing) {
-  // Handle all other network errors.
+catch( network_error &amp;bad_thing ) {
+    // Handle all other network errors.
 }
 </pre>
 
-<p>The catch clauses are tried in order and the first one found that matches the exception is
-  used. Thus in the example above, <span class="code">connect_error</span> exceptions are handled
-  by the handler specifically for that type. Had I put the <span class="code"
-  >network_error</span> handler first, however, the connect_error handler would never get invoked.
-  All <span class="code">connect_error</span> exceptions would be caught by the more general
-  handler before noticing the specific handler. Many compilers will warn you if you set up your
-  handlers in an illogical order.</p>
+<p>The catch clauses are tried in order, and the first one found that matches the exception is
+  used. Thus, in the example above, <span class="code">ConnectError</span> exceptions are handled
+  by the handler specifically for that type. Had I put the <span class="code">NetworkError</span>
+  handler first, however, the <span class="code">ConnectError</span> handler would never get
+  invoked. All <span
+      class="code">ConnectError</span> exceptions would be caught by the more general handler
+  before noticing the specific handler. Many compilers will warn you if you set up your handlers
+  in an illogical order.</p>
 
 <p>The beauty of this method is that if a new version of the network library is released that
   defines additional exceptions, the application code does not necessarily need to be changed. The
   new exceptions, presumably derived from the same base class (<span
-      class="code">network_error</span> in this case) will be handled in a generic way without the
+      class="code">NetworkError</span> in this case) will be handled in a generic way without the
   application code even needing recompiling.</p>
 
 <h3>Standard exception classes</h3>
 
 <p>Although C++ does not require all classes to be derived from a single, ultimate base class (as
-  does a number of other object oriented languages), the C++ standard does provide a class
+  does a number of other object-oriented languages), the C++ standard does provide a class
   hierarchy in the library intended for use in defining exceptions. The standard library itself
   uses classes from this hierarchy for its own exceptions. Some people believe it is best to
   create your own exception classes by deriving them from the standard hierarchy as well.</p>
 
 <p>The advantage of using the standard exception class hierarchy as a base for your own exception
   classes is that programmers who use your code will already have some idea of the meaning and
-  purpose of your exceptions. Also application programs that catch the standard exception classes
+  purpose of your exceptions. Also, application programs that catch the standard exception classes
   will automatically catch exceptions from your code in a natural way. Keep in mind, however, that
   the C++ language does not require that you use the standard library exception classes in any
   way. You are free to create your own exception hierarchy or even use non-class types such as int
@@ -160,17 +154,17 @@ catch (network_error &amp;bad_thing) {
   standard and use the library exception hierarchy either directly or as a base of your own
   exception types.</p>
 
-<p>The library class that is the base of all library exception classes is <span class="code"
->std::exception</span>. It is defined in the header &lt;exception&gt;. Exception objects have only
-  one method named <span class="code">what</span> that returns a pointer to a constant character.
-  The string returned by what is intended to be a human readable message. Thus</p>
+<p>The library class that is the base of all library exception classes is <span class="code">std::exception</span>.
+  It is defined in the header &lt;exception&gt;. Exception objects have only one method named
+  <span class="code">what</span> that returns a pointer to a constant character. The string
+  returned by what is intended to be a human-readable message. Thus:</p>
 
 <pre class="code">
 try {
-  // Do whatever
+    // Do whatever
 }
-catch (std::exception &amp;bad_thing) {
-  std::cerr &lt;&lt; "Exception caught!: " &lt;&lt; bad_thing.what() &lt;&lt; "\n";
+catch( exception &amp;bad_thing ) {
+    cerr &lt;&lt; "Exception caught!: " &lt;&lt; bad_thing.what( ) &lt;&lt; endl;
 }
 </pre>
 
@@ -183,32 +177,31 @@ catch (std::exception &amp;bad_thing) {
 <pre class="code">
 namespace std {
 
-  // The two general exception types.
-  class logic_error   : public exception {...};
-  class runtime_error : public exception {...};
+    // The two general exception types.
+    class logic_error   : public exception {...};
+    class runtime_error : public exception {...};
 
-  // Specific logic errors defined by the standard.
-  class domain_error     : public logic_error {...};
-  class invalid_argument : public logic_error {...};
-  class length_error     : public logic_error {...};
-  class out_of_range     : public logic_error {...};
+    // Specific logic errors defined by the standard.
+    class domain_error     : public logic_error {...};
+    class invalid_argument : public logic_error {...};
+    class length_error     : public logic_error {...};
+    class out_of_range     : public logic_error {...};
 
-  // Specific runtime errors defined by the standard.
-  class range_error     : public runtime_error {...};
-  class overflow_error  : public runtime_error {...};
-  class underflow_error : public runtime_error {...};
-
+    // Specific runtime errors defined by the standard.
+    class range_error     : public runtime_error {...};
+    class overflow_error  : public runtime_error {...};
+    class underflow_error : public runtime_error {...};
 }
 </pre>
 
 <p>Each of these classes has a constructor that takes a reference to a constant <span
     class="code">std::string</span>. The string given to the constructor is the same string
-  returned from the <span class="code">what</span> method. For example the code that throws an
-  exception might look like</p>
+  returned from the <span class="code">what</span> method. For example, the code that throws an
+  exception might look like:</p>
 
 <pre class="code">
-if (bad_program_state())
-  throw std::logic_error("Internal inconsistency detected");
+if( bad_program_state( ) )
+    throw logic_error( "Internal inconsistency detected" );
 </pre>
 
 <p>The standard divides exceptions into two broad categories. The first, logic errors, are
@@ -216,68 +209,64 @@ if (bad_program_state())
   been avoided by careful programming. Throwing a <span class="code">logic_error</span> exception
   is something to do when your program detects a bug in itself.</p>
 
-<p>In contrast a runtime error is an error due to something beyond the program's control. Run time
-  errors could not be checked when the program is compiled, even in principle. They are due to the
-  nature of the input given to the program or to the limitations of the environment in which the
-  running program finds itself.</p>
+<p>In contrast, a runtime error is an error due to something beyond the program's control. Run
+  time errors could not be checked when the program is compiled, even in principle. They are due
+  to the nature of the input given to the program or to the limitations of the environment in
+  which the running program finds itself.</p>
 
 <p>The standard then goes on to define several more specific exception classes of each general
   type. Here are some comments on each of those classes.</p>
 
 <ol>
 
-  <li>
-    <p>
-      <span class="code">class domain_error : public logic_error {...};</span>
-    </p>
+  <li><p>
+    <span class="code">class domain_error : public logic_error {...};</span></p>
+
     <p>Mathematical functions have a domain and a range. The domain is the set of legal values of
       the function's argument(s). For example, a square root function that returns double can't
       handle negative arguments because the square root of a negative number is imaginary. One
-      would say that a negative argument is "outside the domain of the function." Thus if you were
-      writing such a function it would be very reasonable to write</p>
+      would say that a negative argument is "outside the domain of the function." Thus, if you
+      were writing such a function, it would be very reasonable to write</p>
     <pre class="code">
-double square_root(double number)
+double square_root( double number )
 {
-  if (number &lt; 0.0)
-    throw std::domain_error("square root of a negative argument");
+    if( number &lt; 0.0 )
+        throw domain_error( "square root of a negative argument" );
 
-  // Continue with assurance that "number" is zero or positive.
+    // Continue with assurance that "number" is zero or positive.
 }
 </pre>
     <p>Note that this is a logic error because a correct program should never attempt to feed a
-      function an invalid argument.</p>
-  </li>
+      function an invalid argument.</p></li>
 
-  <li>
-    <p>
-      <span class="code">class invalid_argument : public logic_error {...};</span>
-    </p>
-    <p>This exception class is very similar in concept to the <span class="code"
-    >domain_error</span> class above. However, this exception would be a more appropriate choice
-      for a non-mathematical function to use. For example, suppose you are writing a function that
-      accepts a username. Suppose also that on the platform you are using usernames are eight
-      characters or less. You might do</p>
+  <li><p>
+    <span class="code">class invalid_argument : public logic_error {...};</span></p>
+
+    <p>This exception class is very similar in concept to the <span
+        class="code">domain_error</span> class above. However, this exception would be a more
+      appropriate choice for a non-mathematical function to use. For example, suppose you are
+      writing a function that accepts a username. Suppose also that on the platform you are using
+      usernames are eight characters or fewer. You might do:</p>
     <pre class="code">
-void process_user(const std::string &amp;username)
+void process_user( const string &amp;username )
 {
-  if (username.length() &gt; 8)
-    throw std::invalid_argument("long user names can't be processed");
+    if( username.length( ) &gt; 8 )
+        throw invalid_argument( "long user names can't be processed" );
 
-  // Username parameter looks okay.
+    // Username parameter looks okay.
 }
 </pre>
   </li>
 
-  <li>
-    <p>
-      <span class="code">class length_error : public logic_error {...};</span>
-    </p>
+  <li><p><span class="code">class length_error : public logic_error {...};</span></p>
+
     <p>According to the standard: "The class <span class="code">length_error</span> defines the
       type of objects thrown as exceptions to report an attempt to produce an object whose length
-      exceeds its maximum allowable size." For example if you had a class that maintained a buffer
-      and your caller attempted to place more material in that buffer than you had space, it would
-      be appropriate to throw a <span class="code"
-      >std::length_error</span> exception as a response.</p>
+      exceeds its maximum allowable size." For example, if you had a class that maintained a
+      buffer and your caller attempted to place more material in that buffer than you had space,
+      it would be appropriate to throw a <span class="code">length_error</span> exception as a
+      response.</p>
+
     <p>You might be tempted to throw a <span class="code">length_error</span> in the case of the
       extra long username in the previous example. However, the incoming string is not in error by
       being so long (the string itself is fine). The problem is that such a long string is
@@ -287,53 +276,47 @@ void process_user(const std::string &amp;username)
     </p>
   </li>
 
-  <li>
-    <p>
-      <span class="code">class out_of_range : public logic_error {...};</span>
-    </p>
+  <li><p><span class="code">class out_of_range : public logic_error {...};</span></p>
+
     <p>According to the standard: "The class <span class="code">out_of_range</span> defines the
       type of objects thrown as exceptions to report an argument value not in its expected range."
       This sounds very much like a domain error exception except that domain errors are best used
       only with "pure" mathematical functions. I would suggest using the out of range exception
       whenever a numerical argument to a non-mathematical function is out of range.</p>
-    <p>Personally it seems to me that this exception class should be derived from <span
+
+    <p>Personally, it seems to me that this exception class should be derived from <span
         class="code">invalid_argument</span> since out or range arguments are a special kind of
       invalid arguments. Wouldn't you want the handler for an invalid_argument to also catch and
       handle <span class="code">out_of_range</span>? I think so. The C++ standard does not always
       make perfect sense. However, this example does illustrate that designing an exception
-      hierarchy is not necessarily a trivial exercise. Building a program with high quality error
+      hierarchy is not necessarily a trivial exercise. Building a program with high-quality error
       handling requires thought.</p>
   </li>
 
   <li>
-    <p>
-      <span class="code">class range_error : public runtime_error {...};</span>
-    </p>
-    <p>The range error exception should be used when a purely mathematical function attempts to
-      produce a value that is not in the acceptable range of the function.</p>
-  </li>
+    <p><span class="code">class range_error : public runtime_error {...};</span></p>
 
-  <li>
-    <p>
-      <span class="code">class overflow_error : public runtime_error {...};</span> <br/> <span
-        class="code">class underflow_error : public runtime_error {...};</span>
-    </p>
+    <p>The range error exception should be used when a purely mathematical function attempts to
+      produce a value that is not in the acceptable range of the function.</p></li>
+
+  <li><p><span class="code">class overflow_error : public runtime_error {...};</span> <br/> <span
+      class="code">class underflow_error : public runtime_error {...};</span></p>
+
     <p>Overflow and underflow errors refer to when a numeric calculation produces a result that
-      can't be represented by the finite range of the type used. In a sense these are types of
+      can't be represented by the finite range of the type used. In a sense, these are types of
       range errors. However, the failure in this case is not really with the computation but
-      rather with the limited way in which the result of that computation is represented.</p>
-  </li>
+      rather with the limited way in which the result of that computation is represented.</p></li>
 
 </ol>
 
 <p>Please note that you are free to derive your own exception classes from the standard classes.
-  In some cases that may make more sense than just using the general purpose classes directly. For
-  example</p>
+  In some cases, that may make more sense than just using the general purpose classes directly.
+  For example</p>
 
 <pre class="code">
-class connect_error : public std::runtime_error {
-  public:
-    connect_error(const std::string &amp;m) : std::runtime_error(m) { }
+class ConnectError : public runtime_error {
+public:
+    ConnectError( const string &amp;m ) : RuntimeError( m ) { }
 };
 </pre>
 
@@ -341,9 +324,9 @@ class connect_error : public std::runtime_error {
   if the network doesn't work.</p>
 
 <pre class="code">
-class badip_error : public std::invalid_argument {
-  public:
-    badip_error(const std::string &amp;m) : std::invalid_argument(m) { }
+class BadIpError : public invalid_argument {
+public:
+    BadIpError( const string &amp;m ) : invalid_argument( m ) { }
 };
 </pre>
 
@@ -352,28 +335,28 @@ class badip_error : public std::invalid_argument {
   be giving an invalid argument to one of its functions.</p>
 
 <p>Keep in mind also that you can add additional members and methods to your exception classes if
-  you would find that useful. An application that catches your classes specifically would be able
-  to use those methods in the handler. Of course, an application that catches your exception by
-  way of the general base class will know nothing about those extra methods.</p>
+  you find that useful. An application that catches your classes specifically would be able to use
+  those methods in the handler. Of course, an application that catches your exception by way of
+  the general base class will know nothing about those extra methods.</p>
 
-<p>If you wanted to do something like what I show above <em>and</em> you also want your network
-  exceptions to be derived from a generic <span class="code">network_error</span> class, you can
-  do so using multiple inheritance. This is one situation where multiple inheritance is useful.
+<p>If you want to do something like what I show above <em>and</em> you also want your network
+  exceptions to be derived from a generic <span class="code">NetworkError</span> class, you can do
+  so using multiple inheritance. This is one situation where multiple inheritance is useful.
 </p>
 
 <pre class="code">
-class connect_error : public std::runtime_error,
-                      public network_error {
-  public:
-    connect_error(const std::string &amp;m) : std::runtime_error(m) { }
+class ConnectError : public std::runtime_error,
+                     public NetworkError {
+public:
+    ConnectError( const std::string &amp;m ) : std::runtime_error( m ) { }
 };
 </pre>
 
-<p>Here I'm assuming that <span class="code">network_error</span>'s constructor has no parameters.
-  If that isn't true those parameters could be handled in the usual way for multiple inheritance.
-  With this definition a <span class="code">connect_error</span> could be caught by either a <span
+<p>Here I'm assuming that <span class="code">NetworkError</span>'s constructor has no parameters.
+  If that isn't true, those parameters could be handled in the usual way for multiple inheritance.
+  With this definition, a <span class="code">ConnectError</span> could be caught by either a <span
       class="code">std::runtime_error</span> handler or by a <span
-      class="code">network_error</span> handler.</p>
+      class="code">NetworkError</span> handler.</p>
 
 <h3>The bad_alloc exception</h3>
 
@@ -382,7 +365,7 @@ class connect_error : public std::runtime_error,
     class="code">logic_error</span> or <span class="code">runtime_error</span>. The most important
   of these exceptions is <span class="code">std::bad_alloc</span>. The library operator new throws
   <span class="code">bad_alloc</span> if it is unable to allocate the requested memory. Since
-  running out of memory is a common possibility you will find yourself thinking about <span
+  running out of memory is a common possibility, you will find yourself thinking about <span
       class="code">bad_alloc</span> exceptions more often and more deeply than probably any other.
 </p>
 
@@ -391,40 +374,40 @@ class connect_error : public std::runtime_error,
   allocations could, in general, all throw a <span class="code">bad_alloc</span>. For example:</p>
 
 <pre class="code">
-#include &lt;new&gt;       // Where std::bad_alloc is defined.
-#include "matrix.hpp"  // Some third party matrix class.
+#include &lt;new&gt;         // Where std::bad_alloc is defined.
+#include "Matrix.hpp"  // Some third party matrix class.
 
-void f()
+void f( )
 {
-  matrix x, y, z;
+    Matrix x, y, z;
 
-  try {
-    // Give y and z values.
+    try {
+        // Give y and z values.
 
-    // Might throw std::bad_alloc while the matrix operator* allocates
-    // space for the result matrix, while the result is copied to a
-    // temporary matrix, or while the temporary is assigned to x.
-    //
-    x = y * z;
-  }
-  catch (std::bad_alloc) {
-    std::cerr &lt;&lt; "Ran out of memory in f()\n";
-  }
+        // Might throw std::bad_alloc while the matrix operator* allocates
+        // space for the result matrix, while the result is copied to a
+        // temporary matrix, or while the temporary is assigned to x.
+        //
+        x = y * z;
+    }
+    catch( std::bad_alloc ) {
+        std::cerr &lt;&lt; "Ran out of memory in f( )" &lt;&lt; endl;
+    }
 }
 </pre>
 
-<p>Of course this function might ignore exceptions and let the <span class="code"
->bad_alloc</span> propagate to the caller of <span class="code">f</span>. In either case, however,
-  there are many places where a <span class="code">bad_alloc</span> might be thrown. Notice that
-  in the code above I do not name the exception in the handler. This is perfectly acceptable if
-  you don't intend to use the exception object in the handler's code.</p>
+<p>Of course, this function might ignore exceptions and let the <span
+    class="code">bad_alloc</span> propagate to the caller of <span class="code">f</span>. In
+  either case, however, there are many places where a <span class="code">bad_alloc</span> might be
+  thrown. Notice that in the code above I do not name the exception in the handler. This is
+  perfectly acceptable if you don't intend to use the exception object in the handler's code.</p>
 
-<p>Note: Depending on the how the matrix class is implemented there might be much less copying
-  than meets the eye in my example above. With less copying there would also come fewer places
-  where a <span class="code">bad_alloc</span> might be thrown. Exactly when an object's data gets
-  copied is often very significant information when it comes to evaluating a function's exception
-  safety. Hopefully the matrix class fully documents this matter. Alas, often such documentation
-  is lacking.</p>
+<p>Note: Depending on how the matrix class is implemented, there might be much less copying than
+  meets the eye in my example above. With less copying, there would also come fewer places where a
+  <span class="code">bad_alloc</span> might be thrown. Exactly when an object's data gets copied
+  is often very significant information when it comes to evaluating a function's exception safety.
+  Hopefully, the matrix class fully documents this matter. Alas, often such documentation is
+  lacking.</p>
 
 <h3>Exceptions vs assertions</h3>
 
@@ -435,21 +418,21 @@ void f()
 <pre class="code">
 #include &lt;assert.h&gt;
 
-double square_root(double number)
+double square_root( double number )
 {
-  assert(number &gt;= 0.0);
+    assert(number &gt;= 0.0);
 
-  // If we get here the assertion above must have been true.
+    // If we get here the assertion above must have been true.
 }
 </pre>
 
-<p>The <span class="code">assert</span> macro tests the condition provided. If it is true nothing
+<p>The <span class="code">assert</span> macro tests the condition provided. If it is true, nothing
   is done. However, if the condition is false a message is displayed and the program is aborted.
   Usually the message includes the expression in question as well as the line number and file name
-  of the assert that failed.</p>
+  of the assertion that failed.</p>
 
 <p>Assertions are supposed to check for "impossible" events. The condition in the assertion should
-  be such that in a correct program it is always true. If the assertion fails the program will
+  be such that in a correct program it is always true. If the assertion fails, the program will
   print a cryptic message (it's cryptic to the end user) and abort. Assertions are intended to be
   used during development to help catch bugs early during testing and to catch them in a way that
   makes them easier to find. Since the execution time required to do the assertion checking may be
@@ -461,8 +444,8 @@ double square_root(double number)
   program with assertions and one without. For example</p>
 
 <pre class="terminal">
-$ <span class="user-input">cc -o myprog -g myprog.c</span>
-$ <span class="user-input">cc -o myprog -DNDEBUG -O myprog.c</span>
+$ <span class="user-input">gcc -o myprog -g myprog.c</span>
+$ <span class="user-input">gcc -o myprog -DNDEBUG -O myprog.c</span>
 </pre>
 
 <p>The first command will produce an executable with the assertions and debugging information
@@ -471,21 +454,21 @@ $ <span class="user-input">cc -o myprog -DNDEBUG -O myprog.c</span>
   version for final release (be sure to test the release version also... sometimes bugs only show
   up after optimization).</p>
 
-<p>So far everything I've said about assertions applies to C and C++ (since C++ inherits the C
+<p>So far, everything I've said about assertions applies to C and C++ (since C++ inherits the C
   library). However, you may have noticed that assertions are playing a similar role as the logic
   error exceptions I mentioned before. The difference is that if a logic error exception is
   thrown, the program has the option of continuing to run. Furthermore, unless you use some
   preprocessor tricks of your own, the testing for logic errors is always compiled into your
   program.</p>
 
-<p>Occassionally debate breaks out in the C++ newsgroups about the relative merits of using
-  assertions or exceptions to handle internal inconsistencies (logic errors) in a program. Many
-  people do not like the fact that assert will abort the program immediately. On the other hand,
-  many logic errors are unrecoverable anyway. Furthermore the ability to easily remove the
-  assertions from the executable is an attractive feature.</p>
+<p>Occasionally, debate breaks out in C++ forums about the relative merits of using assertions or
+  exceptions to handle internal inconsistencies (logic errors) in a program. Many people do not
+  like the fact that assert will abort the program immediately. On the other hand, many logic
+  errors are unrecoverable anyway. Furthermore, the ability to easily remove the assertions from
+  the executable is an attractive feature.</p>
 
 <p>There is no clear right answer to this debate. You will have to form your own opinion as you
-  gain programming experience. If you are writing programs for someone else that person or
+  gain programming experience. If you are writing programs for someone else, that person or
   organization may have a policy on this matter that you will have to follow. Personally, I rather
   like assertions and tend toward the policy of using assertions to deal with "impossible" logic
   errors and exceptions to deal with normal runtime errors. However, I appreciate the other point
@@ -495,40 +478,31 @@ $ <span class="user-input">cc -o myprog -DNDEBUG -O myprog.c</span>
 
 <ol id="summary-list">
 
-  <li>
-    <p>It is often desirable to define a hierarchy of classes specifically for exceptions. This
-      allows you to catagorize errors into related groups. Application programs can then catch
-      base exceptions by reference as a way of catching exceptions from an entire catagory. This
-      makes it easy for a library to add new exceptions and for older applications to easily
-      handle those new exceptions.</p>
-  </li>
+  <li><p>It is often desirable to define a hierarchy of classes specifically for exceptions. This
+    allows you to categorize errors into related groups. Application programs can then catch base
+    exceptions by reference as a way of catching exceptions from an entire category. This makes it
+    easy for a library to add new exceptions and for older applications to easily handle those new
+    exceptions.</p></li>
 
-  <li>
-    <p>The C++ standard defines an exception hierarchy based on the class <span class="code"
-    >std::exception</span>. The standard defines several derived classes and encourages you to
-      derive classes of your own from the hierarchy it provides. If you do this, it will be easier
-      for application programmers to understand the purpose of your exceptions and to handle them
-      in an appropriate yet generic way.</p>
-  </li>
+  <li><p>The C++ standard defines an exception hierarchy based on the class <span class="code">std::exception</span>.
+    The standard defines several derived classes and encourages you to derive classes of your own
+    from the hierarchy it provides. If you do this, it will be easier for application programmers
+    to understand the purpose of your exceptions and to handle them in an appropriate yet generic
+    way.</p></li>
 
-  <li>
-    <p>The exception <span class="code">std::bad_alloc</span> is thrown whenever the library
-      operator new can't find the requested memory. Since many operations involve dynamically
-      allocating memory, the <span class="code">bad_alloc</span> exception is one that must be
-      commonly thought about.</p>
-  </li>
+  <li><p>The exception <span class="code">std::bad_alloc</span> is thrown whenever the library
+    operator new can't find the requested memory. Since many operations involve dynamically
+    allocating memory, the <span class="code">bad_alloc</span> exception is one that must be
+    commonly thought about.</p></li>
 
-  <li>
-    <p>Executable assertions as provided by the C library give you another way of handling logical
-      errors. In C++ you have the option of using C style assertions or throwing C++ exceptions
-      whenever you encounter an "impossible" condition in your program. There is no clear best
-      choice here.</p>
-  </li>
-
+  <li><p>Executable assertions as provided by the C library give you another way of handling
+    logical errors. In C++ you have the option of using C style assertions or throwing C++
+    exceptions whenever you encounter an "impossible" condition in your program. There is no clear
+    best choice here.</p></li>
 </ol>
 
 <address>
-  &copy; Copyright 2008 by Peter C. Chapin.<br/> Last Revised: <b>November 26, 2008</b>
+  &copy; Copyright 2023 by Peter Chapin.<br/> Last Revised: <b>August 7, 2023</b>
 </address>
 
 </body>
